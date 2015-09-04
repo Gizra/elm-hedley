@@ -124,7 +124,6 @@ encodeCredentials (name, pass) =
 
 getJson : String -> String -> Effects Action
 getJson url credentials =
-  -- Http.send decodeAccessToken url Http.empty
   Http.send Http.defaultSettings
     { verb = "GET"
     , headers = [("Authorization", "Basic " ++ credentials)]

@@ -16,10 +16,7 @@ import Debug
 
 -- MODEL
 
-type alias Id = Int
 type alias AccessToken = String
-
-type User = Anonymous | LoggedIn String
 
 type alias LoginForm =
   { name: String
@@ -27,16 +24,14 @@ type alias LoginForm =
   }
 
 type alias Model =
-  { user : User
-  , id : Id
-  , accessToken: AccessToken
+  { accessToken: (Maybe AccessToken)
   , loginForm : LoginForm
   , isFetching : Bool
   }
 
 init : (Model, Effects Action)
 init =
-  ( Model Anonymous 0 "" (LoginForm "admin" "admin") False
+  ( Model Nothing (LoginForm "admin" "admin") False
   , Effects.none
   )
 
@@ -73,7 +68,7 @@ update action model =
         newModel  = { model | isFetching <- False}
       in
         case result of
-          Ok accessToken -> ({newModel | accessToken <- accessToken}, Effects.none)
+          Ok accessToken -> ({newModel | accessToken <- Just accessToken}, Effects.none)
           Err msg -> (newModel, Effects.none)
 
 
@@ -108,7 +103,7 @@ view address model =
         ]
         []
     , button [ onClick address SubmitForm, disabled ((String.length modelForm.name == 0) || (String.length modelForm.pass == 0)) ] [ text "Login" ]
-    , div [] [text ("Access token: " ++ model.accessToken)]
+    , div [] [text ("Access token: " ++ toString (model.accessToken))]
     ]
 
 -- EFFECTS

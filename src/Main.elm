@@ -1,6 +1,5 @@
 
 import Effects exposing (Never)
-import Login exposing (init, update, view)
 import User exposing (init, update, view)
 import StartApp
 import Task

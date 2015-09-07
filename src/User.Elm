@@ -74,10 +74,10 @@ update action model =
 
     ChildAction act ->
       let
-        (updatedLoginModel, _) = Login.update act model.loginModel
+        (updatedLoginModel, loginEffects) = Login.update act model.loginModel
       in
       ( {model | loginModel <- updatedLoginModel}
-      , Effects.none
+      , Effects.map ChildAction loginEffects
       )
 
 

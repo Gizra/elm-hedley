@@ -6,6 +6,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (on, onClick, targetValue)
 import Http
 import Json.Decode as Json exposing ((:=))
+import Login exposing (..)
 import String exposing (length)
 import Task
 
@@ -21,15 +22,23 @@ type alias AccessToken = String
 type User = Anonymous | LoggedIn String
 
 type alias Model =
-  { user : User
+  { name : User
   , id : Id
   , isFetching : Bool
+
+  -- Child components
+  , loginModel : Login.Model
   }
+
+
+initialModel : Model
+initialModel =
+  Model Anonymous 0 False (Login.initialModel)
 
 init : (Model, Effects Action)
 init =
-  ( Model Anonymous 0 False
-  , getJson "http://localhost/d7_dev/api/users/1" "EcBTcskWJYMSS--WqY8lbrVB9Yrl40_OfdcN0lnRaIc"
+  ( initialModel
+  , Effects.none
   )
 
 
@@ -38,6 +47,7 @@ init =
 type Action
   = GetDataFromServer
   | UpdateDataFromServer (Result Http.Error (Id, String))
+  | ChildAction Login.Action
 
 
 update : Action -> Model -> (Model, Effects Action)
@@ -59,8 +69,18 @@ update action model =
         d = Debug.log "result" result
       in
         case result of
-          -- Ok (id, name) -> ({newModel | user <- LoggedIn name}, Effects.none)
+          Ok (id, name) -> ({newModel | name <- LoggedIn name}, Effects.none)
           Err msg -> (newModel, Effects.none)
+
+    ChildAction act ->
+      let
+        (updatedLoginModel, _) = Login.update act model.loginModel
+      in
+      ( {model | loginModel <- updatedLoginModel}
+      , Effects.none
+      )
+
+
 
 -- VIEW
 
@@ -68,8 +88,16 @@ update action model =
 
 view : Signal.Address Action -> Model -> Html
 view address model =
+  if model.name == Anonymous
+    then
+      let
+        childAddress =
+            Signal.forwardTo address ChildAction
+      in
+        Login.view childAddress model.loginModel
+    else
   div [class "container"]
-    [ div [] [text ("User: " ++ toString(model.user))]
+    [ div [] [text ("User: " ++ toString(model.name))]
     ]
 
 -- EFFECTS

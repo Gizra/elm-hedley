@@ -23,15 +23,25 @@ type alias LoginForm =
   ,  pass : String
   }
 
+type Status =
+  Init
+  | HttpError Http.Error
+
 type alias Model =
   { accessToken: (Maybe AccessToken)
   , loginForm : LoginForm
   , isFetching : Bool
+  , status : Status
   }
+
+initialModel : Model
+initialModel =
+  Model Nothing (LoginForm "admin" "admin") False Init
+
 
 init : (Model, Effects Action)
 init =
-  ( Model Nothing (LoginForm "admin" "admin") False
+  ( initialModel
   , Effects.none
   )
 
@@ -68,8 +78,12 @@ update action model =
         newModel  = { model | isFetching <- False}
       in
         case result of
-          Ok accessToken -> ({newModel | accessToken <- Just accessToken}, Effects.none)
-          Err msg -> (newModel, Effects.none)
+          Ok accessToken ->
+            ({newModel | accessToken <- Just accessToken}, Effects.none)
+          Err msg ->
+            (
+            {newModel | status <- HttpError msg }
+            , Effects.none)
 
 
 

@@ -1,5 +1,6 @@
 module User where
 
+import Company exposing (..)
 import Config exposing (backendUrl)
 import Effects exposing (Effects, Never)
 import Html exposing (..)
@@ -10,9 +11,6 @@ import Json.Decode as Json exposing ((:=))
 import Login exposing (..)
 import String exposing (length)
 import Task
-
-
-import Debug
 
 
 -- MODEL
@@ -29,12 +27,13 @@ type alias Model =
 
   -- Child components
   , loginModel : Login.Model
+  , companies : List Company.Model
   }
 
 
 initialModel : Model
 initialModel =
-  Model Anonymous 0 False (Login.initialModel)
+  Model Anonymous 0 False Login.initialModel [Company.initialModel]
 
 init : (Model, Effects Action)
 init =
@@ -47,7 +46,7 @@ init =
 
 type Action
   = GetDataFromServer
-  | UpdateDataFromServer (Result Http.Error (Id, String))
+  | UpdateDataFromServer (Result Http.Error (Id, String, List Company.Model))
   | ChildAction Login.Action
 
 
@@ -68,7 +67,14 @@ update action model =
         newModel  = { model | isFetching <- False}
       in
         case result of
-          Ok (id, name) -> ({newModel | id <- id, name <- LoggedIn name}, Effects.none)
+          Ok (id, name, companies) ->
+            ( {newModel
+                | id <- id
+                , name <- LoggedIn name
+                , companies <- companies
+              }
+            , Effects.none
+            )
           Err msg -> (newModel, Effects.none)
 
     ChildAction act ->
@@ -112,18 +118,28 @@ view address model =
           ]
 
     LoggedIn name ->
+      let
+        italicName : Html
+        italicName =
+          em [] [text name]
+      in
       div [style myStyle]
-        [ div [] [text ("Welcome " ++ name)]
+        [ div [] [ text "Welcome ", italicName ]
+        , div [] [ text "Your companies are:"]
+        , ul  [] (List.map viewCompanies model.companies)
         ]
 
+viewCompanies : Company.Model -> Html
+viewCompanies company =
+  li [] [ text company.label ]
 
 myStyle : List (String, String)
 myStyle =
     [ ("width", "100%")
     , ("height", "40px")
-    , ("padding", "10px 0")
+    , ("padding", "10px")
+    , ("margin", "50px")
     , ("font-size", "2em")
-    , ("text-align", "center")
     ]
 
 -- EFFECTS
@@ -146,12 +162,21 @@ getJson url accessToken =
       |> Effects.task
 
 
-decodeData : Json.Decoder (Id, String)
+decodeData : Json.Decoder (Id, String, List Company.Model)
 decodeData =
-  let number =
-    Json.oneOf [ Json.int, Json.customDecoder Json.string String.toInt ]
+  let
+    -- Cast String to Int.
+    number : Json.Decoder Int
+    number =
+      Json.oneOf [ Json.int, Json.customDecoder Json.string String.toInt ]
+
+    company =
+      Json.object2 Company.Model
+        ("id" := number)
+        ("label" := Json.string)
   in
   Json.at ["data", "0"]
-    <| Json.object2 (,)
+    <| Json.object3 (,,)
       ("id" := number)
       ("label" := Json.string)
+      ("companies" := Json.list company)

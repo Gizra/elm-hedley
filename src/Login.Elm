@@ -28,7 +28,8 @@ type Status =
   | HttpError Http.Error
 
 type alias Model =
-  { accessToken: (Maybe AccessToken)
+  -- @todo: accessToken: (Maybe AccessToken)
+  { accessToken: AccessToken
   , loginForm : LoginForm
   , isFetching : Bool
   , status : Status
@@ -36,7 +37,7 @@ type alias Model =
 
 initialModel : Model
 initialModel =
-  Model Nothing (LoginForm "admin" "admin") False Init
+  Model "" (LoginForm "admin" "admin") False Init
 
 
 init : (Model, Effects Action)
@@ -79,7 +80,7 @@ update action model =
       in
         case result of
           Ok accessToken ->
-            ({newModel | accessToken <- Just accessToken}, Effects.none)
+            ({newModel | accessToken <- accessToken}, Effects.none)
           Err msg ->
             (
             {newModel | status <- HttpError msg }
@@ -97,9 +98,9 @@ view address model =
     modelForm = model.loginForm
   in
   div [class "container"]
-    [ Html.form [id "login"] []
+    [ Html.form [id "login"] [
     -- Name
-    , input
+    input
         [ placeholder "Name"
         , value model.loginForm.name
         , on "input" targetValue (Signal.message address << UpdateName)
@@ -116,8 +117,9 @@ view address model =
         , required True
         ]
         []
+    ]
     , button [ onClick address SubmitForm, disabled ((String.length modelForm.name == 0) || (String.length modelForm.pass == 0)) ] [ text "Login" ]
-    , div [] [text ("Access token: " ++ toString (model.accessToken))]
+    , div [hidden (model.isFetching == False)] [ text "Loading ..."]
     ]
 
 -- EFFECTS

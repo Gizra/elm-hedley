@@ -1,5 +1,6 @@
 module User where
 
+import Config exposing (backendUrl)
 import Effects exposing (Effects, Never)
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -56,8 +57,7 @@ update action model =
     GetDataFromServer ->
       let
         url : String
-        -- @todo: Use /api/me
-        url = "http://localhost/d7_dev/api/users/1"
+        url = Config.backendUrl ++ "/api/v1.0/me"
       in
         ( { model | isFetching <- True}
         , getJson url model.loginModel.accessToken

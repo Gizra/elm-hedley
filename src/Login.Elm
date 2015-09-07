@@ -1,6 +1,7 @@
 module Login where
 
 import Base64 exposing (encode)
+import Config exposing (backendUrl)
 import Effects exposing (Effects, Never)
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -37,7 +38,7 @@ type alias Model =
 
 initialModel : Model
 initialModel =
-  Model "" (LoginForm "admin" "admin") False Init
+  Model "" (LoginForm "demo" "1234") False Init
 
 
 init : (Model, Effects Action)
@@ -65,7 +66,7 @@ update action model =
     SubmitForm ->
       let
         url : String
-        url = "http://localhost/d7_dev/api/login-token"
+        url = Config.backendUrl ++ "/api/login-token"
 
         credentials : String
         credentials = encodeCredentials(model.loginForm.name, model.loginForm.pass)

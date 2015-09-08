@@ -101,20 +101,21 @@ getDataFromServer =
 
 view : Signal.Address Action -> Model -> Html
 view address model =
-  if model.name == Anonymous
-    then
+  case model.name of
+    Anonymous ->
       let
         childAddress =
             Signal.forwardTo address ChildAction
       in
+        div [style myStyle]
+          [ Login.view childAddress model.loginModel
+          ]
+
+    LoggedIn name ->
       div [style myStyle]
-        [ Login.view childAddress model.loginModel
+        [ div [] [text ("Welcome " ++ name)]
         ]
 
-    else
-  div [style myStyle]
-    [ div [] [text ("Welcome " ++ toString(model.name))]
-    ]
 
 myStyle : List (String, String)
 myStyle =

@@ -60,8 +60,19 @@ type Action
 update : Action -> Model -> (Model, Effects Action)
 update action model =
   case action of
-    UpdateName name -> (model, Effects.none)
-    UpdatePass pass -> (model, Effects.none)
+    UpdateName name ->
+      let
+        loginForm = model.loginForm
+        updatedLoginForm = { loginForm | name <- name }
+      in
+      ({model | loginForm <- updatedLoginForm }, Effects.none)
+
+    UpdatePass pass ->
+      let
+        loginForm = model.loginForm
+        updatedLoginForm = { loginForm | pass <- pass }
+      in
+      ({model | loginForm <- updatedLoginForm }, Effects.none)
 
     SubmitForm ->
       let

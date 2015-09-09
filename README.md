@@ -1,6 +1,6 @@
 # elm-hedley
 
-Port of the [hedley demo](http://hedley-demo.gizra.com/) the Angular client to Elm
+Port of the [hedley demo](http://hedley-demo.gizra.com/) client to Elm
 
 ## Install
 

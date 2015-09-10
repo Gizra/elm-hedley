@@ -12,7 +12,6 @@ import Login exposing (..)
 import String exposing (length)
 import Task
 
-
 -- MODEL
 
 type alias Id = Int

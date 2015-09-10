@@ -1,15 +1,15 @@
 
 import Effects exposing (Never)
-import User exposing (init, update, view)
+import App exposing (init, update, view)
 import StartApp
 import Task
 
 
 app =
   StartApp.start
-    { init = User.init
-    , update = User.update
-    , view = User.view
+    { init = init
+    , update = update
+    , view = view
     , inputs = []
     }
 

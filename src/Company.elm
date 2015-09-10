@@ -12,7 +12,6 @@ import Task
 
 import Debug
 
-
 -- MODEL
 
 type alias Id = Int

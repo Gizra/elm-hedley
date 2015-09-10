@@ -96,9 +96,7 @@ update action model =
 
 getDataFromServer : Effects Action
 getDataFromServer =
-  -- @todo: Get rid of Task.sleep
-  Task.sleep (0)
-    |> Task.map (\_ -> GetDataFromServer)
+  Task.succeed GetDataFromServer
     |> Effects.task
 
 -- VIEW

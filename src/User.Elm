@@ -24,6 +24,7 @@ type alias Model =
   { name : User
   , id : Id
   , isFetching : Bool
+  , accessToken : AccessToken
 
   -- Child components
   , loginModel : Login.Model
@@ -33,7 +34,7 @@ type alias Model =
 
 initialModel : Model
 initialModel =
-  Model Anonymous 0 False Login.initialModel [Company.initialModel]
+  Model Anonymous 0 False "" Login.initialModel [Company.initialModel]
 
 init : (Model, Effects Action)
 init =
@@ -48,6 +49,7 @@ type Action
   = GetDataFromServer
   | UpdateDataFromServer (Result Http.Error (Id, String, List Company.Model))
   | ChildAction Login.Action
+  | SetAccessToken AccessToken
 
 
 update : Action -> Model -> (Model, Effects Action)
@@ -90,8 +92,13 @@ update action model =
               ]
             _ -> [ Effects.map ChildAction loginEffects ]
       in
-      ( {model | loginModel <- updatedLoginModel}
+      ( {model | loginModel <- updatedLoginModel, accessToken <- updatedLoginModel.accessToken}
       , Effects.batch effects
+      )
+
+    SetAccessToken accessToken ->
+      ( {model | accessToken <- accessToken}
+      , Effects.none
       )
 
 getDataFromServer : Effects Action

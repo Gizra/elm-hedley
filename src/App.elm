@@ -44,9 +44,9 @@ update action model =
       let
         (userModel, userEffects) = User.update act model.user
       in
-      ( {model | user <- userModel}
-      , Effects.map ChildUserAction userEffects
-      )
+        ( {model | user <- userModel}
+        , Effects.map ChildUserAction userEffects
+        )
 
 -- VIEW
 

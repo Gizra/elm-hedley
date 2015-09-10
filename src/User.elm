@@ -117,7 +117,7 @@ view address model =
         childAddress =
             Signal.forwardTo address ChildAction
       in
-        div [style myStyle]
+        div []
           [ Login.view childAddress model.loginModel
           ]
 
@@ -127,7 +127,7 @@ view address model =
         italicName =
           em [] [text name]
       in
-      div [style myStyle]
+      div []
         [ div [] [ text "Welcome ", italicName ]
         , div [] [ text "Your companies are:"]
         , ul  [] (List.map viewCompanies model.companies)
@@ -136,15 +136,6 @@ view address model =
 viewCompanies : Company.Model -> Html
 viewCompanies company =
   li [] [ text company.label ]
-
-myStyle : List (String, String)
-myStyle =
-    [ ("width", "100%")
-    , ("height", "40px")
-    , ("padding", "10px")
-    , ("margin", "50px")
-    , ("font-size", "2em")
-    ]
 
 -- EFFECTS
 

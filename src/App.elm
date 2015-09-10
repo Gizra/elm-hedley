@@ -4,6 +4,7 @@ module App where
 import Company exposing (..)
 import Effects exposing (Effects, Never)
 import Html exposing (..)
+import Html.Attributes exposing (..)
 import User exposing (..)
 
 type alias AccessToken = String
@@ -43,7 +44,7 @@ update action model =
       let
         (userModel, userEffects) = User.update act model.user
       in
-      ( {model | user <- userModel, accessToken <- userModel.accessToken}
+      ( {model | user <- userModel}
       , Effects.map ChildUserAction userEffects
       )
 
@@ -57,4 +58,18 @@ view address model =
     childAddress =
       Signal.forwardTo address ChildUserAction
   in
-    User.view childAddress model.user
+    div [style myStyle]
+      [ User.view childAddress model.user
+      , rootModelView model
+      ]
+
+rootModelView : Model -> Html
+rootModelView model =
+  div [] [text ("access token: " ++ toString(model.accessToken))]
+
+myStyle : List (String, String)
+myStyle =
+    [ ("padding", "10px")
+    , ("margin", "50px")
+    , ("font-size", "2em")
+    ]

@@ -3,21 +3,26 @@ module App where
 
 import Company exposing (..)
 import Effects exposing (Effects, Never)
+import Event exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Task exposing (..)
 import User exposing (..)
+
+import Debug
 
 type alias AccessToken = String
 
 type alias Model =
   { user : User.Model
   , companies : List Company.Model
+  , events : Event.Model
   , accessToken : AccessToken
   }
 
 initialModel : Model
 initialModel =
-  Model User.initialModel [] ""
+  Model User.initialModel [] Event.initialModel ""
 
 init : (Model, Effects Action)
 init =
@@ -28,6 +33,7 @@ init =
 type Action
   = SetAccessToken AccessToken
   | ChildUserAction User.Action
+  | ChildEventAction Event.Action
 
 
 update : Action -> Model -> (Model, Effects Action)
@@ -42,10 +48,22 @@ update action model =
 
     ChildUserAction act ->
       let
-        (userModel, userEffects) = User.update act model.user
+        (childModel, childEffects) = User.update act model.user
       in
-        ( {model | user <- userModel}
-        , Effects.map ChildUserAction userEffects
+        ( {model | user <- childModel}
+        , Effects.batch
+            [ Effects.map ChildUserAction childEffects
+            -- @todo: Where to move this so it's invoked on time?
+            , Task.succeed (ChildEventAction Event.GetDataFromServer) |> Effects.task
+            ]
+        )
+
+    ChildEventAction act ->
+      let
+        (childModel, childEffects) = Event.update act model.events
+      in
+        ( {model | events <- childModel }
+        , Effects.map ChildEventAction childEffects
         )
 
 -- VIEW
@@ -54,18 +72,24 @@ update action model =
 
 view : Signal.Address Action -> Model -> Html
 view address model =
-  let
-    childAddress =
-      Signal.forwardTo address ChildUserAction
-  in
-    div [style myStyle]
-      [ User.view childAddress model.user
-      , rootModelView model
-      ]
+  case model.user.name of
+    Anonymous ->
+      let
+        childAddress =
+          Signal.forwardTo address ChildUserAction
+      in
+        div [ style myStyle ] [ User.view childAddress model.user ]
+
+    LoggedIn name ->
+      let
+        childAddress =
+          Signal.forwardTo address ChildEventAction
+      in
+        div [ style myStyle ] [ Event.view childAddress model.events ]
 
 rootModelView : Model -> Html
 rootModelView model =
-  div [] [text ("access token: " ++ toString(model.accessToken))]
+  div [] []
 
 myStyle : List (String, String)
 myStyle =

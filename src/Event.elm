@@ -37,12 +37,13 @@ type alias Event =
 type alias Model =
   { events : List Event
   , status : Status
+  , selected : Maybe Int
   }
 
 
 initialModel : Model
 initialModel =
-  Model [] Init
+  Model [] Init Nothing
 
 init : (Model, Effects Action)
 init =
@@ -56,6 +57,7 @@ init =
 type Action
   = GetDataFromServer
   | UpdateDataFromServer (Result Http.Error (List Event))
+  | Select Int
 
 update : Action -> Model -> (Model, Effects Action)
 update action model =
@@ -84,6 +86,12 @@ update action model =
           , Effects.none
           )
 
+    Select id ->
+      ( { model | selected <- Just id }
+      , Effects.none
+      )
+
+
 -- VIEW
 
 (=>) = (,)
@@ -96,14 +104,41 @@ view address model =
   in
   div []
     [ div [class "h2"] [ text "Event list:"]
-    , ul [] (List.map viewListEvents model.events)
+    , ul [] (List.map (viewListEvents (address, model.selected)) model.events)
+    , div [class "h2"] [ text "Event info:"]
+    , viewEventInfo model
     , button [ onClick address GetDataFromServer ] [ text "Refresh" ]
     ]
 
 
-viewListEvents : Event -> Html
-viewListEvents event =
-  li [] [text event.label]
+viewListEvents : (Signal.Address Action, Maybe Int) -> Event -> Html
+viewListEvents (address, selected) event =
+  case selected of
+    Just val ->
+      if event.id == val
+        then
+          li [ class "selected" ] [text ("Selected: " ++ event.label)]
+        else
+          li [] [ a [ href "#", onClick address (Select event.id) ] [text event.label] ]
+
+    Nothing ->
+      li [] [ a [ href "#", onClick address (Select event.id) ] [text event.label] ]
+
+
+viewEventInfo : Model -> Html
+viewEventInfo model =
+  case model.selected of
+    Just val ->
+      let
+        -- Get the selected element.
+        selectedEvent = List.filter (\event -> event.id == val) model.events
+
+      in
+        div [] (List.map (\event -> text (toString(event.id) ++ ") " ++ event.label)) selectedEvent)
+
+    Nothing ->
+      div [] []
+
 
 
 -- EFFECTS

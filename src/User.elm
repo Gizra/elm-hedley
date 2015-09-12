@@ -131,6 +131,7 @@ view address model =
         [ div [] [ text "Welcome ", italicName ]
         , div [] [ text "Your companies are:"]
         , ul  [] (List.map viewCompanies model.companies)
+        , div  [] [text (toString model.accessToken)]
         ]
 
 viewCompanies : Company.Model -> Html

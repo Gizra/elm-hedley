@@ -5,7 +5,7 @@ import Config exposing (backendUrl)
 import Effects exposing (Effects, Never)
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (on, onClick, targetValue)
+import Html.Events exposing (on, onClick, onSubmit, targetValue)
 import Http
 import Json.Decode as Json exposing ((:=))
 import String exposing (length)
@@ -110,10 +110,15 @@ view address model =
     modelForm = model.loginForm
   in
   div [class "container"]
-    [ Html.form [id "login"] [
+    [ Html.form
+      [ action "javascript:none"
+      , onSubmit address SubmitForm
+      ]
+      [
     -- Name
     input
-        [ placeholder "Name"
+        [ type' "text"
+        , placeholder "Name"
         , value model.loginForm.name
         , on "input" targetValue (Signal.message address << UpdateName)
         , size 40
@@ -122,7 +127,8 @@ view address model =
         []
     -- Password
     , input
-        [ placeholder "Password"
+        [ type' "password"
+        , placeholder "Password"
         , value modelForm.pass
         , on "input" targetValue (Signal.message address << UpdatePass)
         , size 40

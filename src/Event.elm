@@ -28,10 +28,16 @@ type alias Marker =
   , lng : Float
   }
 
+type alias Author =
+  { id : Id
+  , name : String
+  }
+
 type alias Event =
   { id : Id
   , label : String
   , marker : Marker
+  , author : Author
   }
 
 type alias Model =
@@ -134,7 +140,7 @@ viewEventInfo model =
         selectedEvent = List.filter (\event -> event.id == val) model.events
 
       in
-        div [] (List.map (\event -> text (toString(event.id) ++ ") " ++ event.label)) selectedEvent)
+        div [] (List.map (\event -> text (toString(event.id) ++ ") " ++ event.label ++ " by " ++ event.author.name)) selectedEvent)
 
     Nothing ->
       div [] []
@@ -178,10 +184,16 @@ decodeData =
       Json.object2 Marker
         ("lat" := numberFloat)
         ("lng" := numberFloat)
+
+    author =
+      Json.object2 Author
+        ("id" := number)
+        ("label" := Json.string)
   in
   Json.at ["data"]
     <| Json.list
-    <| Json.object3 Event
+    <| Json.object4 Event
       ("id" := number)
       ("label" := Json.string)
       ("location" := marker)
+      ("user" := author)

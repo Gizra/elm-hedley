@@ -9,6 +9,7 @@ import Http
 import Json.Decode as Json exposing ((:=))
 import String exposing (length)
 import Task
+import Dict exposing (Dict)
 
 import Debug
 
@@ -45,6 +46,29 @@ type alias Model =
   , status : Status
   , selected : Maybe Int
   }
+
+
+group : List Event -> Dict Int (Author, Int)
+group events =
+    let
+        -- Event -> Dict Int (Author, Int) -> Dict Int (Author, Int)
+        handleEvent event dict =
+            let
+                currentValue =
+                    Maybe.withDefault (event.author, 0) <|
+                        Dict.get event.author.id dict
+
+                newValue =
+                    case currentValue of
+                        (author, count) -> (author, count + 1)
+
+
+            in
+                Dict.insert event.author.id newValue dict
+            
+    in
+        List.foldl handleEvent Dict.empty events
+
 
 
 initialModel : Model
@@ -114,6 +138,7 @@ view address model =
     , div [class "h2"] [ text "Event info:"]
     , viewEventInfo model
     , button [ onClick address GetDataFromServer ] [ text "Refresh" ]
+    , div [] [ text <| toString (group model.events) ]
     ]
 
 

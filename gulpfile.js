@@ -95,7 +95,7 @@ gulp.task("minify", ["styles"], function () {
     // Minify CSS
     .pipe($.if("*.css", $.minifyCss()))
     // Start cache busting the files
-    .pipe($.revAll({ ignore: [".eot", ".svg", ".ttf", ".woff"] }))
+    .pipe($.revAll({ ignore: ["index.html", ".eot", ".svg", ".ttf", ".woff"] }))
     .pipe(assets.restore())
     // Replace the asset names with their cache busted names
     .pipe($.revReplace())
@@ -115,15 +115,11 @@ gulp.task("minify", ["styles"], function () {
 });
 
 
-// Task to upload your site to your personal GH Pages repo
-gulp.task("deploy", ["publish"], function () {
+// Task to upload your site to your GH Pages repo
+gulp.task("deploy", [], function () {
   // Deploys your optimized site, you can change the settings in the html task if you want to
-  return gulp.src("./dist/**/*")
-    .pipe($.ghPages({
-      // Currently only personal GitHub Pages are supported so it will upload to the master
-      // branch and automatically overwrite anything that is in the directory
-      branch: "gh-pages"
-      }));
+  return gulp.src("dist/**/*")
+    .pipe($.ghPages({branch: "gh-pages"}));
 });
 
 gulp.task('elm-init', elm.init);

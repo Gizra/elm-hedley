@@ -12,6 +12,8 @@ var browserSync = require("browser-sync");
 
 var elm  = require('gulp-elm');
 
+var fs = require('fs');
+
 // merge is used to merge the output from two different streams into the same stream
 var merge = require("merge-stream");
 // Need a command for reloading webpages using BrowserSync
@@ -40,6 +42,18 @@ gulp.task("styles", function () {
   return gulp.src("src/assets/scss/style.scss")
     .pipe(plumber())
     .pipe($.sass())
+    .on('error', function(err){
+      browserSync.notify("SASS error");
+
+      console.error(err.message);
+
+      // Save the error to index.html, with a simple HTML wrapper
+      // so browserSync can inject itself in.
+      fs.writeFileSync('serve/index.html', "<!DOCTYPE HTML><html><body><pre>" + err.message + "</pre></body></html>");
+
+      // No need to continue processing.
+      this.emit('end');
+    })
     // AutoPrefix your CSS so it works between browsers
     .pipe($.autoprefixer("last 1 version", { cascade: true }))
     // Directory your CSS file goes to
@@ -127,6 +141,15 @@ gulp.task('elm', ['elm-init'], function(){
   return gulp.src('src/elm/Main.elm')
     .pipe(plumber())
     .pipe(elm())
+    .on('error', function(err) {
+        console.error(err.message);
+
+        browserSync.notify("Elm compile error", 5000);
+
+        // Save the error to index.html, with a simple HTML wrapper
+        // so browserSync can inject itself in.
+        fs.writeFileSync('serve/index.html', "<!DOCTYPE HTML><html><body><pre>" + err.message + "</pre></body></html>");
+    })
     .pipe(gulp.dest('serve'));
 });
 
@@ -147,9 +170,9 @@ gulp.task("serve:dev", ["styles", "elm", "copy:dev"], function () {
 // These tasks will look for files that change while serving and will auto-regenerate or
 // reload the website accordingly. Update or add other files you need to be watched.
 gulp.task("watch", function () {
-  gulp.watch(["src/**/*.elm"], ["elm"]);
-  gulp.watch(["serve/assets/stylesheets/*.css", "serve/Main.js", "serve/index.html"], reload);
-  gulp.watch(["src/assets/scss/**/*.scss"], ["styles"]);
+  // We need to copy dev, so index.html may be replaced by error messages.
+  gulp.watch(["src/elm/*.elm"], ["elm", "copy:dev", reload]);
+  gulp.watch(["src/assets/scss/**/*.scss"], ["styles", "copy:dev", reload]);
 });
 
 // Serve the site after optimizations to see that everything looks fine

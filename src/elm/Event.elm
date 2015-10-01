@@ -249,7 +249,7 @@ filterListEvents model =
     stringFilter events =
       if String.length (String.trim model.filterString) > 0
         then
-          List.filter (\event -> String.contains (String.trim model.filterString) event.label) events
+          List.filter (\event -> String.contains (String.trim (String.toLower model.filterString)) (String.toLower event.label)) events
 
         else
           events

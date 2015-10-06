@@ -26,9 +26,16 @@ initialModel =
 
 init : (Model, Effects Action)
 init =
-  ( initialModel
-  , Effects.none
-  )
+  let
+    eventEffects = snd Event.init
+    userEffects = snd User.init
+  in
+    ( initialModel
+    , Effects.batch
+      [ Effects.map ChildEventAction eventEffects
+      , Effects.map ChildUserAction userEffects
+      ]
+    )
 
 type Action
   = SetAccessToken AccessToken

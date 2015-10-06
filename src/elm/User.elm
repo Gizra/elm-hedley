@@ -12,6 +12,8 @@ import Login exposing (..)
 import String exposing (length)
 import Task
 
+import Debug
+
 -- MODEL
 
 type alias Id = Int
@@ -37,9 +39,12 @@ initialModel =
 
 init : (Model, Effects Action)
 init =
-  ( initialModel
-  , Effects.none
-  )
+  let
+    loginEffects = snd Login.init
+  in
+    ( initialModel
+    , Effects.map ChildLoginAction loginEffects
+    )
 
 
 -- UPDATE
@@ -47,7 +52,7 @@ init =
 type Action
   = GetDataFromServer
   | UpdateDataFromServer (Result Http.Error (Id, String, List Company.Model))
-  | ChildAction Login.Action
+  | ChildLoginAction Login.Action
   | SetAccessToken AccessToken
 
 
@@ -78,20 +83,30 @@ update action model =
             )
           Err msg -> (newModel, Effects.none)
 
-    ChildAction act ->
+    ChildLoginAction act ->
       let
-        (updatedLoginModel, loginEffects) = Login.update act model.loginModel
+        (childModel, childEffects) = Login.update act model.loginModel
 
+        d = Debug.log "act" act
 
         effects =
           case act of
-            Login.GetAccessTokenFromServer _ ->
-              [ Effects.map ChildAction loginEffects
-              , getDataFromServer
+            Login.UpdateAccessTokenFromServer _ ->
+              [ Effects.map ChildLoginAction childEffects
+              , Task.succeed GetDataFromServer |> Effects.task
               ]
-            _ -> [ Effects.map ChildAction loginEffects ]
+
+            Login.UpdateAccessTokenFromStorage _ ->
+              [ Effects.map ChildLoginAction childEffects
+              , Task.succeed GetDataFromServer |> Effects.task
+              ]
+
+            _ -> [ Effects.map ChildLoginAction childEffects ]
       in
-      ( {model | loginModel <- updatedLoginModel, accessToken <- updatedLoginModel.accessToken}
+      ( {model
+          | loginModel <- childModel
+          , accessToken <- childModel.accessToken
+        }
       , Effects.batch effects
       )
 
@@ -100,10 +115,7 @@ update action model =
       , Effects.none
       )
 
-getDataFromServer : Effects Action
-getDataFromServer =
-  Task.succeed GetDataFromServer
-    |> Effects.task
+
 
 -- VIEW
 
@@ -115,7 +127,7 @@ view address model =
     Anonymous ->
       let
         childAddress =
-            Signal.forwardTo address ChildAction
+            Signal.forwardTo address ChildLoginAction
       in
         div []
           [ Login.view childAddress model.loginModel

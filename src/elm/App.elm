@@ -23,7 +23,10 @@ type alias Model =
 
 initialModel : Model
 initialModel =
-  Model User.initialModel [] Event.initialModel
+  { user = User.initialModel
+  , companies = []
+  , events = Event.initialModel
+  }
 
 init : (Model, Effects Action)
 init =

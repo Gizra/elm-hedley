@@ -7,6 +7,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (on, onClick, targetValue)
 import Http
 import Json.Decode as Json exposing ((:=))
+import Leaflet exposing (Model, initialModel, Marker, update)
 import String exposing (length)
 import Task
 import Dict exposing (Dict)
@@ -48,6 +49,7 @@ type alias Model =
   , selectedAuthor : Maybe Int
   -- @todo: Make (Maybe String)
   , filterString : String
+  , leaflet : Leaflet.Model
   }
 
 initialModel : Model
@@ -57,6 +59,7 @@ initialModel =
   , selectedEvent = Nothing
   , selectedAuthor = Nothing
   , filterString = ""
+  , leaflet = Leaflet.initialModel
   }
 
 init : (Model, Effects Action)
@@ -71,12 +74,18 @@ init =
 type Action
   = GetDataFromServer
   | UpdateDataFromServer (Result Http.Error (List Event))
-  | SelectEvent Int
+  
+  -- Select event might get values from JS (i.e. selecting a leaflet marker)
+  -- so we allow passing a Maybe Int, instead of just Int.
+  | SelectEvent (Maybe Int)
   | UnSelectEvent
   | SelectAuthor Int
   | UnSelectAuthor
   -- @todo: Make (Maybe String)
   | FilterEvents String
+
+  -- Child actions
+  | ChildLeafletAction Leaflet.Action
 
 
 type alias Context =
@@ -101,36 +110,50 @@ update context action model =
               | events <- events
               , status <- Fetched
             }
-          , Effects.none
+          , Task.succeed (FilterEvents model.filterString) |> Effects.task
           )
         Err msg ->
           ( {model | status <- HttpError msg}
           , Effects.none
           )
 
-    SelectEvent id ->
-      ( { model | selectedEvent <- Just id }
-      , Effects.none
-      )
+    SelectEvent val ->
+      case val of
+        Just id ->
+          ( { model | selectedEvent <- Just id }
+          , Task.succeed (ChildLeafletAction <| Leaflet.SelectMarker <| Just id) |> Effects.task
+          )
+        Nothing ->
+          (model, Task.succeed  UnSelectEvent |> Effects.task)
 
     UnSelectEvent ->
       ( { model | selectedEvent <- Nothing }
-      , Effects.none
+      , Task.succeed (ChildLeafletAction <| Leaflet.SelectMarker Nothing) |> Effects.task
       )
 
     SelectAuthor id ->
       ( { model | selectedAuthor <- Just id }
-      , Task.succeed UnSelectEvent |> Effects.task
+      , Effects.batch
+        [ Task.succeed UnSelectEvent |> Effects.task
+        , Task.succeed (FilterEvents model.filterString) |> Effects.task
+        ]
       )
 
     UnSelectAuthor ->
       ( { model | selectedAuthor <- Nothing }
-      , Task.succeed UnSelectEvent |> Effects.task
+      , Effects.batch
+        [ Task.succeed UnSelectEvent |> Effects.task
+        , Task.succeed (FilterEvents model.filterString) |> Effects.task
+        ]
       )
 
-    FilterEvents filter ->
+    FilterEvents val ->
       let
-        model' = { model | filterString <- filter }
+        model' = { model | filterString <- val }
+
+        leaflet = model.leaflet
+        leaflet' = { leaflet | markers <- (leafletMarkers model')}
+
         effects =
           case model.selectedEvent of
             Just id ->
@@ -147,11 +170,26 @@ update context action model =
             Nothing ->
               Effects.none
       in
-      ( { model | filterString <- filter }
-      , effects
-      )
+        ( { model
+          | filterString <- val
+          , leaflet <- leaflet'
+          }
+        , effects
+        )
 
+    ChildLeafletAction act ->
+      let
+        (childModel, childEffects) = Leaflet.update act model.leaflet
+      in
+        ( {model | leaflet <- childModel }
+        , Effects.map ChildLeafletAction childEffects
+        )
 
+-- Build the Leaflet's markers data from the events
+leafletMarkers : Model -> List Leaflet.Marker
+leafletMarkers model =
+  filterListEvents model
+    |> List.map (\event -> Leaflet.Marker event.id event.marker.lat event.marker.lng)
 
 -- VIEW
 
@@ -176,10 +214,17 @@ view address model =
           ]
 
       , div []
-          [ div [class "h2"] [ text "Event info:"]
+          [ div [class "h2"] [ text "Map:"]
+          , div [ style myStyle, id "map" ] []
           , viewEventInfo model
           ]
       ]
+    ]
+
+myStyle : List (String, String)
+myStyle =
+    [ ("width", "600px")
+    , ("height", "400px")
     ]
 
 groupEventsByAuthors : List Event -> Dict Int (Author, Int)
@@ -280,7 +325,7 @@ viewListEvents address model =
 
     eventSelect event =
       li []
-        [ a [ href "#", onClick address (SelectEvent event.id) ] [ text event.label ] ]
+        [ a [ href "#", onClick address (SelectEvent <| Just event.id) ] [ text event.label ] ]
 
     eventUnselect event =
       li []

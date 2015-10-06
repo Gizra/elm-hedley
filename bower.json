@@ -1,0 +1,19 @@
+{
+  "name": "elm-hedley",
+  "version": "0.1.0",
+  "homepage": "https://github.com/amitaibu/elm-login",
+  "authors": [
+    "Amitai Burstein <amitai@gizra.com>"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "leaflet": "~0.7.5"
+  }
+}

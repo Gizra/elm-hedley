@@ -87,8 +87,6 @@ update action model =
       let
         (childModel, childEffects) = Login.update act model.loginModel
 
-        d = Debug.log "act" act
-
         effects =
           case act of
             Login.UpdateAccessTokenFromServer _ ->

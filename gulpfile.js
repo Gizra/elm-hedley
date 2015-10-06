@@ -24,15 +24,17 @@ var reload = browserSync.reload;
 // And define a variable that BrowserSync uses in its function
 var bs;
 
+var wiredep = require('wiredep').stream;
+
 // Deletes the directory that is used to serve the site during development
 gulp.task("clean:dev", function() {
-  return del(["serve/**/*"]);
+  return del(["serve"]);
 });
 
 
 // Deletes the directory that the optimized site is output to
 gulp.task("clean:prod", function() {
-  return del(["dist/**/*"]);
+  return del(["dist"]);
 });
 
 
@@ -86,16 +88,37 @@ gulp.task("fonts", function () {
 });
 
 // Copy index.html and CNAME files to the "serve" directory
-gulp.task("copy:dev", function () {
-  return gulp.src(["src/index.html", "src/CNAME"])
+gulp.task("copy:dev", ["copy:bower"], function () {
+  return gulp.src(["src/index.html", "src/CNAME", "src/js/**/*", "src/assets/images/**/*"])
     .pipe(gulp.dest("serve"))
     .pipe($.size({ title: "index.html & CNAME" }))
 });
+
+// Copy bower.
+gulp.task("copy:bower", function () {
+  return gulp.src(["bower_components/**/*"])
+    .pipe(gulp.dest("serve/bower_components"))
+    .pipe($.size({ title: "Bower" }))
+});
+
+// Copy images.
+gulp.task("copy:images", function () {
+  return gulp.src([])
+    .pipe(gulp.dest("serve/assets/images"))
+    .pipe($.size({ title: "Assets images" }))
+});
+
 
 gulp.task("cname", function () {
   return gulp.src(["serve/CNAME"])
     .pipe(gulp.dest("dist"))
     .pipe($.size({ title: "CNAME" }))
+});
+
+gulp.task('bower', function () {
+  gulp.src("src/index.html")
+    .pipe(wiredep())
+    .pipe(gulp.dest("serve"));
 });
 
 
@@ -171,6 +194,7 @@ gulp.task("serve:dev", ["build"], function () {
 // reload the website accordingly. Update or add other files you need to be watched.
 gulp.task("watch", function () {
   // We need to copy dev, so index.html may be replaced by error messages.
+  gulp.watch(["src/index.html", "src/js/**/*.js"], ["copy:dev", reload]);
   gulp.watch(["src/elm/*.elm"], ["elm", "copy:dev", reload]);
   gulp.watch(["src/assets/scss/**/*.scss"], ["styles", "copy:dev", reload]);
 });
@@ -190,10 +214,11 @@ gulp.task("serve:prod", function () {
 gulp.task("default", ["serve:dev", "watch"]);
 
 // Builds the site but doesnt serve it to you
+// @todo: Add "bower" here
 gulp.task("build", ["clean:dev", "styles", "copy:dev", "elm"], function () {});
 
 // Builds your site with the "build" command and then runs all the optimizations on
 // it and outputs it to "./dist"
-gulp.task("publish", ["clean:prod", "build"], function () {
+gulp.task("publish", ["build", "clean:prod"], function () {
   gulp.start("minify", "cname", "images", "fonts");
 });

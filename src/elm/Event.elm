@@ -78,8 +78,12 @@ type Action
   -- @todo: Make (Maybe String)
   | FilterEvents String
 
-update : Action -> Model -> (Model, Effects Action)
-update action model =
+
+type alias Context =
+  { accessToken : String }
+
+update : Context -> Action -> Model -> (Model, Effects Action)
+update context action model =
   case action of
     GetDataFromServer ->
       let
@@ -87,8 +91,7 @@ update action model =
         url = Config.backendUrl ++ "/api/v1.0/events"
       in
         ( { model | status <- Fetching}
-          -- @todo: Remove access token hardcoding.
-        , getJson url "erUOM1tKSABIGmcCKPoXhZYxO-7F4qUBGyxjRL7oUKs"
+        , getJson url context.accessToken
         )
 
     UpdateDataFromServer result ->

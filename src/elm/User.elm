@@ -103,12 +103,12 @@ update action model =
 
             _ -> [ Effects.map ChildLoginAction childEffects ]
       in
-      ( {model
-          | loginModel <- childModel
-          , accessToken <- childModel.accessToken
-        }
-      , Effects.batch effects
-      )
+        ( {model
+            | loginModel <- childModel
+            , accessToken <- childModel.accessToken
+          }
+        , Effects.batch effects
+        )
 
     SetAccessToken accessToken ->
       ( {model | accessToken <- accessToken}

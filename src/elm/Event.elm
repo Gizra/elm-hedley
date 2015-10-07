@@ -74,7 +74,7 @@ init =
 type Action
   = GetDataFromServer
   | UpdateDataFromServer (Result Http.Error (List Event))
-  
+
   -- Select event might get values from JS (i.e. selecting a leaflet marker)
   -- so we allow passing a Maybe Int, instead of just Int.
   | SelectEvent (Maybe Int)
@@ -206,6 +206,7 @@ view address model =
       [ div []
           [ div [class "h2"] [ text "Event Authors:"]
           , ul [] (viewEventsByAuthors address model.events model.selectedAuthor)
+          , div [ hidden (model.status == Fetched)] [ text "Loading..."]
           ]
       , div []
           [ div [class "h2"] [ text "Event list:"]

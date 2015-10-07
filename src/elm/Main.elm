@@ -39,11 +39,10 @@ port mapManager =
     getEvents model =
       (.events >> .events) model
 
-    val model = LeafletPort
-      (getLeaflet model)
-      (List.map .id (getEvents model))
+    getLeafletPort model =
+      LeafletPort (getLeaflet model) (List.map .id (getEvents model))
 
   in
-  Signal.map val app.model
+  Signal.map getLeafletPort app.model
 
 port selectEvent : Signal (Maybe Int)

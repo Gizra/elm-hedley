@@ -156,7 +156,7 @@ gulp.task("minify", ["styles"], function () {
 gulp.task("deploy", [], function () {
   // Deploys your optimized site, you can change the settings in the html task if you want to
   return gulp.src("dist/**/*")
-    .pipe($.ghPages({branch: "gh-pages"}));
+    .pipe($.ghPages({branch: "gh-pages", cacheDir: ".publish"}));
 });
 
 gulp.task('elm-init', elm.init);

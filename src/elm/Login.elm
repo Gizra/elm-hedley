@@ -47,7 +47,7 @@ initialModel =
   , isFetching = False
   , status = Init
   -- We start by assuming there's already an access token it the localStorage.
-  -- While this property is set to True, the login form will not appear.  
+  -- While this property is set to True, the login form will not appear.
   , hasAccessTokenInStorage = True
   }
 
@@ -172,43 +172,42 @@ view address model =
   in
     div
 
-      [ class "container"
-      -- Don't show the form while checking for the access token from the
-      -- storage.
-      , hidden model.hasAccessTokenInStorage
-      ]
+      [ class "container" ]
 
       [ Html.form
         [ action "javascript:none"
         , onSubmit address SubmitForm
+        -- Don't show the form while checking for the access token from the
+        -- storage.
+        , hidden model.hasAccessTokenInStorage
         ]
         [
-      -- Name
-      input
-          [ type' "text"
-          , placeholder "Name"
-          , value model.loginForm.name
-          , on "input" targetValue (Signal.message address << UpdateName)
-          , size 40
-          , required True
-          ]
-          []
-      -- Password
-      , input
-          [ type' "password"
-          , placeholder "Password"
-          , value modelForm.pass
-          , on "input" targetValue (Signal.message address << UpdatePass)
-          , size 40
-          , required True
-          ]
-          []
-      ]
-      , button
-          [ onClick address SubmitForm
-          , disabled (String.isEmpty modelForm.name || String.isEmpty modelForm.pass || model.isFetching) ]
-          [ text "Login" ]
-      , div [hidden (model.isFetching == False)] [ text "Loading ..."]
+        -- Name
+        input
+            [ type' "text"
+            , placeholder "Name"
+            , value model.loginForm.name
+            , on "input" targetValue (Signal.message address << UpdateName)
+            , size 40
+            , required True
+            ]
+            []
+        -- Password
+        , input
+            [ type' "password"
+            , placeholder "Password"
+            , value modelForm.pass
+            , on "input" targetValue (Signal.message address << UpdatePass)
+            , size 40
+            , required True
+            ]
+            []
+        , button
+            [ onClick address SubmitForm
+            , disabled (String.isEmpty modelForm.name || String.isEmpty modelForm.pass || model.isFetching) ]
+            [ text "Login" ]
+        ]        
+      , div [hidden (model.isFetching == False && not model.hasAccessTokenInStorage)] [ text "Loading ..."]
       ]
 
 -- EFFECTS

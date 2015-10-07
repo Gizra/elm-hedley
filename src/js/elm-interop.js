@@ -18,7 +18,7 @@ var defaultIcon = L.icon({
 });
 
 var selectedIcon = L.icon({
-  iconUrl: 'default@2x.png',
+  iconUrl: 'selected@2x.png',
   iconRetinaUrl: 'selected@2x.png',
   iconSize: [35, 46]
 });

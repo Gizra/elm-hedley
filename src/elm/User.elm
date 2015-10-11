@@ -55,6 +55,10 @@ type Action
   | ChildLoginAction Login.Action
   | SetAccessToken AccessToken
 
+  -- Page
+  | Activate
+  | Deactivate
+
 
 update : Action -> Model -> (Model, Effects Action)
 update action model =
@@ -114,6 +118,13 @@ update action model =
       )
 
 
+    Activate ->
+      (model, Effects.none)
+
+    Deactivate ->
+      (model, Effects.none)
+
+
 
 -- VIEW
 
@@ -141,7 +152,6 @@ view address model =
         [ div [] [ text "Welcome ", italicName ]
         , div [] [ text "Your companies are:"]
         , ul  [] (List.map viewCompanies model.companies)
-        , div  [] [text (toString model.accessToken)]
         ]
 
 viewCompanies : Company.Model -> Html

@@ -24,7 +24,7 @@ initialModel : Model
 initialModel =
   { markers = []
   , selectedMarker = Nothing
-  , showMap = True
+  , showMap = False
   }
 
 init : (Model, Effects Action)

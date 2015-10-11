@@ -142,8 +142,7 @@ update action model =
           ( { model | hasAccessTokenInStorage <- False }
           , Effects.none
           )
-
-
+          
 
 sendInputToStorage : String -> Effects Action
 sendInputToStorage s =
@@ -206,7 +205,7 @@ view address model =
             [ onClick address SubmitForm
             , disabled (String.isEmpty modelForm.name || String.isEmpty modelForm.pass || model.isFetching) ]
             [ text "Login" ]
-        ]        
+        ]
       , div [hidden (model.isFetching == False && not model.hasAccessTokenInStorage)] [ text "Loading ..."]
       ]
 

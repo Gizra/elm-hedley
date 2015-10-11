@@ -87,6 +87,10 @@ type Action
   -- Child actions
   | ChildLeafletAction Leaflet.Action
 
+  -- Page
+  | Activate
+  | Deactivate
+
 
 type alias Context =
   { accessToken : String }
@@ -180,6 +184,36 @@ update context action model =
     ChildLeafletAction act ->
       let
         (childModel, childEffects) = Leaflet.update act model.leaflet
+      in
+        ( {model | leaflet <- childModel }
+        , Effects.map ChildLeafletAction childEffects
+        )
+
+    Activate ->
+      let
+        (childModel, childEffects) = Leaflet.update Leaflet.ToggleMap model.leaflet
+
+        defaultEffects =
+          [ Effects.map ChildLeafletAction childEffects ]
+
+        effects =
+          if model.status == Fetching || model.status == Fetched
+            then
+              -- Data was already fetched or in the process of being fetched,
+              -- so use the cache.
+              defaultEffects
+            else
+              -- Fetch new data.
+              (Task.succeed GetDataFromServer |> Effects.task) :: defaultEffects
+
+      in
+        ( {model | leaflet <- childModel }
+        , Effects.batch effects
+        )
+
+    Deactivate ->
+      let
+        (childModel, childEffects) = Leaflet.update Leaflet.ToggleMap model.leaflet
       in
         ( {model | leaflet <- childModel }
         , Effects.map ChildLeafletAction childEffects

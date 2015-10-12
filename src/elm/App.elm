@@ -36,6 +36,16 @@ initialModel =
   , activePage = User
   }
 
+initialEffects : List (Effects Action)
+initialEffects =
+  let
+    eventEffects = snd Event.init
+    userEffects = snd User.init
+  in
+    [ Effects.map ChildEventAction eventEffects
+    , Effects.map ChildUserAction userEffects
+    ]
+
 init : (Model, Effects Action)
 init =
   let
@@ -43,10 +53,7 @@ init =
     userEffects = snd User.init
   in
     ( initialModel
-    , Effects.batch
-      [ Effects.map ChildEventAction eventEffects
-      , Effects.map ChildUserAction userEffects
-      ]
+    , Effects.batch initialEffects
     )
 
 -- UPDATE
@@ -73,28 +80,46 @@ update action model =
       let
         (childModel, childEffects) = User.update act model.user
 
-        defaultEffects =
-          [ Effects.map ChildUserAction childEffects ]
+        defaultEffect =
+          Effects.map ChildUserAction childEffects
 
-        effects =
+        -- A convinence variable to hold the default effect as a list.
+        defaultEffects =
+          [ defaultEffect ]
+
+        model' =
+          { model | user <- childModel }
+
+        (model'', effects') =
           case act of
             User.UpdateDataFromServer result ->
               case result of
                 Ok _ ->
                   -- User was successfully logged in, so we can redirect to the
                   -- events page.
-                  (Task.succeed (SetActivePage Event) |> Effects.task) :: defaultEffects
+                  ( model'
+                  , (Task.succeed (SetActivePage Event) |> Effects.task) :: defaultEffects
+                  )
 
                 Err _ ->
-                  defaultEffects
+                  ( model'
+                  , defaultEffects
+                  )
+
+            User.Logout ->
+              ( initialModel
+              -- Call the init effects, where the user logout which removed the
+              -- access token is the first one.
+              , defaultEffect :: initialEffects
+              )
 
             _ ->
-              defaultEffects
+              ( model'
+              , defaultEffects
+              )
 
       in
-        ( { model | user <- childModel }
-        , Effects.batch effects
-        )
+        (model'', Effects.batch effects')
 
     SetActivePage page ->
       let
@@ -166,21 +191,23 @@ navbar address model =
 -- Navbar for Auth user.
 navbarLoggedIn : Signal.Address Action -> Model -> Html
 navbarLoggedIn address model =
-  node "nav" [class "navbar navbar-default"]
-    [ div [class "container-fluid"]
-      -- Brand and toggle get grouped for better mobile display
-        [ div [class "navbar-header"] []
-        , div [ class "collapse navbar-collapse"]
-            [ ul [class "nav navbar-nav"]
-              [ li [] [ a [ href "#", onClick address (SetActivePage User) ] [ text "My account"] ]
-              , li [] [ a [ href "#", onClick address (SetActivePage Event)] [ text "Events"] ]
+  let
+    childAddress =
+      Signal.forwardTo address ChildUserAction
+  in
+    node "nav" [class "navbar navbar-default"]
+      [ div [class "container-fluid"]
+        -- Brand and toggle get grouped for better mobile display
+          [ div [class "navbar-header"] []
+          , div [ class "collapse navbar-collapse"]
+              [ ul [class "nav navbar-nav"]
+                [ li [] [ a [ href "#", onClick address (SetActivePage User) ] [ text "My account"] ]
+                , li [] [ a [ href "#", onClick address (SetActivePage Event)] [ text "Events"] ]
+                , li [] [ a [ href "#", onClick childAddress User.Logout] [ text "Logout"] ]
+                ]
               ]
-
-            ]
-
-        ]
-
-    ]
+          ]
+      ]
 
 myStyle : List (String, String)
 myStyle =

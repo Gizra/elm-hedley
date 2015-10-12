@@ -99,9 +99,9 @@ update action model =
         credentials : String
         credentials = encodeCredentials(model.loginForm.name, model.loginForm.pass)
       in
-      ( { model | isFetching <- True}
-      , getJson url credentials
-      )
+        ( { model | isFetching <- True}
+        , getJson url credentials
+        )
 
     UpdateAccessTokenFromServer result ->
       let
@@ -142,7 +142,7 @@ update action model =
           ( { model | hasAccessTokenInStorage <- False }
           , Effects.none
           )
-          
+
 
 sendInputToStorage : String -> Effects Action
 sendInputToStorage s =
@@ -174,8 +174,8 @@ view address model =
       [ class "container" ]
 
       [ Html.form
-        [ action "javascript:none"
-        , onSubmit address SubmitForm
+        [ onSubmit address SubmitForm
+        , action "#"
         -- Don't show the form while checking for the access token from the
         -- storage.
         , hidden model.hasAccessTokenInStorage
@@ -203,7 +203,8 @@ view address model =
             []
         , button
             [ onClick address SubmitForm
-            , disabled (String.isEmpty modelForm.name || String.isEmpty modelForm.pass || model.isFetching) ]
+            , disabled (String.isEmpty modelForm.name || String.isEmpty modelForm.pass || model.isFetching)
+            ]
             [ text "Login" ]
         ]
       , div [hidden (model.isFetching == False && not model.hasAccessTokenInStorage)] [ text "Loading ..."]

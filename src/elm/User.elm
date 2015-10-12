@@ -9,6 +9,7 @@ import Html.Events exposing (on, onClick, targetValue)
 import Http
 import Json.Decode as Json exposing ((:=))
 import Login exposing (..)
+import Storage exposing (removeItem)
 import String exposing (length)
 import Task
 
@@ -50,9 +51,12 @@ init =
 -- UPDATE
 
 type Action
-  = GetDataFromServer
+  = NoOp (Maybe ())
+  | GetDataFromServer
   | UpdateDataFromServer (Result Http.Error (Id, String, List Company.Model))
   | ChildLoginAction Login.Action
+  | Logout
+  -- @todo: Remove, as we don't use it
   | SetAccessToken AccessToken
 
   -- Page
@@ -63,6 +67,9 @@ type Action
 update : Action -> Model -> (Model, Effects Action)
 update action model =
   case action of
+    NoOp _ ->
+      (model, Effects.none)
+
     GetDataFromServer ->
       let
         url : String
@@ -91,19 +98,25 @@ update action model =
       let
         (childModel, childEffects) = Login.update act model.loginModel
 
+        defaultEffects =
+          [ Effects.map ChildLoginAction childEffects ]
+
+        getDataFromServerEffects =
+          (Task.succeed GetDataFromServer |> Effects.task) :: defaultEffects
+
         effects =
           case act of
-            Login.UpdateAccessTokenFromServer _ ->
-              [ Effects.map ChildLoginAction childEffects
-              , Task.succeed GetDataFromServer |> Effects.task
-              ]
+            Login.UpdateAccessTokenFromServer result ->
+              -- Call server only if token exists.
+              if isAccessTokenInStorage result then getDataFromServerEffects else defaultEffects
 
-            Login.UpdateAccessTokenFromStorage _ ->
-              [ Effects.map ChildLoginAction childEffects
-              , Task.succeed GetDataFromServer |> Effects.task
-              ]
+            Login.UpdateAccessTokenFromStorage result ->
+              -- Call server only if token exists.
+              if isAccessTokenInStorage result then getDataFromServerEffects else defaultEffects
 
-            _ -> [ Effects.map ChildLoginAction childEffects ]
+
+            _ ->
+              defaultEffects
       in
         ( {model
             | loginModel <- childModel
@@ -112,11 +125,13 @@ update action model =
         , Effects.batch effects
         )
 
+    Logout ->
+      (model, removeStorageItem)
+
     SetAccessToken accessToken ->
       ( {model | accessToken <- accessToken}
       , Effects.none
       )
-
 
     Activate ->
       (model, Effects.none)
@@ -125,6 +140,26 @@ update action model =
       (model, Effects.none)
 
 
+-- Determines if a call to the server should be done, based on having an access
+-- token present.
+isAccessTokenInStorage : Result err String -> Bool
+isAccessTokenInStorage result =
+  case result of
+    -- If token is empty, no need to call the server.
+    Ok token ->
+      if String.isEmpty token then False else True
+
+    Err _ ->
+      False
+
+-- Task to remove localStorage.
+-- @todo: How to avoid NoOp, which isn't doing anything?
+removeStorageItem : Effects Action
+removeStorageItem =
+  Storage.removeItem "access_token"
+    |> Task.toMaybe
+    |> Task.map NoOp
+    |> Effects.task
 
 -- VIEW
 

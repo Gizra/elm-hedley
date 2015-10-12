@@ -25,50 +25,69 @@ var selectedIcon = L.icon({
 
 elmApp.ports.mapManager.subscribe(function(model) {
   // We use timeout, to let virtual-dom add the div we need to bind to.
-  setTimeout(function () {
-    if (!model.leaflet.showMap && !!mapEl) {
-      mapEl.remove();
-      mapEl = undefined;
-      markersEl = {};
-      return;
+  waitForElement('#map', mapManager, model);
+});
+
+
+/**
+ * Wait for selector to appear before invoking related functions.
+ */
+function waitForElement(selector, fn, model) {
+  var element = document.querySelector(selector);
+  setTimeout(function() {
+    if (!!element) {
+      fn.call(null, model);
+    }
+    else {
+      waitForElement(selector, fn, model);
+    }
+  }, 50);
+}
+
+/**
+ * Attach or detach the Leaflet map and markers.
+ */
+function mapManager(model) {
+  if (!model.leaflet.showMap && !!mapEl) {
+    mapEl.remove();
+    mapEl = undefined;
+    markersEl = {};
+    return;
+  }
+
+  mapEl = mapEl || addMap();
+
+  // The event Ids holds the array of all the events - even the one that are
+  // hidden. By unsetting the ones that have visible markers, we remain with
+  // the ones that should be removed.
+  var eventIds = model.events;
+
+  model.leaflet.markers.forEach(function(marker) {
+    var id = marker.id;
+    if (!markersEl[id]) {
+      markersEl[id] = L.marker([marker.lat, marker.lng]).addTo(mapEl);
+      selectMarker(markersEl[id], id);
+    }
+    else {
+      markersEl[id].setLatLng([marker.lat, marker.lng]);
     }
 
-    mapEl = mapEl || addMap();
+    // Set the marker's icon.
+    markersEl[id].setIcon(!!model.leaflet.selectedMarker && model.leaflet.selectedMarker === id ? selectedIcon : defaultIcon);
 
-    // The event Ids holds the array of all the events - even the one that are
-    // hidden. By unsetting the ones that have visible markers, we remain with
-    // the ones that should be removed.
-    var eventIds = model.events;
+    // Unset the marker form the event IDs list.
+    var index = eventIds.indexOf(id);
+    eventIds.splice(index, 1);
+  });
 
-    model.leaflet.markers.forEach(function(marker) {
-      var id = marker.id;
-      if (!markersEl[id]) {
-        markersEl[id] = L.marker([marker.lat, marker.lng]).addTo(mapEl);
-        selectMarker(markersEl[id], id);
-      }
-      else {
-        markersEl[id].setLatLng([marker.lat, marker.lng]);
-      }
-
-      // Set the marker's icon.
-      markersEl[id].setIcon(!!model.leaflet.selectedMarker && model.leaflet.selectedMarker === id ? selectedIcon : defaultIcon);
-
-      // Unset the marker form the event IDs list.
-      var index = eventIds.indexOf(id);
-      eventIds.splice(index, 1);
-    });
-
-    // Hide existing markers.
-    eventIds.forEach(function(id) {
-      if (markersEl[id]) {
-        mapEl.removeLayer(markersEl[id]);
-        markersEl[id] = undefined;
-      }
-    })
-
-  }, 50);
-
-});
+  // Hide existing markers.
+  eventIds.forEach(function(id) {
+    if (markersEl[id]) {
+      mapEl.removeLayer(markersEl[id]);
+      markersEl[id] = undefined;
+    }
+  });
+}
 
 /**
  * Send marker click event to Elm.

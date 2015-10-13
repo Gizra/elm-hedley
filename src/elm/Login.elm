@@ -30,12 +30,13 @@ type alias LoginForm =
 
 type Status =
   Init
+  | Fetching
+  | Fetched
   | HttpError Http.Error
 
 type alias Model =
   { accessToken: AccessToken
   , loginForm : LoginForm
-  , isFetching : Bool
   , status : Status
   , hasAccessTokenInStorage : Bool
   }
@@ -44,7 +45,6 @@ initialModel : Model
 initialModel =
   { accessToken = ""
   , loginForm = LoginForm "demo" "1234"
-  , isFetching = False
   , status = Init
   -- We start by assuming there's already an access token it the localStorage.
   -- While this property is set to True, the login form will not appear.
@@ -99,13 +99,17 @@ update action model =
         credentials : String
         credentials = encodeCredentials(model.loginForm.name, model.loginForm.pass)
       in
-        ( { model | isFetching <- True}
-        , getJson url credentials
-        )
+        if model.status == Fetching
+          then
+            (model, Effects.none)
+          else
+            ( { model | status <- Fetching}
+            , getJson url credentials
+            )
 
     UpdateAccessTokenFromServer result ->
       let
-        model'  = { model | isFetching <- False}
+        model'  = { model | status <- Fetched}
       in
         case result of
           Ok token ->
@@ -203,11 +207,11 @@ view address model =
             []
         , button
             [ onClick address SubmitForm
-            , disabled (String.isEmpty modelForm.name || String.isEmpty modelForm.pass || model.isFetching)
+            , disabled (String.isEmpty modelForm.name || String.isEmpty modelForm.pass || model.status == Fetching || model.status == Fetched)
             ]
             [ text "Login" ]
         ]
-      , div [hidden (model.isFetching == False && not model.hasAccessTokenInStorage)] [ text "Loading ..."]
+      , div [hidden (not (model.status == Fetching) && not model.hasAccessTokenInStorage)] [ text "Loading ..."]
       ]
 
 -- EFFECTS

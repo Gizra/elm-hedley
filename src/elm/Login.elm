@@ -175,7 +175,7 @@ view address model =
 
       [ Html.form
         [ onSubmit address SubmitForm
-        , action "#"
+        , action "javascript:void(0);"
         -- Don't show the form while checking for the access token from the
         -- storage.
         , hidden model.hasAccessTokenInStorage

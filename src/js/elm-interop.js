@@ -2,11 +2,6 @@
 
 var elmApp = Elm.fullscreen(Elm.Main, {selectEvent: null});
 
-// @todo: Remove this hack, that makes sure that the map will appear on first
-// load, as the subscribe to port is triggered only on the first change of
-// model, and not when it is initialized.
-elmApp.ports.selectEvent.send(null);
-
 // Maintain the map and marker state.
 var mapEl = undefined;
 var markersEl = {};
@@ -41,6 +36,7 @@ elmApp.ports.mapManager.subscribe(function(model) {
  * Wait for selector to appear before invoking related functions.
  */
 function waitForElement(selector, fn, model) {
+
   setTimeout(function() {
     var result = fn.call(null, selector, model);
     if (!result) {
@@ -75,6 +71,8 @@ function mapManager(selector, model) {
   // the ones that should be removed.
   var eventIds = model.events;
 
+  var selectedMarker = undefined;
+
   model.leaflet.markers.forEach(function(marker) {
     var id = marker.id;
     if (!markersEl[id]) {
@@ -85,13 +83,34 @@ function mapManager(selector, model) {
       markersEl[id].setLatLng([marker.lat, marker.lng]);
     }
 
+    var isSelected = !!model.leaflet.selectedMarker && model.leaflet.selectedMarker === id;
+
+    if (isSelected) {
+      // Center the map around the selected event.
+      selectedMarker = markersEl[id];
+    }
+
     // Set the marker's icon.
-    markersEl[id].setIcon(!!model.leaflet.selectedMarker && model.leaflet.selectedMarker === id ? selectedIcon : defaultIcon);
+    markersEl[id].setIcon(isSelected ? selectedIcon : defaultIcon);
 
     // Unset the marker form the event IDs list.
     var index = eventIds.indexOf(id);
     eventIds.splice(index, 1);
   });
+
+  // When there are markers available, fit the map around them.
+  if (model.leaflet.markers.length) {
+    mapEl.fitBounds(model.leaflet.markers);
+
+    // When a marker is selected, center the map around it.
+    if (selectedMarker) {
+      mapEl.panTo(selectedMarker._latlng);
+    }
+  }
+  else {
+    // Show the entire world when no markers are set.
+    mapEl.setZoom(1);
+  }
 
   // Hide existing markers.
   eventIds.forEach(function(id) {
@@ -118,8 +137,8 @@ function selectMarker(markerEl, id) {
  * Initialize a Leaflet map.
  */
 function addMap() {
-  // Leaflet
-  var mapEl = L.map('map').setView([50, 50], 3);
+  // Leaflet map.
+  var mapEl = L.map('map');
 
   L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6IjZjNmRjNzk3ZmE2MTcwOTEwMGY0MzU3YjUzOWFmNWZhIn0.Y8bhBaUMqFiPrDRW9hieoQ', {
     maxZoom: 10,

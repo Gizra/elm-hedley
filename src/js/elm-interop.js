@@ -24,6 +24,14 @@ var selectedIcon = L.icon({
 });
 
 elmApp.ports.mapManager.subscribe(function(model) {
+  if (!model.leaflet.showMap && !!mapEl) {
+    // Hide the map.
+    mapEl.remove();
+    mapEl = undefined;
+    markersEl = {};
+    return;
+  }
+
   // We use timeout, to let virtual-dom add the div we need to bind to.
   waitForElement('#map', mapManager, model);
 });
@@ -33,12 +41,10 @@ elmApp.ports.mapManager.subscribe(function(model) {
  * Wait for selector to appear before invoking related functions.
  */
 function waitForElement(selector, fn, model) {
-  var element = document.querySelector(selector);
   setTimeout(function() {
-    if (!!element) {
-      fn.call(null, model);
-    }
-    else {
+    var result = fn.call(null, selector, model);
+    if (!result) {
+      // Element still doesn't exist, so wait some more.
       waitForElement(selector, fn, model);
     }
   }, 50);
@@ -46,13 +52,20 @@ function waitForElement(selector, fn, model) {
 
 /**
  * Attach or detach the Leaflet map and markers.
+ *
+ * @return bool
+ *   Determines if mapManager completed it's operation. True means we don't need
+ *   ro re-call this function.
  */
-function mapManager(model) {
-  if (!model.leaflet.showMap && !!mapEl) {
-    mapEl.remove();
-    mapEl = undefined;
-    markersEl = {};
-    return;
+function mapManager(selector, model) {
+  if (!model.leaflet.showMap) {
+    return true;
+  }
+
+  var element = document.querySelector(selector);
+  if (!element) {
+    // Element doesn't exist yet.
+    return false;
   }
 
   mapEl = mapEl || addMap();
@@ -87,6 +100,9 @@ function mapManager(model) {
       markersEl[id] = undefined;
     }
   });
+
+  // Map was binded properly.
+  return true;
 }
 
 /**

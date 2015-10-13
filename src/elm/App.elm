@@ -140,12 +140,17 @@ update action model =
               Task.succeed (ChildEventAction Event.Activate) |> Effects.task
 
       in
-        ( { model | activePage <- page}
-        , Effects.batch
-          [ currentPageEffects
-          , newPageEffects
-          ]
-        )
+        if model.activePage == page
+          then
+            -- Requesting the same page, so don't do anything.
+            (model, Effects.none)
+          else
+            ( { model | activePage <- page}
+            , Effects.batch
+              [ currentPageEffects
+              , newPageEffects
+              ]
+            )
 
 -- VIEW
 

@@ -174,20 +174,19 @@ view address model =
     modelForm = model.loginForm
   in
     div
-
       [ class "container" ]
-
       [ Html.form
         [ onSubmit address SubmitForm
         , action "javascript:void(0);"
+        , class "form-signin"
         -- Don't show the form while checking for the access token from the
         -- storage.
         , hidden model.hasAccessTokenInStorage
         ]
-        [
-        -- Name
-        input
+        [ h2 [ class "form-signin-heading"] [text "Please login"]
+        , input
             [ type' "text"
+            , class "form-control"
             , placeholder "Name"
             , value model.loginForm.name
             , on "input" targetValue (Signal.message address << UpdateName)
@@ -198,6 +197,7 @@ view address model =
         -- Password
         , input
             [ type' "password"
+            , class "form-control"
             , placeholder "Password"
             , value modelForm.pass
             , on "input" targetValue (Signal.message address << UpdatePass)
@@ -207,6 +207,7 @@ view address model =
             []
         , button
             [ onClick address SubmitForm
+            , class "btn btn-lg btn-primary btn-block"
             , disabled (String.isEmpty modelForm.name || String.isEmpty modelForm.pass || model.status == Fetching || model.status == Fetched)
             ]
             [ text "Login" ]

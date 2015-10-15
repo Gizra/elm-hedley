@@ -26,6 +26,8 @@ type alias Model =
   , companies : List Company.Model
   , events : Event.Model
   , activePage : Page
+  -- If the user is anonymous, we want to know where to redirect them.
+  , nextPage : Maybe Page
   }
 
 initialModel : Model
@@ -34,6 +36,7 @@ initialModel =
   , companies = []
   , events = Event.initialModel
   , activePage = User
+  , nextPage = Nothing
   }
 
 initialEffects : List (Effects Action)
@@ -95,11 +98,20 @@ update action model =
             User.UpdateDataFromServer result ->
               case result of
                 Ok _ ->
-                  -- User was successfully logged in, so we can redirect to the
-                  -- events page.
-                  ( model'
-                  , (Task.succeed (SetActivePage Event) |> Effects.task) :: defaultEffects
-                  )
+                  let
+                    nextPage =
+                      case model.nextPage of
+                        Just page ->
+                          page
+                        Nothing ->
+                          Event
+
+                  in
+                    -- User was successfully logged in, so we can redirect to the
+                    -- events page.
+                    ( { model' | nextPage <- Nothing }
+                    , (Task.succeed (SetActivePage nextPage) |> Effects.task) :: defaultEffects
+                    )
 
                 Err _ ->
                   ( model'
@@ -123,8 +135,10 @@ update action model =
 
     SetActivePage page ->
       let
-        page' =
-          if model.user.name == Anonymous then User else page
+        (page', nextPage) =
+          if model.user.name == Anonymous
+            then (User, Just page)
+            else (page, Nothing)
 
         currentPageEffects =
           case model.activePage of
@@ -146,9 +160,14 @@ update action model =
         if model.activePage == page'
           then
             -- Requesting the same page, so don't do anything.
-            (model, Effects.none)
+            -- @todo: Because login and myAccount are under the same page (User)
+            -- we set the nextPage here as-well.
+            ( { model | nextPage <- nextPage }, Effects.none)
           else
-            ( { model | activePage <- page'}
+            ( { model
+              | activePage <- page'
+              , nextPage <- nextPage
+              }
             , Effects.batch
               [ currentPageEffects
               , newPageEffects

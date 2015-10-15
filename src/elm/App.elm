@@ -7,6 +7,7 @@ import Event exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
+import RouteHash exposing (HashUpdate)
 import Task exposing (..)
 import User exposing (..)
 
@@ -19,7 +20,6 @@ type alias AccessToken = String
 type Page
   = Event
   | User
-  | MyAccount
 
 type alias Model =
   { user : User.Model
@@ -123,6 +123,9 @@ update action model =
 
     SetActivePage page ->
       let
+        page' =
+          if model.user.name == Anonymous then User else page
+
         currentPageEffects =
           case model.activePage of
             User ->
@@ -132,7 +135,7 @@ update action model =
               Task.succeed (ChildEventAction Event.Deactivate) |> Effects.task
 
         newPageEffects =
-          case page of
+          case page' of
             User ->
               Task.succeed (ChildUserAction User.Activate) |> Effects.task
 
@@ -140,12 +143,12 @@ update action model =
               Task.succeed (ChildEventAction Event.Activate) |> Effects.task
 
       in
-        if model.activePage == page
+        if model.activePage == page'
           then
             -- Requesting the same page, so don't do anything.
             (model, Effects.none)
           else
-            ( { model | activePage <- page}
+            ( { model | activePage <- page'}
             , Effects.batch
               [ currentPageEffects
               , newPageEffects
@@ -171,12 +174,6 @@ mainContent address model =
       in
         div [ style myStyle ] [ User.view childAddress model.user ]
 
-    MyAccount ->
-      let
-        model' = { model | activePage <- User }
-      in
-      view address model'
-
     Event ->
       let
         childAddress =
@@ -199,6 +196,9 @@ navbarLoggedIn address model =
   let
     childAddress =
       Signal.forwardTo address ChildUserAction
+
+    hrefVoid =
+      href "javascript:void(0);"
   in
     node "nav" [class "navbar navbar-default"]
       [ div [class "container-fluid"]
@@ -206,9 +206,9 @@ navbarLoggedIn address model =
           [ div [class "navbar-header"] []
           , div [ class "collapse navbar-collapse"]
               [ ul [class "nav navbar-nav"]
-                [ li [] [ a [ href "#", onClick address (SetActivePage User) ] [ text "My account"] ]
-                , li [] [ a [ href "#", onClick address (SetActivePage Event)] [ text "Events"] ]
-                , li [] [ a [ href "#", onClick childAddress User.Logout] [ text "Logout"] ]
+                [ li [] [ a [ hrefVoid, onClick address (SetActivePage User) ] [ text "My account"] ]
+                , li [] [ a [ hrefVoid, onClick address (SetActivePage Event)] [ text "Events"] ]
+                , li [] [ a [ hrefVoid, onClick childAddress User.Logout] [ text "Logout"] ]
                 ]
               ]
           ]
@@ -220,3 +220,41 @@ myStyle =
     , ("margin", "50px")
     , ("font-size", "2em")
     ]
+
+
+-- ROUTING
+
+delta2update : Model -> Model -> Maybe HashUpdate
+delta2update previous current =
+  case current.activePage of
+    Event ->
+      -- First, we ask the submodule for a HashUpdate. Then, we use
+      -- `map` to prepend something to the URL.
+      RouteHash.map ((::) "events") <|
+        Event.delta2update previous.events current.events
+
+    User ->
+      let
+        url =
+          if current.user.name == Anonymous then "login" else "my-account"
+      in
+        RouteHash.map ((::) url) <|
+          User.delta2update previous.user current.user
+
+
+-- Here, we basically do the reverse of what delta2update does
+location2action : List String -> List Action
+location2action list =
+  case list of
+    "login" :: rest ->
+      ( SetActivePage User ) :: []
+
+    "my-account" :: rest ->
+      ( SetActivePage User ) :: []
+
+    "events" :: rest ->
+      ( SetActivePage Event ) :: []
+
+    _ ->
+      -- @todo: Add 404
+      ( SetActivePage User ) :: []

@@ -1,6 +1,7 @@
 module Event where
 
 import Config exposing (backendUrl)
+import Dict exposing (Dict)
 import Effects exposing (Effects, Never)
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -8,9 +9,9 @@ import Html.Events exposing (on, onClick, targetValue)
 import Http
 import Json.Decode as Json exposing ((:=))
 import Leaflet exposing (Model, initialModel, Marker, update)
+import RouteHash exposing (HashUpdate)
 import String exposing (length)
 import Task
-import Dict exposing (Dict)
 
 import Debug
 
@@ -291,11 +292,11 @@ viewEventsByAuthors address events selectedAuthor =
           text (author.name ++ " (" ++ toString(count) ++ ")")
 
         authorSelect =
-          a [ href "#", onClick address (SelectAuthor author.id) ] [ authorRaw ]
+          a [ href "javascript:void(0);", onClick address (SelectAuthor author.id) ] [ authorRaw ]
 
         authorUnselect =
           span []
-            [ a [ href "#", onClick address (UnSelectAuthor) ] [ text "x " ]
+            [ a [ href "javascript:void(0);", onClick address (UnSelectAuthor) ] [ text "x " ]
             , authorRaw
             ]
       in
@@ -358,14 +359,17 @@ viewListEvents address model =
   let
     filteredEvents = filterListEvents model
 
+    hrefVoid =
+      href "javascript:void(0);"
+
     eventSelect event =
       li []
-        [ a [ href "#", onClick address (SelectEvent <| Just event.id) ] [ text event.label ] ]
+        [ a [ hrefVoid , onClick address (SelectEvent <| Just event.id) ] [ text event.label ] ]
 
     eventUnselect event =
       li []
         [ span []
-          [ a [ href "#", onClick address (UnSelectEvent) ] [ text "x " ]
+          [ a [ href "javascript:void(0);", onClick address (UnSelectEvent) ] [ text "x " ]
           , text event.label
           ]
         ]
@@ -454,3 +458,13 @@ decodeData =
       ("label" := Json.string)
       ("location" := marker)
       ("user" := author)
+
+-- ROUTER
+
+delta2update : Model -> Model -> Maybe HashUpdate
+delta2update previous current =
+  Just <| RouteHash.set []
+
+location2action : List String -> List Action
+location2action list =
+  []

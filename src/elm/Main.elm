@@ -1,12 +1,13 @@
-
-import Effects exposing (Never)
 import App exposing (init, update, view)
+import CustomStartApp as StartApp
+import Effects exposing (Never)
 import Event exposing (Action)
 import Leaflet exposing (Action, Model)
-import StartApp
-import Task
+import RouteHash
+import Task exposing (Task)
 
 
+app : StartApp.App App.Model App.Action
 app =
   StartApp.start
     { init = init
@@ -23,12 +24,23 @@ port tasks : Signal (Task.Task Never ())
 port tasks =
   app.tasks
 
+port routeTasks : Signal (Task () ())
+port routeTasks =
+    RouteHash.start
+        { prefix = RouteHash.defaultPrefix
+        , address = app.address
+        , models = app.model
+        , delta2update = App.delta2update
+        , location2action = App.location2action
+        }
+
+-- Interactions with Leaflet maps
+
 type alias LeafletPort =
   { leaflet : Leaflet.Model
   , events : List Int
   }
 
--- Interactions with Leaflet maps
 port mapManager : Signal LeafletPort
 port mapManager =
   let

@@ -9,6 +9,7 @@ import Html.Events exposing (on, onClick, targetValue)
 import Http
 import Json.Decode as Json exposing ((:=))
 import Login exposing (..)
+import RouteHash exposing (HashUpdate)
 import Storage exposing (removeItem)
 import String exposing (length)
 import Task
@@ -231,3 +232,13 @@ decodeData =
       ("id" := number)
       ("label" := Json.string)
       ("companies" := Json.list company)
+
+-- ROUTER
+
+delta2update : Model -> Model -> Maybe HashUpdate
+delta2update previous current =
+  Just <| RouteHash.set []
+
+location2action : List String -> List Action
+location2action list =
+  []

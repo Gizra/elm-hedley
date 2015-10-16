@@ -274,6 +274,9 @@ location2action list =
     "events" :: rest ->
       ( SetActivePage Event ) :: []
 
+    "" :: rest ->
+      ( SetActivePage Event ) :: []
+
     _ ->
       -- @todo: Add 404
       ( SetActivePage User ) :: []

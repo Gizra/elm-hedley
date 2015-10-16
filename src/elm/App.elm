@@ -236,8 +236,8 @@ navbarLoggedIn address model =
 myStyle : List (String, String)
 myStyle =
     [ ("padding", "10px")
-    , ("margin", "50px")
-    , ("font-size", "2em")
+    , ("margin", "20px")
+    , ("font-size", "1.2em")
     ]
 
 

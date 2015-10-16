@@ -238,15 +238,15 @@ view address model =
   in
   div []
     [ div [style [("display", "flex")]]
-      [ div []
-          [ div [class "h2"] [ text "Event Authors:"]
+      [ div [style [("margin-right", "50px")]]
+          [ div [class "h2"] [ text "Event Authors"]
           , ul [] (viewEventsByAuthors address model.events model.selectedAuthor)
           , div [ hidden (model.status == Fetched)] [ text "Loading..."]
-          ]
-      , div []
-          [ div [class "h2"] [ text "Event list:"]
-          , (viewFilterString address model)
-          , (viewListEvents address model)
+          , div []
+              [ div [class "h2"] [ text "Event list"]
+              , (viewFilterString address model)
+              , (viewListEvents address model)
+              ]
           ]
 
       , div []
@@ -266,7 +266,7 @@ myStyle =
 groupEventsByAuthors : List Event -> Dict Int (Author, Int)
 groupEventsByAuthors events =
   let
-    -- handleEvent : Event -> Dict Int (Author, Int) -> Dict Int (Author, Int)
+    handleEvent : Event -> Dict Int (Author, Int) -> Dict Int (Author, Int)
     handleEvent event dict =
       let
         currentValue =

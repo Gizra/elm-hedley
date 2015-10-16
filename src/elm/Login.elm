@@ -14,8 +14,6 @@ import String exposing (length)
 import Task
 
 
-
-
 import Debug
 
 
@@ -99,7 +97,7 @@ update action model =
         credentials : String
         credentials = encodeCredentials(model.loginForm.name, model.loginForm.pass)
       in
-        if model.status == Fetching
+        if model.status == Fetching || model.status == Fetched
           then
             (model, Effects.none)
           else

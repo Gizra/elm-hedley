@@ -23,10 +23,16 @@ type alias AccessToken = String
 
 type User = Anonymous | LoggedIn String
 
+type Status =
+  Init
+  | Fetching
+  | Fetched
+  | HttpError Http.Error
+
 type alias Model =
   { name : User
   , id : Id
-  , isFetching : Bool
+  , status : Status
   , accessToken : AccessToken
 
   -- Child components
@@ -37,7 +43,15 @@ type alias Model =
 
 initialModel : Model
 initialModel =
-  Model Anonymous 0 False "" Login.initialModel [Company.initialModel]
+  { name = Anonymous
+  , id = 0
+  , status = Init
+  , accessToken = ""
+
+  -- Child components
+  , loginModel = Login.initialModel
+  , companies = [Company.initialModel]
+  }
 
 init : (Model, Effects Action)
 init =
@@ -76,24 +90,32 @@ update action model =
         url : String
         url = Config.backendUrl ++ "/api/v1.0/me"
       in
-        ( { model | isFetching <- True}
-        , getJson url model.loginModel.accessToken
-        )
+        if model.status == Fetching || model.status == Fetched
+          then
+            (model, Effects.none)
+          else
+            ( { model | status <- Fetching}
+            , getJson url model.loginModel.accessToken
+            )
 
     UpdateDataFromServer result ->
       let
-        newModel  = { model | isFetching <- False}
+        model' =
+          { model | status <- Fetched}
       in
         case result of
           Ok (id, name, companies) ->
-            ( {newModel
+            ( {model'
                 | id <- id
                 , name <- LoggedIn name
                 , companies <- companies
               }
             , Effects.none
             )
-          Err msg -> (newModel, Effects.none)
+          Err msg ->
+            ( { model' | status <- HttpError msg }
+            , Effects.none
+            )
 
     ChildLoginAction act ->
       let

@@ -236,9 +236,9 @@ view address model =
     message =
       Signal.send address GetDataFromServer
   in
-  div []
-    [ div [style [("display", "flex")]]
-      [ div [style [("margin-right", "50px")]]
+  div [class "container"]
+    [ div [class "row"]
+      [ div [class "col-md-3"]
           [ div [class "h2"] [ text "Event Authors"]
           , ul [] (viewEventsByAuthors address model.events model.selectedAuthor)
           , div [ hidden (model.status == Fetched)] [ text "Loading..."]
@@ -249,19 +249,19 @@ view address model =
               ]
           ]
 
-      , div []
+      , div [class "col-md-9"]
           [ div [class "h2"] [ text "Map:"]
-          , div [ style myStyle, id "map" ] []
+          , div [ style mapStyle, id "map" ] []
           , viewEventInfo model
           ]
       ]
     ]
 
-myStyle : List (String, String)
-myStyle =
-    [ ("width", "600px")
-    , ("height", "400px")
-    ]
+mapStyle : List (String, String)
+mapStyle =
+  [ ("width", "600px")
+  , ("height", "400px")
+  ]
 
 groupEventsByAuthors : List Event -> Dict Int (Author, Int)
 groupEventsByAuthors events =

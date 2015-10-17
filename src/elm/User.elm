@@ -206,11 +206,11 @@ view address model =
         italicName =
           em [] [text name]
       in
-      div []
-        [ div [] [ text "Welcome ", italicName ]
-        , div [] [ text "Your companies are:"]
-        , ul  [] (List.map viewCompanies model.companies)
-        ]
+        div [class "container"]
+          [ div [] [ text "Welcome ", italicName ]
+          , div [] [ text "Your companies are:"]
+          , ul  [] (List.map viewCompanies model.companies)
+          ]
 
 viewCompanies : Company.Model -> Html
 viewCompanies company =

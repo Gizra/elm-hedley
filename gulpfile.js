@@ -2,6 +2,9 @@
 "use strict";
 
 var gulp = require("gulp");
+
+var gulpSequence = require('gulp-sequence');
+
 // Loads the plugins without having to list all of them, but you need
 // to call them as $.pluginname
 var $ = require("gulp-load-plugins")();
@@ -27,14 +30,14 @@ var bs;
 var wiredep = require('wiredep').stream;
 
 // Deletes the directory that is used to serve the site during development
-gulp.task("clean:dev", function() {
-  return del(["serve"]);
+gulp.task("clean:dev", function(cb) {
+  return del(["serve"], cb);
 });
 
 
 // Deletes the directory that the optimized site is output to
-gulp.task("clean:prod", function() {
-  return del(["dist"]);
+gulp.task("clean:prod", function(cb) {
+  return del(["dist"], cb);
 });
 
 
@@ -215,7 +218,7 @@ gulp.task("default", ["serve:dev", "watch"]);
 
 // Builds the site but doesnt serve it to you
 // @todo: Add "bower" here
-gulp.task("build", ["clean:dev", "styles", "copy:dev", "elm"], function () {});
+gulp.task("build", gulpSequence("clean:dev", ["styles", "copy:dev", "elm"]));
 
 // Builds your site with the "build" command and then runs all the optimizations on
 // it and outputs it to "./dist"

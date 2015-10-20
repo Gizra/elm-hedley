@@ -181,6 +181,7 @@ view address model =
   div []
     [ (navbar address model)
     , (mainContent address model)
+    , footer
     ]
 
 mainContent : Signal.Address Action -> Model -> Html
@@ -208,6 +209,21 @@ navbar address model =
 
     LoggedIn name ->
       navbarLoggedIn address model
+
+footer : Html
+footer =
+
+  div [class "footer"]
+    [ div [class "container"]
+        [ span []
+            [ text "With ♥ from "
+            , a [href "http://gizra.com", target "_blank"] [text "gizra"]
+            , text " | "
+            , text "Fork me on "
+            , a [href "https://github.com/Gizra/elm-hedley", target "_blank"] [text "GitHub"]
+            ]
+        ]
+    ]
 
 -- Navbar for Auth user.
 navbarLoggedIn : Signal.Address Action -> Model -> Html

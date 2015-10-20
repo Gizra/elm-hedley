@@ -250,7 +250,7 @@ view address model =
           ]
 
       , div [class "col-md-9"]
-          [ div [class "h2"] [ text "Map:"]
+          [ div [class "h2"] [ text "Map"]
           , div [ style mapStyle, id "map" ] []
           , viewEventInfo model
           ]

@@ -224,13 +224,7 @@ getJson url accessToken =
   let
     encodedUrl = Http.url url [ ("access_token", accessToken) ]
   in
-    Http.send Http.defaultSettings
-      { verb = "GET"
-      , headers = []
-      , url = encodedUrl
-      , body = Http.empty
-      }
-      |> Http.fromJson decodeData
+    Http.get decodeData encodedUrl
       |> Task.toResult
       |> Task.map UpdateDataFromServer
       |> Effects.task

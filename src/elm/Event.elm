@@ -80,7 +80,9 @@ init =
 -- UPDATE
 
 type Action
-  = GetDataFromServer
+  = NoOp
+  | GetData
+  | GetDataFromServer
   | UpdateDataFromServer (Result Http.Error (List Event)) Time.Time
 
   -- Select event might get values from JS (i.e. selecting a leaflet marker)
@@ -106,6 +108,14 @@ type alias Context =
 update : Context -> Action -> Model -> (Model, Effects Action)
 update context action model =
   case action of
+    NoOp ->
+      (model, Effects.none)
+
+    GetData ->
+      if model.status == Fetching
+        then (model, Effects.none)
+        else (model, getDataFromCache model.status)
+
     GetDataFromServer ->
       let
         url : String
@@ -201,26 +211,12 @@ update context action model =
       let
         (childModel, childEffects) = Leaflet.update Leaflet.ToggleMap model.leaflet
 
-        defaultEffects =
-          [ Effects.map ChildLeafletAction childEffects ]
-
-        effects =
-          case model.status of
-            -- Data was already fetched or in the process of being fetched,
-            -- so use the cache.
-            Fetching ->
-              defaultEffects
-
-            Fetched _ ->
-              defaultEffects
-
-            -- Fetch new data.
-            _ ->
-              (Task.succeed GetDataFromServer |> Effects.task) :: defaultEffects
-
       in
         ( {model | leaflet <- childModel }
-        , Effects.batch effects
+        , Effects.batch
+            [ Task.succeed GetData |> Effects.task
+            , Effects.map ChildLeafletAction childEffects
+            ]
         )
 
     Deactivate ->
@@ -243,10 +239,6 @@ leafletMarkers model =
 
 view : Signal.Address Action -> Model -> Html
 view address model =
-  let
-    message =
-      Signal.send address GetDataFromServer
-  in
   div [class "container"]
     [ div [class "row"]
       [ div [class "col-md-3"]
@@ -394,7 +386,7 @@ viewListEvents address model =
         Nothing ->
           eventSelect(event)
   in
-    if List.length filteredEvents > 0
+    if not <| List.isEmpty filteredEvents
       then
         ul [] (List.map getListItem filteredEvents)
       else
@@ -420,6 +412,25 @@ viewEventInfo model =
 
 
 -- EFFECTS
+
+getDataFromCache : Status -> Effects Action
+getDataFromCache status =
+  let
+    actionTask =
+      case status of
+        Fetched fetchTime ->
+          Task.map (\currentTime ->
+            if fetchTime + Config.cacheTtl > currentTime
+              then NoOp
+              else GetDataFromServer
+          ) getCurrentTime
+
+        _ ->
+          Task.succeed GetDataFromServer
+
+  in
+    Effects.task actionTask
+
 
 getJson : String -> String -> Effects Action
 getJson url accessToken =

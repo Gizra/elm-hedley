@@ -14,6 +14,7 @@
         "evancz/elm-effects": "2.0.0 <= v < 3.0.0",
         "evancz/elm-html": "4.0.1 <= v < 5.0.0",
         "evancz/elm-http": "1.0.0 <= v < 2.0.0",
+        "evancz/task-tutorial": "1.0.2 <= v < 2.0.0",
         "rgrempel/elm-route-hash": "1.0.3 <= v < 2.0.0",
         "truqu/elm-base64": "1.0.0 <= v < 2.0.0"
     },

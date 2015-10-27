@@ -11,7 +11,9 @@ import Json.Decode as Json exposing ((:=))
 import Leaflet exposing (Model, initialModel, Marker, update)
 import RouteHash exposing (HashUpdate)
 import String exposing (length)
-import Task
+import Task  exposing (andThen, Task)
+import TaskTutorial exposing (getCurrentTime)
+import Time exposing (Time)
 
 import Debug
 
@@ -22,9 +24,14 @@ type alias Id = Int
 type Status =
   Init
   | Fetching
-  -- @todo: Pass timestamp for "Fetched".
-  | Fetched
+  | Fetched Time.Time
   | HttpError Http.Error
+
+isFetched : Status -> Bool
+isFetched status =
+  case status of
+    Fetched _ -> True
+    _ -> False
 
 type alias Marker =
   { lat: Float
@@ -74,7 +81,7 @@ init =
 
 type Action
   = GetDataFromServer
-  | UpdateDataFromServer (Result Http.Error (List Event))
+  | UpdateDataFromServer (Result Http.Error (List Event)) Time.Time
 
   -- Select event might get values from JS (i.e. selecting a leaflet marker)
   -- so we allow passing a Maybe Int, instead of just Int.
@@ -108,12 +115,12 @@ update context action model =
         , getJson url context.accessToken
         )
 
-    UpdateDataFromServer result ->
+    UpdateDataFromServer result timestamp ->
       case result of
         Ok events ->
           ( {model
               | events <- events
-              , status <- Fetched
+              , status <- Fetched timestamp
             }
           , Task.succeed (FilterEvents model.filterString) |> Effects.task
           )
@@ -198,13 +205,17 @@ update context action model =
           [ Effects.map ChildLeafletAction childEffects ]
 
         effects =
-          if model.status == Fetching || model.status == Fetched
-            then
-              -- Data was already fetched or in the process of being fetched,
-              -- so use the cache.
+          case model.status of
+            -- Data was already fetched or in the process of being fetched,
+            -- so use the cache.
+            Fetching ->
               defaultEffects
-            else
-              -- Fetch new data.
+
+            Fetched _ ->
+              defaultEffects
+
+            -- Fetch new data.
+            _ ->
               (Task.succeed GetDataFromServer |> Effects.task) :: defaultEffects
 
       in
@@ -241,7 +252,7 @@ view address model =
       [ div [class "col-md-3"]
           [ div [class "h2"] [ text "Event Authors"]
           , ul [] (viewEventsByAuthors address model.events model.selectedAuthor)
-          , div [ hidden (model.status == Fetched)] [ text "Loading..."]
+          , div [ hidden (isFetched model.status)] [ text "Loading..."]
           , div []
               [ div [class "h2"] [ text "Event list"]
               , (viewFilterString address model)
@@ -410,16 +421,24 @@ viewEventInfo model =
 
 -- EFFECTS
 
-
 getJson : String -> String -> Effects Action
 getJson url accessToken =
   let
     encodedUrl = Http.url url [ ("access_token", accessToken) ]
+
+    httpTask =
+      Task.toResult <|
+        Http.get decodeData encodedUrl
+
+    actionTask =
+      httpTask `andThen` (\result ->
+        Task.map (\timestamp ->
+          UpdateDataFromServer result timestamp
+        ) getCurrentTime
+      )
+
   in
-    Http.get decodeData encodedUrl
-      |> Task.toResult
-      |> Task.map UpdateDataFromServer
-      |> Effects.task
+    Effects.task actionTask
 
 
 decodeData : Json.Decoder (List Event)

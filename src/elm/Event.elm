@@ -20,17 +20,18 @@ import Debug
 -- MODEL
 
 type alias Id = Int
+type alias CompanyId = Int
 
 type Status =
   Init
-  | Fetching
-  | Fetched Time.Time
+  | Fetching (Maybe CompanyId)
+  | Fetched (Maybe CompanyId) Time.Time
   | HttpError Http.Error
 
 isFetched : Status -> Bool
 isFetched status =
   case status of
-    Fetched _ -> True
+    Fetched _ _ -> True
     _ -> False
 
 type alias Marker =
@@ -53,6 +54,7 @@ type alias Event =
 type alias Model =
   { events : List Event
   , status : Status
+  , selectedCompany : Maybe CompanyId
   , selectedEvent : Maybe Int
   , selectedAuthor : Maybe Int
   -- @todo: Make (Maybe String)
@@ -64,6 +66,7 @@ initialModel : Model
 initialModel =
   { events = []
   , status = Init
+  , selectedCompany = Nothing
   , selectedEvent = Nothing
   , selectedAuthor = Nothing
   , filterString = ""
@@ -81,12 +84,13 @@ init =
 
 type Action
   = NoOp
-  | GetData
-  | GetDataFromServer
-  | UpdateDataFromServer (Result Http.Error (List Event)) Time.Time
+  | GetData (Maybe CompanyId)
+  | GetDataFromServer (Maybe CompanyId)
+  | UpdateDataFromServer (Result Http.Error (List Event)) (Maybe CompanyId) Time.Time
 
   -- Select event might get values from JS (i.e. selecting a leaflet marker)
   -- so we allow passing a Maybe Int, instead of just Int.
+  | SelectCompany (Maybe CompanyId)
   | SelectEvent (Maybe Int)
   | UnSelectEvent
   | SelectAuthor Int
@@ -98,7 +102,7 @@ type Action
   | ChildLeafletAction Leaflet.Action
 
   -- Page
-  | Activate
+  | Activate (Maybe CompanyId)
   | Deactivate
 
 
@@ -111,26 +115,41 @@ update context action model =
     NoOp ->
       (model, Effects.none)
 
-    GetData ->
-      if model.status == Fetching
-        then (model, Effects.none)
-        else (model, getDataFromCache model.status)
+    GetData maybeCompanyId ->
+      let
+        noFx =
+          (model, Effects.none)
 
-    GetDataFromServer ->
+        getFx =
+          (model, getDataFromCache model.status maybeCompanyId)
+      in
+      case model.status of
+        Fetching id ->
+          if id == maybeCompanyId
+            -- We are already fetching this data
+            then noFx
+            -- We are fetching data, but for a different company ID,
+            -- so we need to re-fetch.
+            else getFx
+
+        _ ->
+          getFx
+
+    GetDataFromServer maybeCompanyId ->
       let
         url : String
         url = Config.backendUrl ++ "/api/v1.0/events"
       in
-        ( { model | status <- Fetching}
-        , getJson url context.accessToken
+        ( { model | status <- Fetching maybeCompanyId}
+        , getJson url maybeCompanyId context.accessToken
         )
 
-    UpdateDataFromServer result timestamp ->
+    UpdateDataFromServer result maybeCompanyId timestamp ->
       case result of
         Ok events ->
           ( {model
               | events <- events
-              , status <- Fetched timestamp
+              , status <- Fetched maybeCompanyId timestamp
             }
           , Task.succeed (FilterEvents model.filterString) |> Effects.task
           )
@@ -139,6 +158,12 @@ update context action model =
           , Effects.none
           )
 
+    SelectCompany maybeCompanyId ->
+      ( { model | selectedCompany <- maybeCompanyId }
+      , Task.succeed (GetData maybeCompanyId) |> Effects.task
+      )
+
+
     SelectEvent val ->
       case val of
         Just id ->
@@ -146,7 +171,7 @@ update context action model =
           , Task.succeed (ChildLeafletAction <| Leaflet.SelectMarker <| Just id) |> Effects.task
           )
         Nothing ->
-          (model, Task.succeed  UnSelectEvent |> Effects.task)
+          (model, Task.succeed UnSelectEvent |> Effects.task)
 
     UnSelectEvent ->
       ( { model | selectedEvent <- Nothing }
@@ -207,14 +232,14 @@ update context action model =
         , Effects.map ChildLeafletAction childEffects
         )
 
-    Activate ->
+    Activate maybeCompanyId ->
       let
         (childModel, childEffects) = Leaflet.update Leaflet.ToggleMap model.leaflet
 
       in
         ( {model | leaflet <- childModel }
         , Effects.batch
-            [ Task.succeed GetData |> Effects.task
+            [ Task.succeed (GetData maybeCompanyId) |> Effects.task
             , Effects.map ChildLeafletAction childEffects
             ]
         )
@@ -235,16 +260,22 @@ leafletMarkers model =
 
 -- VIEW
 
-(=>) = (,)
-
 view : Signal.Address Action -> Model -> Html
 view address model =
   div [class "container"]
     [ div [class "row"]
       [ div [class "col-md-3"]
-          [ div [class "h2"] [ text "Event Authors"]
-          , ul [] (viewEventsByAuthors address model.events model.selectedAuthor)
-          , div [ hidden (isFetched model.status)] [ text "Loading..."]
+          [ div []
+              [ div [class "h2"] [ text "Companies"]
+              , companyListForSelect address model.selectedCompany
+              ]
+
+          , div []
+              [ div [class "h2"] [ text "Event Authors"]
+              , ul [] (viewEventsByAuthors address model.events model.selectedAuthor)
+              , div [ hidden (isFetched model.status)] [ text "Loading..."]
+              ]
+
           , div []
               [ div [class "h2"] [ text "Event list"]
               , (viewFilterString address model)
@@ -259,6 +290,38 @@ view address model =
           ]
       ]
     ]
+
+-- @todo: Remove hardcoding.
+companyListForSelect address selectedCompany  =
+  let
+    selectedText =
+      case selectedCompany of
+        Just id ->
+          toString id
+        Nothing ->
+          ""
+
+    textToMaybe string =
+      if String.isEmpty string
+        then Nothing
+        else
+          -- Converting to int return a result.
+          case (String.toInt string) of
+            Ok val ->
+              Just val
+            Err _ ->
+              Nothing
+  in
+  select
+    [ value selectedText
+    , on "change" targetValue (\str -> Signal.message address <| SelectCompany <| textToMaybe str)
+    ]
+    [ option [value ""] [ text "-- All Companies --"]
+    , option [value "1"] [ text "Lexihouse"]
+    , option [value "2"] [ text "Voltex"]
+    , option [value "3"] [ text "Santechi"]
+    ]
+
 
 mapStyle : List (String, String)
 mapStyle =
@@ -413,29 +476,49 @@ viewEventInfo model =
 
 -- EFFECTS
 
-getDataFromCache : Status -> Effects Action
-getDataFromCache status =
+getDataFromCache : Status -> Maybe CompanyId -> Effects Action
+getDataFromCache status maybeCompanyId =
   let
+    getFx =
+      Task.succeed <| GetDataFromServer maybeCompanyId
+
     actionTask =
       case status of
-        Fetched fetchTime ->
-          Task.map (\currentTime ->
-            if fetchTime + Config.cacheTtl > currentTime
-              then NoOp
-              else GetDataFromServer
-          ) getCurrentTime
+        Fetched id fetchTime ->
+          if id == maybeCompanyId
+            then
+              Task.map (\currentTime ->
+                if fetchTime + Config.cacheTtl > currentTime
+                  then NoOp
+                  else GetDataFromServer maybeCompanyId
+              ) getCurrentTime
+            else
+              getFx
 
         _ ->
-          Task.succeed GetDataFromServer
+          getFx
 
   in
     Effects.task actionTask
 
 
-getJson : String -> String -> Effects Action
-getJson url accessToken =
+getJson : String -> Maybe CompanyId -> String -> Effects Action
+getJson url maybeCompanyId accessToken =
   let
-    encodedUrl = Http.url url [ ("access_token", accessToken) ]
+    params =
+      [ ("access_token", accessToken) ]
+
+    params' =
+      case maybeCompanyId of
+        Just id ->
+          -- Filter by company
+          ("filter[company]", toString id) :: params
+
+        Nothing ->
+          params
+
+
+    encodedUrl = Http.url url params'
 
     httpTask =
       Task.toResult <|
@@ -444,7 +527,7 @@ getJson url accessToken =
     actionTask =
       httpTask `andThen` (\result ->
         Task.map (\timestamp ->
-          UpdateDataFromServer result timestamp
+          UpdateDataFromServer result maybeCompanyId timestamp
         ) getCurrentTime
       )
 

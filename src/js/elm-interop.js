@@ -103,6 +103,13 @@ function mapManager(selector, model) {
   // When there are markers available, fit the map around them.
   if (model.leaflet.markers.length) {
 
+    // Try to see is there are bounds. If there are not, center the map.
+    try {
+      mapEl.getBounds();
+    }
+    catch (err) {
+      mapEl.fitBounds(model.leaflet.markers);
+    }
 
     // When a marker is selected, center the map around it.
     if (selectedMarker) {

@@ -64,14 +64,16 @@ function mapManager(selector, model) {
     return false;
   }
 
+  // Determine if we are inside the function for the first time, the map is
+  // shown, since actiavted the page.
+  var firstShow = !mapEl;
+
   mapEl = mapEl || addMap();
 
-  // The event Ids holds the array of all the current events - even the one that
-  // might be filtered out. By unsetting the ones that have visible markers, we
-  // remain with the ones that should be removed.
-  // We make sure to clonse the event Ids, so we can always query the original
-  // events.
-  var eventIds = JSON.parse(JSON.stringify(model.events));
+  // The event Ids holds the array of all the events - even the one that are
+  // hidden. By unsetting the ones that have visible markers, we remain with
+  // the ones that should be removed.
+  var eventIds = model.events;
 
   var selectedMarker = undefined;
 
@@ -103,6 +105,13 @@ function mapManager(selector, model) {
   // When there are markers available, fit the map around them.
   if (model.leaflet.markers.length) {
 
+    // Try to see is there are bounds. If there are not, center the map.
+    try {
+      mapEl.getBounds();
+    }
+    catch (err) {
+      mapEl.fitBounds(model.leaflet.markers);
+    }
 
     // When a marker is selected, center the map around it.
     if (selectedMarker) {
@@ -111,37 +120,20 @@ function mapManager(selector, model) {
     else {
       mapEl.fitBounds(model.leaflet.markers);
     }
+
   }
   else {
     // Show the entire world when no markers are set.
     mapEl.setZoom(1);
   }
 
-  // Hide filtered markers.
+  // Hide existing markers.
   eventIds.forEach(function(id) {
     if (markersEl[id]) {
       mapEl.removeLayer(markersEl[id]);
       markersEl[id] = undefined;
     }
   });
-
-
-  // Iterate over all the existing markers, and make sure they part of the
-  // existing events list. Otherwise, remove them.
-  for (var id in markersEl) {
-    if (model.events.indexOf(parseInt(id)) > -1) {
-      // Marker doesn't exist in the current event list.
-      continue;
-    }
-
-    if (!markersEl[id]) {
-      // Marker is already invisible.
-      continue;
-    }
-
-    mapEl.removeLayer(markersEl[id]);
-    markersEl[id] = undefined;
-  }
 
   // Map was binded properly.
   return true;

@@ -23,7 +23,7 @@ type alias AccessToken = String
 
 type alias LoginForm =
   { name: String
-  ,  pass : String
+  , pass : String
   }
 
 type Status =
@@ -101,7 +101,11 @@ update action model =
           then
             (model, Effects.none)
           else
-            ( { model | status <- Fetching}
+            ( { model
+              | status <- Fetching
+              -- Hide the password.
+              , loginForm <- LoginForm model.loginForm.name ""
+              }
             , getJson url credentials
             )
 

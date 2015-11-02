@@ -73,8 +73,10 @@ update action model =
   case action of
     ChildEventAction act ->
       let
-        -- Pass the access token along to child components.
-        context = { accessToken = (.user >> .accessToken) model }
+        -- Pass the access token along to the child components.
+        context =
+          { accessToken = (.user >> .accessToken) model }
+
         (childModel, childEffects) = Event.update context act model.events
       in
         ( {model | events <- childModel }
@@ -99,7 +101,9 @@ update action model =
           case act of
             User.UpdateDataFromServer result ->
               case result of
-                Ok _ ->
+                -- We reach out into the companies that is passed to the child
+                -- action.
+                Ok (id, name, companies) ->
                   let
                     nextPage =
                       case model.nextPage of
@@ -110,9 +114,13 @@ update action model =
 
                   in
                     -- User was successfully logged in, so we can redirect to the
-                    -- events page.
+                    -- events page, and update their companies.
                     ( { model' | nextPage <- Nothing }
-                    , (Task.succeed (SetActivePage nextPage) |> Effects.task) :: defaultEffects
+                    , (Task.succeed (UpdateCompanies companies) |> Effects.task)
+                      ::
+                      (Task.succeed (SetActivePage nextPage) |> Effects.task)
+                      ::
+                      defaultEffects
                     )
 
                 Err _ ->
@@ -193,6 +201,10 @@ view address model =
 
 mainContent : Signal.Address Action -> Model -> Html
 mainContent address model =
+  let
+    context =
+      { companies = model.companies}
+  in
   case model.activePage of
     User ->
       let
@@ -206,7 +218,7 @@ mainContent address model =
         childAddress =
           Signal.forwardTo address ChildEventAction
       in
-        div [ style myStyle ] [ Event.view childAddress model.events ]
+        div [ style myStyle ] [ Event.view context childAddress model.events ]
 
 navbar : Signal.Address Action -> Model -> Html
 navbar address model =

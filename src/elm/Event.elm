@@ -1,6 +1,7 @@
 module Event where
 
 import Config exposing (backendUrl)
+import Company exposing (Model)
 import Dict exposing (Dict)
 import Effects exposing (Effects, Never)
 import Html exposing (..)
@@ -106,10 +107,13 @@ type Action
   | Deactivate
 
 
-type alias Context =
+type alias UpdateContext =
   { accessToken : String }
 
-update : Context -> Action -> Model -> (Model, Effects Action)
+type alias ViewContext =
+  { companies : List Company.Model }
+
+update : UpdateContext -> Action -> Model -> (Model, Effects Action)
 update context action model =
   case action of
     NoOp ->
@@ -260,14 +264,14 @@ leafletMarkers model =
 
 -- VIEW
 
-view : Signal.Address Action -> Model -> Html
-view address model =
+view : ViewContext -> Signal.Address Action -> Model -> Html
+view context address model =
   div [class "container"]
     [ div [class "row"]
       [ div [class "col-md-3"]
           [ div []
               [ div [class "h2"] [ text "Companies"]
-              , companyListForSelect address model.selectedCompany
+              , companyListForSelect address context.companies model.selectedCompany
               ]
 
           , div []
@@ -291,8 +295,8 @@ view address model =
       ]
     ]
 
--- @todo: Remove hardcoding.
-companyListForSelect address selectedCompany  =
+companyListForSelect : Signal.Address Action -> List Company.Model -> Maybe CompanyId -> Html
+companyListForSelect address companies selectedCompany  =
   let
     selectedText =
       case selectedCompany of
@@ -302,7 +306,7 @@ companyListForSelect address selectedCompany  =
           ""
 
     textToMaybe string =
-      if String.isEmpty string
+      if string == "0"
         then Nothing
         else
           -- Converting to int return a result.
@@ -311,16 +315,28 @@ companyListForSelect address selectedCompany  =
               Just val
             Err _ ->
               Nothing
+
+
+    -- Add an "All companies" option
+    companies' =
+      (Company.Model 0 "-- All companies --") :: companies
+
+    -- The selected company ID.
+    selectedId =
+      case selectedCompany of
+        Just id ->
+          id
+        Nothing ->
+          0
+
+    getOption company =
+      option [value <| toString company.id, selected (company.id == selectedId)] [ text company.label]
   in
-  select
-    [ value selectedText
-    , on "change" targetValue (\str -> Signal.message address <| SelectCompany <| textToMaybe str)
-    ]
-    [ option [value ""] [ text "-- All Companies --"]
-    , option [value "1"] [ text "Lexihouse"]
-    , option [value "2"] [ text "Voltex"]
-    , option [value "3"] [ text "Santechi"]
-    ]
+    select
+      [ value selectedText
+      , on "change" targetValue (\str -> Signal.message address <| SelectCompany <| textToMaybe str)
+      ]
+      (List.map getOption companies')
 
 
 mapStyle : List (String, String)

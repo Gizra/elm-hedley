@@ -4,3 +4,4 @@ node_modules
 serve
 dist
 .publish
+.idea

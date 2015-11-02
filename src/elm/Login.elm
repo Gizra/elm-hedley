@@ -182,46 +182,68 @@ view address model =
 
 
   in
-    div
-      [ class "container" ]
-      [ Html.form
-        [ onSubmit address SubmitForm
-        , action "javascript:void(0);"
-        , class "form-signin"
-        -- Don't show the form while checking for the access token from the
-        -- storage.
-        , hidden model.hasAccessTokenInStorage
+    div [ id "login-page" ] [
+      hr [] []
+      , div [ class "container" ] [
+        div [ class "wrapper" ]
+          [ Html.form
+            [ onSubmit address SubmitForm
+            , action "javascript:void(0);"
+            , class "form-signin"
+            -- Don't show the form while checking for the access token from the
+            -- storage.
+            , hidden model.hasAccessTokenInStorage
+            ]
+            -- Form title
+            [ h2 [] [ text "Please login" ]
+            -- UserName
+            , div
+              [ class "input-group"]
+              [ span
+                [ class "input-group-addon"]
+                [ i [ class "glyphicon glyphicon-user"] []
+              ]
+              , input
+                [ type' "text"
+                , class "form-control"
+                , placeholder "Name"
+                , value model.loginForm.name
+                , on "input" targetValue (Signal.message address << UpdateName)
+                , size 40
+                , required True
+                ]
+                []
+               ]
+            -- Password
+            , div
+              [ class "input-group"]
+              [ span
+                [ class "input-group-addon"]
+                [ i [ class "fa fa-lock fa-lg"] []
+              ]
+              , input
+                [ type' "password"
+                , class "form-control"
+                , placeholder "Password"
+                , value modelForm.pass
+                , on "input" targetValue (Signal.message address << UpdatePass)
+                , size 40
+                , required True
+                ]
+                []
+               ]
+            -- Submit button
+            , button
+                [ onClick address SubmitForm
+                , class "btn btn-lg btn-primary btn-block"
+                , disabled disabledButton
+                ]
+                [ loginText ]
+            ]
+            , div [hidden (not (model.status == Fetching) && not model.hasAccessTokenInStorage)] [ text "Loading ..."]
+          ]
         ]
-        [ h2 [ class "form-signin-heading"] [text "Please login"]
-        , input
-            [ type' "text"
-            , class "form-control"
-            , placeholder "Name"
-            , value model.loginForm.name
-            , on "input" targetValue (Signal.message address << UpdateName)
-            , size 40
-            , required True
-            ]
-            []
-        -- Password
-        , input
-            [ type' "password"
-            , class "form-control"
-            , placeholder "Password"
-            , value modelForm.pass
-            , on "input" targetValue (Signal.message address << UpdatePass)
-            , size 40
-            , required True
-            ]
-            []
-        , button
-            [ onClick address SubmitForm
-            , class "btn btn-lg btn-primary btn-block"
-            , disabled disabledButton
-            ]
-            [ loginText ]
-        ]
-      , div [hidden (not (model.status == Fetching) && not model.hasAccessTokenInStorage)] [ text "Loading ..."]
+        , hr [] []
       ]
 
 -- EFFECTS

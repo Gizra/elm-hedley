@@ -1,40 +1,70 @@
-// Source: http://codepen.io/ace-subido/pen/Cuiep
-.form-signin {
-  max-width: 380px;
-  padding: 15px 35px 45px;
-  margin: 0 auto;
-  background-color: #fff;
-  border: 1px solid rgba(0,0,0,0.1);
+#login-page {
+  margin-top: 15%;
 
-  .form-signin-heading,
-	.checkbox {
-	  margin-bottom: 30px;
-	}
+  .wrapper {
+    margin: 55px auto;
+    max-width: 380px;
+  }
 
-	.checkbox {
-	  font-weight: normal;
-	}
+  .form-signin {
+    margin: auto 0px;
+    padding: 15px;
+    max-width: 380px;
+    color: white;
+    background: $dark-gray;
+    border: 1px solid rgba(0,0,0,0.1);
 
-	.form-control {
-	  position: relative;
-	  font-size: 16px;
-	  height: auto;
-	  padding: 10px;
+    h2 {
+      margin-top: 0px;
+      margin-bottom: 20px;
+      text-transform: capitalize;
+    }
 
-		&:focus {
-		  z-index: 2;
-		}
-	}
+    .btn,
+    .input-group-addon {
+      color: white;
+      border: none;
+    }
 
-	input[type="text"] {
-	  margin-bottom: -1px;
-	  border-bottom-left-radius: 0;
-	  border-bottom-right-radius: 0;
-	}
+    .input-group,
+    .input-group-addon,
+    .form-control,
+    .btn {
+      border-radius: 0px;
+    }
 
-	input[type="password"] {
-	  margin-bottom: 20px;
-	  border-top-left-radius: 0;
-	  border-top-right-radius: 0;
-	}
+    .btn {
+      transition: background 0.4s ease-in;
+      background: $blue;
+
+      &:hover {
+        background: darken($blue, 15%);
+      }
+    }
+
+    .input-group {
+      margin-bottom: 15px;
+
+      .input-group-addon {
+        min-width: 45px;
+        background: $light-gray;
+
+        .form-control {
+          border-radius: 0px;
+          position: relative;
+          font-size: 16px;
+          height: auto;
+          padding: 10px;
+
+          &:focus {
+            z-index: 2;
+          }
+        }
+      }
+    }
+  }
 }
+
+
+
+

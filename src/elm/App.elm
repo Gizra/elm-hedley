@@ -16,9 +16,10 @@ import Debug
 -- MODEL
 
 type alias AccessToken = String
+type alias CompanyId = Int
 
 type Page
-  = Event
+  = Event (Maybe CompanyId)
   | User
 
 type alias Model =
@@ -65,14 +66,17 @@ type Action
   = ChildEventAction Event.Action
   | ChildUserAction User.Action
   | SetActivePage Page
+  | UpdateCompanies (List Company.Model)
 
 update : Action -> Model -> (Model, Effects Action)
 update action model =
   case action of
     ChildEventAction act ->
       let
-        -- Pass the access token along to child components.
-        context = { accessToken = (.user >> .accessToken) model }
+        -- Pass the access token along to the child components.
+        context =
+          { accessToken = (.user >> .accessToken) model }
+
         (childModel, childEffects) = Event.update context act model.events
       in
         ( {model | events <- childModel }
@@ -97,20 +101,26 @@ update action model =
           case act of
             User.UpdateDataFromServer result ->
               case result of
-                Ok _ ->
+                -- We reach out into the companies that is passed to the child
+                -- action.
+                Ok (id, name, companies) ->
                   let
                     nextPage =
                       case model.nextPage of
                         Just page ->
                           page
                         Nothing ->
-                          Event
+                          Event Nothing
 
                   in
                     -- User was successfully logged in, so we can redirect to the
-                    -- events page.
+                    -- events page, and update their companies.
                     ( { model' | nextPage <- Nothing }
-                    , (Task.succeed (SetActivePage nextPage) |> Effects.task) :: defaultEffects
+                    , (Task.succeed (UpdateCompanies companies) |> Effects.task)
+                      ::
+                      (Task.succeed (SetActivePage nextPage) |> Effects.task)
+                      ::
+                      defaultEffects
                     )
 
                 Err _ ->
@@ -145,7 +155,7 @@ update action model =
             User ->
               Task.succeed (ChildUserAction User.Deactivate) |> Effects.task
 
-            Event ->
+            Event companyId ->
               Task.succeed (ChildEventAction Event.Deactivate) |> Effects.task
 
         newPageEffects =
@@ -153,8 +163,8 @@ update action model =
             User ->
               Task.succeed (ChildUserAction User.Activate) |> Effects.task
 
-            Event ->
-              Task.succeed (ChildEventAction Event.Activate) |> Effects.task
+            Event companyId ->
+              Task.succeed (ChildEventAction <| Event.Activate Nothing) |> Effects.task
 
       in
         if model.activePage == page'
@@ -174,6 +184,11 @@ update action model =
               ]
             )
 
+    UpdateCompanies companies ->
+      ( { model | companies <- companies}
+      , Effects.none
+      )
+
 -- VIEW
 
 view : Signal.Address Action -> Model -> Html
@@ -186,6 +201,10 @@ view address model =
 
 mainContent : Signal.Address Action -> Model -> Html
 mainContent address model =
+  let
+    context =
+      { companies = model.companies}
+  in
   case model.activePage of
     User ->
       let
@@ -194,12 +213,12 @@ mainContent address model =
       in
         div [ style myStyle ] [ User.view childAddress model.user ]
 
-    Event ->
+    Event companyId ->
       let
         childAddress =
           Signal.forwardTo address ChildEventAction
       in
-        div [ style myStyle ] [ Event.view childAddress model.events ]
+        div [ style myStyle ] [ Event.view context childAddress model.events ]
 
 navbar : Signal.Address Action -> Model -> Html
 navbar address model =
@@ -242,7 +261,7 @@ navbarLoggedIn address model =
           , div [ class "collapse navbar-collapse"]
               [ ul [class "nav navbar-nav"]
                 [ li [] [ a [ hrefVoid, onClick address (SetActivePage User) ] [ text "My account"] ]
-                , li [] [ a [ hrefVoid, onClick address (SetActivePage Event)] [ text "Events"] ]
+                , li [] [ a [ hrefVoid, onClick address (SetActivePage <| Event Nothing)] [ text "Events"] ]
                 , li [] [ a [ hrefVoid, onClick childAddress User.Logout] [ text "Logout"] ]
                 ]
               ]
@@ -259,7 +278,7 @@ myStyle =
 delta2update : Model -> Model -> Maybe HashUpdate
 delta2update previous current =
   case current.activePage of
-    Event ->
+    Event companyId ->
       -- First, we ask the submodule for a HashUpdate. Then, we use
       -- `map` to prepend something to the URL.
       RouteHash.map ((::) "events") <|
@@ -285,10 +304,10 @@ location2action list =
       ( SetActivePage User ) :: []
 
     "events" :: rest ->
-      ( SetActivePage Event ) :: []
+      ( SetActivePage <| Event Nothing ) :: []
 
     "" :: rest ->
-      ( SetActivePage Event ) :: []
+      ( SetActivePage <| Event Nothing ) :: []
 
     _ ->
       -- @todo: Add 404

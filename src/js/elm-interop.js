@@ -66,10 +66,12 @@ function mapManager(selector, model) {
 
   mapEl = mapEl || addMap();
 
-  // The event Ids holds the array of all the events - even the one that are
-  // hidden. By unsetting the ones that have visible markers, we remain with
-  // the ones that should be removed.
-  var eventIds = model.events;
+  // The event Ids holds the array of all the current events - even the one that
+  // might be filtered out. By unsetting the ones that have visible markers, we
+  // remain with the ones that should be removed.
+  // We make sure to clonse the event Ids, so we can always query the original
+  // events.
+  var eventIds = JSON.parse(JSON.stringify(model.events));
 
   var selectedMarker = undefined;
 
@@ -115,13 +117,31 @@ function mapManager(selector, model) {
     mapEl.setZoom(1);
   }
 
-  // Hide existing markers.
+  // Hide filtered markers.
   eventIds.forEach(function(id) {
     if (markersEl[id]) {
       mapEl.removeLayer(markersEl[id]);
       markersEl[id] = undefined;
     }
   });
+
+
+  // Iterate over all the existing markers, and make sure they part of the
+  // existing events list. Otherwise, remove them.
+  for (var id in markersEl) {
+    if (model.events.indexOf(parseInt(id)) > -1) {
+      // Marker doesn't exist in the current event list.
+      continue;
+    }
+
+    if (!markersEl[id]) {
+      // Marker is already invisible.
+      continue;
+    }
+
+    mapEl.removeLayer(markersEl[id]);
+    markersEl[id] = undefined;
+  }
 
   // Map was binded properly.
   return true;

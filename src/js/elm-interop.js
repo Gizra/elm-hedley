@@ -100,11 +100,14 @@ function mapManager(selector, model) {
 
   // When there are markers available, fit the map around them.
   if (model.leaflet.markers.length) {
-    mapEl.fitBounds(model.leaflet.markers);
+
 
     // When a marker is selected, center the map around it.
     if (selectedMarker) {
       mapEl.panTo(selectedMarker._latlng);
+    }
+    else {
+      mapEl.fitBounds(model.leaflet.markers);
     }
   }
   else {

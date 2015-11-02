@@ -243,7 +243,7 @@ update context action model =
       in
         ( {model | leaflet <- childModel }
         , Effects.batch
-            [ Task.succeed (GetData maybeCompanyId) |> Effects.task
+            [ Task.succeed (SelectCompany maybeCompanyId) |> Effects.task
             , Effects.map ChildLeafletAction childEffects
             ]
         )

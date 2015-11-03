@@ -202,10 +202,10 @@ view address model =
             [ h2 [] [ text "Please login" ]
             -- UserName
             , div
-              [ class "input-group"]
+              [ class "input-group" ]
               [ span
                 [ class "input-group-addon"]
-                [ i [ class "glyphicon glyphicon-user"] []
+                [ i [ class "glyphicon glyphicon-user" ] []
               ]
               , input
                 [ type' "text"
@@ -222,8 +222,8 @@ view address model =
             , div
               [ class "input-group"]
               [ span
-                [ class "input-group-addon"]
-                [ i [ class "fa fa-lock fa-lg"] []
+                [ class "input-group-addon" ]
+                [ i [ class "fa fa-lock fa-lg" ] []
               ]
               , input
                 [ type' "password"
@@ -238,13 +238,16 @@ view address model =
                ]
             -- Submit button
             , button
-                [ onClick address SubmitForm
-                , class "btn btn-lg btn-primary btn-block"
-                , disabled disabledButton
-                ]
-                [ loginText ]
+              [ onClick address SubmitForm
+              , class "btn btn-lg btn-primary btn-block"
+              , disabled disabledButton
+              ]
+              [ loginText ]
             ]
-            , div [hidden (not (model.status == Fetching) && not model.hasAccessTokenInStorage)] [ text "Loading ..."]
+            , div
+              [ class "text-center"
+              , hidden (not (model.status == Fetching) && not model.hasAccessTokenInStorage) ]
+              [ text "Loading ..." ]
           ]
         ]
         , hr [] []

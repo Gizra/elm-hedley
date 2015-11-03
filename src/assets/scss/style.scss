@@ -2,6 +2,11 @@
 @import "footer";
 @import "login";
 
+html {
+  position: relative;
+  min-height: 100%;
+}
+
 body {
   font-family: 'Roboto Condensed', arial, sans-serif;
   background: $main-bg;
@@ -21,4 +26,15 @@ hr {
   border-radius: 5px;
   background: white;
   box-shadow: 0px 7px 2px 0px rgba(0, 0, 0, 0.05);
+}
+
+a.gizra-logo {
+  text-decoration: none;
+  text-transform: lowercase;
+  font-family: Abril Fatface;
+  color: $gizra;
+
+   &:hover {
+     color: $gizra-dark;
+   }
 }

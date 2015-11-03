@@ -232,17 +232,19 @@ navbar address model =
 footer : Html
 footer =
 
-  div [class "footer"]
+  div [class "main-footer"]
     [ div [class "container"]
-        [ span []
-            [ text "With ♥ from "
-            , a [href "http://gizra.com", target "_blank"] [text "gizra"]
-            , text " | "
-            , text "Fork me on "
-            , a [href "https://github.com/Gizra/elm-hedley", target "_blank"] [text "GitHub"]
-            ]
+      [ span []
+        [ text "With "
+        , i [ class "fa fa-heart" ] []
+        , text " from "
+        , a [ href "http://gizra.com", target "_blank", class "gizra-logo" ] [text "gizra"]
+        , span [ class "divider" ] [text "|"]
+        , text "Fork me on "
+        , a [href "https://github.com/Gizra/elm-hedley", target "_blank"] [text "Github"]
         ]
-    ]
+      ]
+  ]
 
 -- Navbar for Auth user.
 navbarLoggedIn : Signal.Address Action -> Model -> Html

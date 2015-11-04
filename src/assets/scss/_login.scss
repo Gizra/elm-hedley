@@ -37,6 +37,11 @@
       transition: background 0.4s ease-in;
       background: $blue;
 
+      &[disabled],
+      &[disabled]:hover {
+        background: $light-gray;
+      }
+
       &:hover {
         background: darken($blue, 15%);
       }

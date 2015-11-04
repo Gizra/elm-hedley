@@ -176,14 +176,14 @@ view address model =
     modelForm =
       model.loginForm
 
-    disabledButton =
-      String.isEmpty modelForm.name || String.isEmpty modelForm.pass || model.status == Fetching || model.status == Fetched
+    isFormEmpty =
+      String.isEmpty modelForm.name || String.isEmpty modelForm.pass
 
-    loginText =
-      if disabledButton
-        then i [ class "fa fa-spinner fa-spin" ] []
-        else span [] [text "Login"]
+    isFetchStatus =
+      model.status == Fetching || model.status == Fetched
 
+    spinner =
+      i [ class "fa fa-spinner fa-spin" ] []
 
   in
     div [ id "login-page" ] [
@@ -215,6 +215,7 @@ view address model =
                 , on "input" targetValue (Signal.message address << UpdateName)
                 , size 40
                 , required True
+                , disabled (isFetchStatus)
                 ]
                 []
                ]
@@ -233,6 +234,7 @@ view address model =
                 , on "input" targetValue (Signal.message address << UpdatePass)
                 , size 40
                 , required True
+                , disabled (isFetchStatus)
                 ]
                 []
                ]
@@ -240,9 +242,10 @@ view address model =
             , button
               [ onClick address SubmitForm
               , class "btn btn-lg btn-primary btn-block"
-              , disabled disabledButton
+              , disabled (isFetchStatus || isFormEmpty)
               ]
-              [ loginText ]
+            [ span [ hidden <| not isFetchStatus] [ spinner ]
+            , span [ hidden isFetchStatus ] [ text "Login" ] ]
             ]
             , div
               [ class "text-center"

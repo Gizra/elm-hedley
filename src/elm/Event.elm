@@ -574,13 +574,13 @@ decodeData =
         ("id" := number)
         ("label" := Json.string)
   in
-  Json.at ["data"]
-    <| Json.list
-    <| Json.object4 Event
-      ("id" := number)
-      ("label" := Json.string)
-      ("location" := marker)
-      ("user" := author)
+    Json.at ["data"]
+      <| Json.list
+      <| Json.object4 Event
+        ("id" := number)
+        ("label" := Json.string)
+        ("location" := marker)
+        ("user" := author)
 
 -- ROUTER
 

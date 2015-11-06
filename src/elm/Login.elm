@@ -170,8 +170,6 @@ getInputFromStorage =
 
 -- VIEW
 
-(=>) = (,)
-
 view : Signal.Address Action -> Model -> Html
 view address model =
   let

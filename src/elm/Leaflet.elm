@@ -3,8 +3,6 @@ module Leaflet where
 import Effects exposing (Effects)
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (on, onClick)
-import Task exposing (map)
 
 -- MODEL
 

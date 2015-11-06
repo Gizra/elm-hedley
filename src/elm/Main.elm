@@ -16,6 +16,7 @@ app =
     , inputs = [Signal.map (App.ChildEventAction << Event.SelectEvent) selectEvent]
     }
 
+
 main =
   app.html
 

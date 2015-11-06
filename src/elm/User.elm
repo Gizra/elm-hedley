@@ -8,7 +8,6 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (on, onClick, targetValue)
 import Http
 import Json.Decode as Json exposing ((:=))
-import Login exposing (..)
 import RouteHash exposing (HashUpdate)
 import Storage exposing (removeItem)
 import String exposing (length)
@@ -36,7 +35,6 @@ type alias Model =
   , accessToken : AccessToken
 
   -- Child components
-  , loginModel : Login.Model
   , companies : List Company.Model
   }
 
@@ -49,18 +47,14 @@ initialModel =
   , accessToken = ""
 
   -- Child components
-  , loginModel = Login.initialModel
   , companies = [Company.initialModel]
   }
 
 init : (Model, Effects Action)
 init =
-  let
-    loginEffects = snd Login.init
-  in
-    ( initialModel
-    , Effects.map ChildLoginAction loginEffects
-    )
+  ( initialModel
+  , Effects.none
+  )
 
 
 -- UPDATE
@@ -69,8 +63,6 @@ type Action
   = NoOp (Maybe ())
   | GetDataFromServer
   | UpdateDataFromServer (Result Http.Error (Id, String, List Company.Model))
-  | ChildLoginAction Login.Action
-  | Logout
   -- @todo: Remove, as we don't use it
   | SetAccessToken AccessToken
 
@@ -78,9 +70,11 @@ type Action
   | Activate
   | Deactivate
 
+type alias Context =
+  { accessToken : AccessToken}
 
-update : Action -> Model -> (Model, Effects Action)
-update action model =
+update : Context -> Action -> Model -> (Model, Effects Action)
+update context action model =
   case action of
     NoOp _ ->
       (model, Effects.none)
@@ -94,8 +88,8 @@ update action model =
           then
             (model, Effects.none)
           else
-            ( { model | status <- Fetching}
-            , getJson url model.loginModel.accessToken
+            ( { model | status <- Fetching }
+            , getJson url context.accessToken
             )
 
     UpdateDataFromServer result ->
@@ -116,40 +110,6 @@ update action model =
             ( { model' | status <- HttpError msg }
             , Effects.none
             )
-
-    ChildLoginAction act ->
-      let
-        (childModel, childEffects) = Login.update act model.loginModel
-
-        defaultEffects =
-          [ Effects.map ChildLoginAction childEffects ]
-
-        getDataFromServerEffects =
-          (Task.succeed GetDataFromServer |> Effects.task) :: defaultEffects
-
-        effects =
-          case act of
-            Login.UpdateAccessTokenFromServer result ->
-              -- Call server only if token exists.
-              if isAccessTokenInStorage result then getDataFromServerEffects else defaultEffects
-
-            Login.UpdateAccessTokenFromStorage result ->
-              -- Call server only if token exists.
-              if isAccessTokenInStorage result then getDataFromServerEffects else defaultEffects
-
-
-            _ ->
-              defaultEffects
-      in
-        ( {model
-            | loginModel <- childModel
-            , accessToken <- childModel.accessToken
-          }
-        , Effects.batch effects
-        )
-
-    Logout ->
-      (model, removeStorageItem)
 
     SetAccessToken accessToken ->
       ( {model | accessToken <- accessToken}
@@ -175,14 +135,6 @@ isAccessTokenInStorage result =
     Err _ ->
       False
 
--- Task to remove localStorage.
--- @todo: How to avoid NoOp, which isn't doing anything?
-removeStorageItem : Effects Action
-removeStorageItem =
-  Storage.removeItem "access_token"
-    |> Task.toMaybe
-    |> Task.map NoOp
-    |> Effects.task
 
 -- VIEW
 
@@ -192,13 +144,7 @@ view : Signal.Address Action -> Model -> Html
 view address model =
   case model.name of
     Anonymous ->
-      let
-        childAddress =
-            Signal.forwardTo address ChildLoginAction
-      in
-        div []
-          [ Login.view childAddress model.loginModel
-          ]
+      div [] [ text "This is wrong - anon user cannot reach this!"]
 
     LoggedIn name ->
       let
@@ -219,7 +165,7 @@ viewCompanies company =
 -- EFFECTS
 
 
-getJson : String -> Login.AccessToken -> Effects Action
+getJson : String -> AccessToken -> Effects Action
 getJson url accessToken =
   let
     encodedUrl = Http.url url [ ("access_token", accessToken) ]

@@ -9,6 +9,7 @@ import Html.Events exposing (on, onClick, onSubmit, targetValue)
 import Http
 import Json.Encode as JE exposing (string, Value)
 import Json.Decode as JD exposing ((:=))
+import RouteHash exposing (HashUpdate)
 import Storage exposing (..)
 import String exposing (length)
 import Task
@@ -61,15 +62,19 @@ init =
 -- UPDATE
 
 type Action
-  = UpdateName String
+  = NoOp (Result AccessToken ())
+  | UpdateName String
   | UpdatePass String
   | SubmitForm
   | UpdateAccessTokenFromServer (Result Http.Error AccessToken)
 
   -- Storage
-  | GetStorage (Result String ())
-  | SetStorage String
-  | UpdateAccessTokenFromStorage (Result String String)
+  | SetAccessToken AccessToken
+  | UpdateAccessTokenFromStorage (Result String AccessToken)
+
+  -- Page
+  | Activate
+  | Deactivate
 
 
 update : Action -> Model -> (Model, Effects Action)
@@ -109,39 +114,30 @@ update action model =
             , getJson url credentials
             )
 
+    NoOp result ->
+      (model, Effects.none)
+
+    SetAccessToken token ->
+      ( { model | accessToken <- token }
+      , sendInputToStorage token
+      )
+
     UpdateAccessTokenFromServer result ->
-      let
-        model'  = { model | status <- Fetched}
-      in
-        case result of
-          Ok token ->
-            ( { model' | accessToken <- token }
-            , sendInputToStorage token
-            )
-          Err msg ->
-            ( { model' | status <- HttpError msg }
-            , Effects.none
-            )
-
-
-    GetStorage result ->
       case result of
         Ok token ->
-          (model, getInputFromStorage)
-        Err err ->
-          (model, Effects.none)
-
-
-    SetStorage token ->
-      -- Don't update the model here, instead after this action is done, the
-      -- effect should call another action to update the model.
-      ( model, sendInputToStorage token)
+          ( { model | status <- Fetched }
+          , Task.succeed (SetAccessToken token) |> Effects.task
+          )
+        Err msg ->
+          ( { model | status <- HttpError msg }
+          , Effects.none
+          )
 
     UpdateAccessTokenFromStorage result ->
       case result of
         Ok token ->
-          ( { model | accessToken <- token }
-          , Effects.none
+          ( model
+          , Task.succeed (SetAccessToken token) |> Effects.task
           )
         Err err ->
           -- There was no access token in the storage, so show the login form
@@ -149,12 +145,18 @@ update action model =
           , Effects.none
           )
 
+    Activate ->
+      (model, Effects.none)
+
+    Deactivate ->
+      (model, Effects.none)
+
 
 sendInputToStorage : String -> Effects Action
 sendInputToStorage s =
   Storage.setItem "access_token" (JE.string s)
     |> Task.toResult
-    |> Task.map GetStorage
+    |> Task.map NoOp
     |> Effects.task
 
 getInputFromStorage : Effects Action
@@ -284,3 +286,13 @@ getJson url credentials =
 decodeAccessToken : JD.Decoder AccessToken
 decodeAccessToken =
   JD.at ["access_token"] <| JD.string
+
+-- ROUTER
+
+delta2update : Model -> Model -> Maybe HashUpdate
+delta2update previous current =
+  Just <| RouteHash.set []
+
+location2action : List String -> List Action
+location2action list =
+  []

@@ -7,7 +7,9 @@ import Event exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
+import Login exposing (Model, initialModel, update)
 import RouteHash exposing (HashUpdate)
+import Storage exposing (removeItem)
 import Task exposing (..)
 import User exposing (..)
 
@@ -20,12 +22,15 @@ type alias CompanyId = Int
 
 type Page
   = Event (Maybe CompanyId)
+  | Login
   | User
 
 type alias Model =
-  { user : User.Model
+  { accessToken : AccessToken
+  , user : User.Model
   , companies : List Company.Model
   , events : Event.Model
+  , login: Login.Model
   , activePage : Page
   -- If the user is anonymous, we want to know where to redirect them.
   , nextPage : Maybe Page
@@ -33,10 +38,12 @@ type alias Model =
 
 initialModel : Model
 initialModel =
-  { user = User.initialModel
+  { accessToken = ""
+  , user = User.initialModel
   , companies = []
   , events = Event.initialModel
-  , activePage = User
+  , login = Login.initialModel
+  , activePage = Login
   , nextPage = Nothing
   }
 
@@ -44,27 +51,30 @@ initialEffects : List (Effects Action)
 initialEffects =
   let
     eventEffects = snd Event.init
+    loginEffects = snd Login.init
     userEffects = snd User.init
   in
     [ Effects.map ChildEventAction eventEffects
+    , Effects.map ChildLoginAction loginEffects
     , Effects.map ChildUserAction userEffects
     ]
 
 init : (Model, Effects Action)
 init =
-  let
-    eventEffects = snd Event.init
-    userEffects = snd User.init
-  in
-    ( initialModel
-    , Effects.batch initialEffects
-    )
+  ( initialModel
+  , Effects.batch initialEffects
+  )
 
 -- UPDATE
 
 type Action
   = ChildEventAction Event.Action
+  | ChildLoginAction Login.Action
   | ChildUserAction User.Action
+  | Logout
+  -- Action to be called after a Logout
+  | NoOp (Maybe ())
+  | SetAccessToken AccessToken
   | SetActivePage Page
   | UpdateCompanies (List Company.Model)
 
@@ -75,7 +85,7 @@ update action model =
       let
         -- Pass the access token along to the child components.
         context =
-          { accessToken = (.user >> .accessToken) model }
+          { accessToken = model.accessToken }
 
         (childModel, childEffects) = Event.update context act model.events
       in
@@ -83,14 +93,49 @@ update action model =
         , Effects.map ChildEventAction childEffects
         )
 
+    ChildLoginAction act ->
+      let
+
+        (childModel, childEffects) = Login.update act model.login
+
+        defaultEffect =
+          Effects.map ChildLoginAction childEffects
+
+        -- A convinence variable to hold the default effect as a list.
+        defaultEffects =
+          [ defaultEffect ]
+
+        effects' =
+          case act of
+            -- User's token was fetched, so we can set it in the accessToken
+            -- root property, and also get the user info, which will in turn
+            -- redirect the user from the login page.
+            Login.SetAccessToken token ->
+              (Task.succeed (SetAccessToken token) |> Effects.task)
+              ::
+              (Task.succeed (ChildUserAction User.GetDataFromServer) |> Effects.task)
+              ::
+              defaultEffects
+
+            _ ->
+              defaultEffects
+
+      in
+        ( {model | login <- childModel }
+        , Effects.batch effects'
+        )
+
+
     ChildUserAction act ->
       let
-        (childModel, childEffects) = User.update act model.user
+        context =
+          { accessToken = model.accessToken }
+
+        (childModel, childEffects) = User.update context act model.user
 
         defaultEffect =
           Effects.map ChildUserAction childEffects
 
-        -- A convinence variable to hold the default effect as a list.
         defaultEffects =
           [ defaultEffect ]
 
@@ -113,8 +158,8 @@ update action model =
                           Event Nothing
 
                   in
-                    -- User was successfully logged in, so we can redirect to the
-                    -- events page, and update their companies.
+                    -- User data was successfully fetched, so we can redirect to
+                    -- the next page, and update their companies.
                     ( { model' | nextPage <- Nothing }
                     , (Task.succeed (UpdateCompanies companies) |> Effects.task)
                       ::
@@ -128,13 +173,6 @@ update action model =
                   , defaultEffects
                   )
 
-            User.Logout ->
-              ( initialModel
-              -- Call the init effects, where the user logout which removed the
-              -- access token is the first one.
-              , defaultEffect :: initialEffects
-              )
-
             _ ->
               ( model'
               , defaultEffects
@@ -143,28 +181,57 @@ update action model =
       in
         (model'', Effects.batch effects')
 
+
+    Logout ->
+      ( initialModel
+      , Effects.batch <| removeStorageItem :: initialEffects
+      )
+
+    NoOp _ ->
+      ( model, Effects.none )
+
+    SetAccessToken accessToken ->
+      ( { model | accessToken <- accessToken}
+      , Task.succeed (ChildUserAction User.GetDataFromServer) |> Effects.task
+      )
+
     SetActivePage page ->
       let
         (page', nextPage) =
           if model.user.name == Anonymous
-            then (User, Just page)
+            then
+              if page == Login
+                -- If the user is anonymous and we are asked to set the  active
+                -- page to login, then we make sure that the next page doesn't
+                -- change, so they won't be rediected back to the login page.
+                then (Login, model.nextPage)
+                else (Login, Just page)
             else (page, Nothing)
 
         currentPageEffects =
           case model.activePage of
-            User ->
-              Task.succeed (ChildUserAction User.Deactivate) |> Effects.task
-
             Event companyId ->
               Task.succeed (ChildEventAction Event.Deactivate) |> Effects.task
 
+            Login ->
+              Task.succeed (ChildLoginAction Login.Deactivate) |> Effects.task
+
+            User ->
+              Task.succeed (ChildUserAction User.Deactivate) |> Effects.task
+
+
+
         newPageEffects =
           case page' of
+            Event companyId ->
+              Task.succeed (ChildEventAction <| Event.Activate Nothing) |> Effects.task
+
+            Login ->
+              Task.succeed (ChildLoginAction Login.Activate) |> Effects.task
+
             User ->
               Task.succeed (ChildUserAction User.Activate) |> Effects.task
 
-            Event companyId ->
-              Task.succeed (ChildEventAction <| Event.Activate Nothing) |> Effects.task
 
       in
         if model.activePage == page'
@@ -189,6 +256,14 @@ update action model =
       , Effects.none
       )
 
+-- Task to remove the access token from localStorage.
+removeStorageItem : Effects Action
+removeStorageItem =
+  Storage.removeItem "access_token"
+    |> Task.toMaybe
+    |> Task.map NoOp
+    |> Effects.task
+
 -- VIEW
 
 view : Signal.Address Action -> Model -> Html
@@ -201,24 +276,30 @@ view address model =
 
 mainContent : Signal.Address Action -> Model -> Html
 mainContent address model =
-  let
-    context =
-      { companies = model.companies}
-  in
   case model.activePage of
+    Event companyId ->
+      let
+        childAddress =
+          Signal.forwardTo address ChildEventAction
+
+        context =
+          { companies = model.companies}
+      in
+        div [ style myStyle ] [ Event.view context childAddress model.events ]
+
+    Login ->
+      let
+        childAddress =
+          Signal.forwardTo address ChildLoginAction
+      in
+        div [ style myStyle ] [ Login.view childAddress model.login ]
+
     User ->
       let
         childAddress =
           Signal.forwardTo address ChildUserAction
       in
         div [ style myStyle ] [ User.view childAddress model.user ]
-
-    Event companyId ->
-      let
-        childAddress =
-          Signal.forwardTo address ChildEventAction
-      in
-        div [ style myStyle ] [ Event.view context childAddress model.events ]
 
 navbar : Signal.Address Action -> Model -> Html
 navbar address model =
@@ -264,7 +345,7 @@ navbarLoggedIn address model =
               [ ul [class "nav navbar-nav"]
                 [ li [] [ a [ hrefVoid, onClick address (SetActivePage User) ] [ text "My account"] ]
                 , li [] [ a [ hrefVoid, onClick address (SetActivePage <| Event Nothing)] [ text "Events"] ]
-                , li [] [ a [ hrefVoid, onClick childAddress User.Logout] [ text "Logout"] ]
+                , li [] [ a [ hrefVoid, onClick address Logout] [ text "Logout"] ]
                 ]
               ]
           ]
@@ -286,13 +367,13 @@ delta2update previous current =
       RouteHash.map ((::) "events") <|
         Event.delta2update previous.events current.events
 
+    Login ->
+      RouteHash.map ((::) "login") <|
+        Login.delta2update previous.login current.login
+
     User ->
-      let
-        url =
-          if current.user.name == Anonymous then "login" else "my-account"
-      in
-        RouteHash.map ((::) url) <|
-          User.delta2update previous.user current.user
+      RouteHash.map ((::) "my-account") <|
+        User.delta2update previous.user current.user
 
 
 -- Here, we basically do the reverse of what delta2update does
@@ -300,7 +381,7 @@ location2action : List String -> List Action
 location2action list =
   case list of
     "login" :: rest ->
-      ( SetActivePage User ) :: []
+      ( SetActivePage Login ) :: []
 
     "my-account" :: rest ->
       ( SetActivePage User ) :: []
@@ -313,4 +394,4 @@ location2action list =
 
     _ ->
       -- @todo: Add 404
-      ( SetActivePage User ) :: []
+      ( SetActivePage Login ) :: []

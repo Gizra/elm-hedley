@@ -29,12 +29,6 @@ type Status =
   | Fetched (Maybe CompanyId) Time.Time
   | HttpError Http.Error
 
-isFetched : Status -> Bool
-isFetched status =
-  case status of
-    Fetched _ _ -> True
-    _ -> False
-
 type alias Marker =
   { lat: Float
   , lng : Float
@@ -488,7 +482,11 @@ viewEventInfo model =
     Nothing ->
       div [] []
 
-
+isFetched : Status -> Bool
+isFetched status =
+  case status of
+    Fetched _ _ -> True
+    _ -> False
 
 -- EFFECTS
 

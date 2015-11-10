@@ -61,12 +61,7 @@ type Action
   = NoOp (Maybe ())
   | GetDataFromServer
   | UpdateDataFromServer (Result Http.Error (Id, String, List Company.Model))
-  -- @todo: Remove, as we don't use it
   | SetAccessToken AccessToken
-
-  -- Page
-  | Activate
-  | Deactivate
 
 type alias Context =
   { accessToken : AccessToken}
@@ -113,12 +108,6 @@ update context action model =
       ( {model | accessToken <- accessToken}
       , Effects.none
       )
-
-    Activate ->
-      (model, Effects.none)
-
-    Deactivate ->
-      (model, Effects.none)
 
 
 -- Determines if a call to the server should be done, based on having an access

@@ -72,10 +72,6 @@ type Action
   | SetAccessToken AccessToken
   | UpdateAccessTokenFromStorage (Result String AccessToken)
 
-  -- Page
-  | Activate
-  | Deactivate
-
 
 update : Action -> Model -> (Model, Effects Action)
 update action model =
@@ -144,12 +140,6 @@ update action model =
           ( { model | hasAccessTokenInStorage <- False }
           , Effects.none
           )
-
-    Activate ->
-      (model, Effects.none)
-
-    Deactivate ->
-      (model, Effects.none)
 
 
 sendInputToStorage : String -> Effects Action

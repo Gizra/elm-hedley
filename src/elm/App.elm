@@ -1,13 +1,14 @@
 module App where
 
 
-import Company exposing (..)
-import Effects exposing (Effects, Never)
-import Event exposing (..)
-import Html exposing (..)
-import Html.Attributes exposing (..)
+import Company exposing (Model)
+import Effects exposing (Effects)
+import Event exposing (Model, initialModel, update)
+import Html exposing (a, div, i, li, node, span, text, ul, Html)
+import Html.Attributes exposing (class, href, style, target)
 import Html.Events exposing (onClick)
 import Login exposing (Model, initialModel, update)
+import PageNotFound exposing (view)
 import RouteHash exposing (HashUpdate)
 import Storage exposing (removeItem)
 import Task exposing (..)
@@ -23,6 +24,7 @@ type alias CompanyId = Int
 type Page
   = Event (Maybe CompanyId)
   | Login
+  | PageNotFound
   | User
 
 type alias Model =
@@ -192,13 +194,24 @@ update action model =
         (page', nextPage) =
           if model.user.name == Anonymous
             then
-              if page == Login
-                -- If the user is anonymous and we are asked to set the  active
-                -- page to login, then we make sure that the next page doesn't
+              case page of
+                -- When the page is not found, we should keep the URL as is,
+                -- and even after the user info was fetched, we should keep it
+                -- so we set the next Page also to the error page.
+                PageNotFound ->
+                  (page, Just page)
+
+                -- The user is anonymous and we are asked to set the active page
+                -- to login, then we make sure that the next page doesn't
                 -- change, so they won't be rediected back to the login page.
-                then (Login, model.nextPage)
-                else (Login, Just page)
-            else (page, Nothing)
+                Login ->
+                  (Login, model.nextPage)
+
+                _ ->
+                  (Login, Just page)
+
+              -- Authenticated user.
+              else (page, Nothing)
 
         currentPageEffects =
           case model.activePage of
@@ -207,8 +220,6 @@ update action model =
 
             _ ->
               Effects.none
-
-
 
         newPageEffects =
           case page' of
@@ -279,6 +290,10 @@ mainContent address model =
       in
         div [ style myStyle ] [ Login.view childAddress model.login ]
 
+    PageNotFound ->
+      div [] [ PageNotFound.view ]
+
+
     User ->
       let
         childAddress =
@@ -331,6 +346,7 @@ navbarLoggedIn address model =
                 [ li [] [ a [ hrefVoid, onClick address (SetActivePage User) ] [ text "My account"] ]
                 , li [] [ a [ hrefVoid, onClick address (SetActivePage <| Event Nothing)] [ text "Events"] ]
                 , li [] [ a [ hrefVoid, onClick address Logout] [ text "Logout"] ]
+                , li [] [ a [ href "/#!/error-page"] [ text "PageNotFound (404)"] ]
                 ]
               ]
           ]
@@ -353,8 +369,16 @@ delta2update previous current =
         Event.delta2update previous.events current.events
 
     Login ->
-      RouteHash.map ((::) "login") <|
-        Login.delta2update previous.login current.login
+      if current.login.hasAccessTokenInStorage
+        -- The user has access token, but not yet logged in, so we don't change
+        -- the url to "login", as we are just waiting for the server to fetch
+        -- the user info.
+        then Nothing
+        else RouteHash.map ((::) "login") <| Login.delta2update previous.login current.login
+
+
+    PageNotFound ->
+      Nothing
 
     User ->
       RouteHash.map ((::) "my-account") <|
@@ -378,5 +402,4 @@ location2action list =
       ( SetActivePage <| Event Nothing ) :: []
 
     _ ->
-      -- @todo: Add 404
-      ( SetActivePage Login ) :: []
+      ( SetActivePage PageNotFound ) :: []

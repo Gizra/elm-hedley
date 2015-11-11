@@ -1,5 +1,5 @@
 import App exposing (init, update, view)
-import CustomStartApp as StartApp
+import StartApp as StartApp
 import Effects exposing (Never)
 import Event exposing (Action)
 import Leaflet exposing (Action, Model)
@@ -7,19 +7,24 @@ import RouteHash
 import Task exposing (Task)
 
 
-app : StartApp.App App.Model App.Action
+-- app : StartApp.App App.Model App.Action
 app =
   StartApp.start
     { init = init
     , update = update
     , view = view
-    , inputs = [Signal.map (App.ChildEventAction << Event.SelectEvent) selectEvent]
+    , inputs =
+        [ messages.signal
+        , Signal.map (App.ChildEventAction << Event.SelectEvent) selectEvent
+        ]
     }
-
 
 main =
   app.html
 
+messages : Signal.Mailbox App.Action
+messages =
+    Signal.mailbox App.NoOp
 
 port tasks : Signal (Task.Task Never ())
 port tasks =
@@ -29,7 +34,7 @@ port routeTasks : Signal (Task () ())
 port routeTasks =
     RouteHash.start
         { prefix = RouteHash.defaultPrefix
-        , address = app.address
+        , address = messages.address
         , models = app.model
         , delta2update = App.delta2update
         , location2action = App.location2action

@@ -62,8 +62,7 @@ init =
 -- UPDATE
 
 type Action
-  = NoOp (Result AccessToken ())
-  | UpdateName String
+  = UpdateName String
   | UpdatePass String
   | SubmitForm
   | UpdateAccessTokenFromServer (Result Http.Error AccessToken)
@@ -110,12 +109,9 @@ update action model =
             , getJson url credentials
             )
 
-    NoOp result ->
-      (model, Effects.none)
-
     SetAccessToken token ->
       ( { model | accessToken <- token }
-      , sendInputToStorage token
+      , Effects.none
       )
 
     UpdateAccessTokenFromServer result ->
@@ -140,14 +136,6 @@ update action model =
           ( { model | hasAccessTokenInStorage <- False }
           , Effects.none
           )
-
-
-sendInputToStorage : String -> Effects Action
-sendInputToStorage s =
-  Storage.setItem "access_token" (JE.string s)
-    |> Task.toResult
-    |> Task.map NoOp
-    |> Effects.task
 
 getInputFromStorage : Effects Action
 getInputFromStorage =

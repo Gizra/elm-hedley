@@ -7,9 +7,11 @@ import Event exposing (Model, initialModel, update)
 import Html exposing (a, div, i, li, node, span, text, ul, Html)
 import Html.Attributes exposing (class, href, style, target)
 import Html.Events exposing (onClick)
+import Json.Encode as JE exposing (string, Value)
 import Login exposing (Model, initialModel, update)
 import PageNotFound exposing (view)
 import RouteHash exposing (HashUpdate)
+import String exposing (isEmpty)
 import Storage exposing (removeItem)
 import Task exposing (..)
 import User exposing (..)
@@ -70,10 +72,10 @@ type Action
   | SetActivePage Page
   | UpdateCompanies (List Company.Model)
 
-  -- NoOp actions needed to satisfy the Effects that always requite an action.
+  -- NoOp actions
   | NoOp
-  -- Action to be called after a Logout
   | NoOpLogout (Maybe ())
+  | NoOpSetAccessToken (Result AccessToken ())
 
 
 update : Action -> Model -> (Model, Effects Action)
@@ -142,6 +144,15 @@ update action model =
 
         (model'', effects') =
           case act of
+            -- Bubble up the SetAccessToken to the App level.
+            User.SetAccessToken token ->
+              ( model'
+              , (Task.succeed (SetAccessToken token) |> Effects.task)
+                ::
+                defaultEffects
+              )
+
+            -- Act when user was successfully fetched from the server.
             User.UpdateDataFromServer result ->
               case result of
                 -- We reach out into the companies that is passed to the child
@@ -186,9 +197,26 @@ update action model =
       )
 
     SetAccessToken accessToken ->
-      ( { model | accessToken <- accessToken}
-      , Task.succeed (ChildUserAction User.GetDataFromServer) |> Effects.task
-      )
+      let
+        defaultEffects =
+          [sendInputToStorage accessToken]
+
+        effects' =
+          if (String.isEmpty accessToken)
+            then
+              -- Setting an empty access token should result with a logout.
+              (Task.succeed Logout |> Effects.task)
+              ::
+              defaultEffects
+            else
+              (Task.succeed (ChildUserAction User.GetDataFromServer) |> Effects.task)
+              ::
+              defaultEffects
+
+      in
+        ( { model | accessToken <- accessToken}
+        , Effects.batch effects'
+        )
 
     SetActivePage page ->
       let
@@ -253,16 +281,9 @@ update action model =
       , Effects.none
       )
 
+    -- NoOp actions
     _ ->
       ( model, Effects.none )
-
--- Task to remove the access token from localStorage.
-removeStorageItem : Effects Action
-removeStorageItem =
-  Storage.removeItem "access_token"
-    |> Task.toMaybe
-    |> Task.map NoOpLogout
-    |> Effects.task
 
 -- VIEW
 
@@ -360,6 +381,22 @@ myStyle : List (String, String)
 myStyle =
   [ ("font-size", "1.2em") ]
 
+-- EFFECTS
+
+sendInputToStorage : String -> Effects Action
+sendInputToStorage val =
+  Storage.setItem "access_token" (JE.string val)
+    |> Task.toResult
+    |> Task.map NoOpSetAccessToken
+    |> Effects.task
+
+-- Task to remove the access token from localStorage.
+removeStorageItem : Effects Action
+removeStorageItem =
+  Storage.removeItem "access_token"
+    |> Task.toMaybe
+    |> Task.map NoOpLogout
+    |> Effects.task
 
 -- ROUTING
 

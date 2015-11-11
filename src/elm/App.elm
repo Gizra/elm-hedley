@@ -66,11 +66,15 @@ type Action
   | ChildLoginAction Login.Action
   | ChildUserAction User.Action
   | Logout
-  -- Action to be called after a Logout
-  | NoOp (Maybe ())
   | SetAccessToken AccessToken
   | SetActivePage Page
   | UpdateCompanies (List Company.Model)
+
+  -- NoOp actions needed to satisfy the Effects that always requite an action.
+  | NoOp
+  -- Action to be called after a Logout
+  | NoOpLogout (Maybe ())
+
 
 update : Action -> Model -> (Model, Effects Action)
 update action model =
@@ -181,9 +185,6 @@ update action model =
       , Effects.batch <| removeStorageItem :: initialEffects
       )
 
-    NoOp _ ->
-      ( model, Effects.none )
-
     SetAccessToken accessToken ->
       ( { model | accessToken <- accessToken}
       , Task.succeed (ChildUserAction User.GetDataFromServer) |> Effects.task
@@ -252,12 +253,15 @@ update action model =
       , Effects.none
       )
 
+    _ ->
+      ( model, Effects.none )
+
 -- Task to remove the access token from localStorage.
 removeStorageItem : Effects Action
 removeStorageItem =
   Storage.removeItem "access_token"
     |> Task.toMaybe
-    |> Task.map NoOp
+    |> Task.map NoOpLogout
     |> Effects.task
 
 -- VIEW

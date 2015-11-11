@@ -5,7 +5,7 @@ import Config exposing (backendUrl)
 import Effects exposing (Effects, Never)
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Http
+import Http exposing (Error)
 import Json.Decode as Json exposing ((:=))
 import RouteHash exposing (HashUpdate)
 import String exposing (length)
@@ -58,10 +58,12 @@ init =
 -- UPDATE
 
 type Action
-  = NoOp (Maybe ())
-  | GetDataFromServer
+  = GetDataFromServer
+  | SetAccessToken AccessToken  
   | UpdateDataFromServer (Result Http.Error (Id, String, List Company.Model))
-  | SetAccessToken AccessToken
+
+  -- NoOp actions
+  | NoOp (Maybe ())
 
 type alias Context =
   { accessToken : AccessToken}
@@ -100,8 +102,21 @@ update context action model =
             , Effects.none
             )
           Err msg ->
+            let
+              effects =
+                case msg of
+                  Http.BadResponse code _ ->
+                    if (code == 401)
+                      -- Token is wrong, so remove any existing one.
+                      then Task.succeed (SetAccessToken "") |> Effects.task
+                      else Effects.none
+
+                  _ ->
+                    Effects.none
+
+            in
             ( { model' | status <- HttpError msg }
-            , Effects.none
+            , effects
             )
 
     SetAccessToken accessToken ->

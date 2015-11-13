@@ -102,7 +102,9 @@ type Action
 
 
 type alias UpdateContext =
-  { accessToken : String }
+  { accessToken : String
+  , companies : List Company.Model
+  }
 
 type alias ViewContext =
   { companies : List Company.Model }
@@ -157,9 +159,26 @@ update context action model =
           )
 
     SelectCompany maybeCompanyId ->
-      ( { model | selectedCompany <- maybeCompanyId }
-      , Task.succeed (GetData maybeCompanyId) |> Effects.task
-      )
+      let
+        isValidCompany val =
+          context.companies
+            |> List.filter (\company -> company.id == val)
+            |> List.length
+
+
+        selectedCompany =
+          case maybeCompanyId of
+            Just val ->
+              -- Make sure the given company ID is a valid one.
+              if ((isValidCompany val) > 0)
+                then Just val
+                else Nothing
+            Nothing ->
+              Nothing
+      in
+        ( { model | selectedCompany <- selectedCompany }
+        , Task.succeed (GetData selectedCompany) |> Effects.task
+        )
 
 
     SelectEvent val ->
@@ -586,26 +605,21 @@ delta2update : Model -> Model -> Maybe HashUpdate
 delta2update previous current =
   let
     url =
-      case current.selectedEvent of
-        Just eventId -> [ toString (eventId) ]
+      case current.selectedCompany of
+        Just companyId -> [ toString (companyId) ]
         Nothing -> []
   in
     Just <| RouteHash.set url
 
-location2action : List String -> List Action
-location2action list =
-  let
-    maybeEventId =
-      case List.head list of
-        Just eventId ->
-          case String.toInt eventId of
-            Ok val ->
-              Just val
-            Err _ ->
-              Nothing
-
-        Nothing ->
+location2company : List String -> Maybe Int
+location2company list =
+  case List.head list of
+    Just eventId ->
+      case String.toInt eventId of
+        Ok val ->
+          Just val
+        Err _ ->
           Nothing
 
-  in
-    [ SelectEvent maybeEventId ]
+    Nothing ->
+      Nothing

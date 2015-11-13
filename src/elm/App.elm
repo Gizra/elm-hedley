@@ -85,7 +85,9 @@ update action model =
       let
         -- Pass the access token along to the child components.
         context =
-          { accessToken = model.accessToken }
+          { accessToken = model.accessToken
+          , companies = model.companies
+          }
 
         (childModel, childEffects) = Event.update context act model.events
       in
@@ -253,7 +255,7 @@ update action model =
         newPageEffects =
           case page' of
             Event companyId ->
-              Task.succeed (ChildEventAction <| Event.Activate Nothing) |> Effects.task
+              Task.succeed (ChildEventAction <| Event.Activate companyId) |> Effects.task
 
             _ ->
               Effects.none
@@ -436,7 +438,7 @@ location2action list =
       ( SetActivePage User ) :: []
 
     "events" :: rest ->
-      ( SetActivePage <| Event Nothing ) :: List.map ChildEventAction ( Event.location2action rest )
+      ( SetActivePage <| Event (Event.location2company rest) ) :: []
 
     "" :: rest ->
       ( SetActivePage <| Event Nothing ) :: []

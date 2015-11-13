@@ -584,8 +584,28 @@ decodeData =
 
 delta2update : Model -> Model -> Maybe HashUpdate
 delta2update previous current =
-  Just <| RouteHash.set []
+  let
+    url =
+      case current.selectedEvent of
+        Just eventId -> [ toString (eventId) ]
+        Nothing -> []
+  in
+    Just <| RouteHash.set url
 
 location2action : List String -> List Action
 location2action list =
-  []
+  let
+    maybeEventId =
+      case List.head list of
+        Just eventId ->
+          case String.toInt eventId of
+            Ok val ->
+              Just val
+            Err _ ->
+              Nothing
+
+        Nothing ->
+          Nothing
+
+  in
+    [ SelectEvent maybeEventId ]

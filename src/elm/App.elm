@@ -415,15 +415,14 @@ delta2update previous current =
         -- the url to "login", as we are just waiting for the server to fetch
         -- the user info.
         then Nothing
-        else RouteHash.map ((::) "login") <| Login.delta2update previous.login current.login
+        else Just <| RouteHash.set ["login"]
 
 
     PageNotFound ->
       Nothing
 
     User ->
-      RouteHash.map ((::) "my-account") <|
-        User.delta2update previous.user current.user
+      Just <| RouteHash.set ["my-account"]
 
 
 -- Here, we basically do the reverse of what delta2update does
@@ -437,7 +436,7 @@ location2action list =
       ( SetActivePage User ) :: []
 
     "events" :: rest ->
-      ( SetActivePage <| Event Nothing ) :: []
+      ( SetActivePage <| Event Nothing ) :: List.map ChildEventAction ( Event.location2action rest )
 
     "" :: rest ->
       ( SetActivePage <| Event Nothing ) :: []

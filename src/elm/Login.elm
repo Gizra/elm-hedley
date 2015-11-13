@@ -7,9 +7,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (on, onClick, onSubmit, targetValue)
 import Http
-import Json.Encode as JE exposing (string, Value)
 import Json.Decode as JD exposing ((:=))
-import RouteHash exposing (HashUpdate)
 import Storage exposing (..)
 import String exposing (length)
 import Task
@@ -262,13 +260,3 @@ getJson url credentials =
 decodeAccessToken : JD.Decoder AccessToken
 decodeAccessToken =
   JD.at ["access_token"] <| JD.string
-
--- ROUTER
-
-delta2update : Model -> Model -> Maybe HashUpdate
-delta2update previous current =
-  Just <| RouteHash.set []
-
-location2action : List String -> List Action
-location2action list =
-  []

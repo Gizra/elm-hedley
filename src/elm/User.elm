@@ -7,7 +7,6 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Http exposing (Error)
 import Json.Decode as Json exposing ((:=))
-import RouteHash exposing (HashUpdate)
 import String exposing (length)
 import Task
 
@@ -59,7 +58,7 @@ init =
 
 type Action
   = GetDataFromServer
-  | SetAccessToken AccessToken  
+  | SetAccessToken AccessToken
   | UpdateDataFromServer (Result Http.Error (Id, String, List Company.Model))
 
   -- NoOp actions
@@ -194,13 +193,3 @@ decodeData =
       ("id" := number)
       ("label" := Json.string)
       ("companies" := Json.list company)
-
--- ROUTER
-
-delta2update : Model -> Model -> Maybe HashUpdate
-delta2update previous current =
-  Just <| RouteHash.set []
-
-location2action : List String -> List Action
-location2action list =
-  []

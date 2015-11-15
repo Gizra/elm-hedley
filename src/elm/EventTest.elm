@@ -1,10 +1,7 @@
-module Tests where
+module EventTest where
 
 import ElmTest.Assertion exposing (..)
 import ElmTest.Test exposing (..)
-
-import String
-
 
 import Company exposing (Model)
 import Effects exposing (Effects)
@@ -36,6 +33,6 @@ contextData =
 
 all : Test
 all =
-  suite "All tests"
+  suite "All Event tests"
     [ selectCompanySuite
     ]

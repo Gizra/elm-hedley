@@ -5,4 +5,6 @@ serve
 dist
 .publish
 .idea
-tests.js
+# Compiled tests
+elm.js
+test.html

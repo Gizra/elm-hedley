@@ -1,0 +1,13 @@
+language: node_js
+node_js:
+  - "4.1"
+
+install:
+  - npm install -g elm
+  - npm install
+  - elm-package install -y
+before_script:
+  - elm-make ./src/elm/TestRunner.elm --output tests.js --yes
+  - curl https://gist.githubusercontent.com/amitaibu/156236d28adddf1c1f16/raw/ebef859fa441f7fc05ae242bf854430c47e5b586/add_jsdom.js > add_jsdom.js
+  - cat add_jsdom.js >> tests.js
+script: node tests.js

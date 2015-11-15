@@ -5,3 +5,4 @@ serve
 dist
 .publish
 .idea
+tests.js

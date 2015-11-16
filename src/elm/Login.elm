@@ -232,9 +232,8 @@ view address model =
           [ class "input-group"]
           [ span
               [ class "input-group-addon" ]
-              [ i [ class "fa fa-lock fa-lg" ] []
-            ]
-            , input
+              [ i [ class "fa fa-lock fa-lg" ] [] ]
+          , input
               [ type' "password"
               , class "form-control"
               , placeholder "Password"

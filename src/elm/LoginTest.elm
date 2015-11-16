@@ -7,6 +7,16 @@ import Effects exposing (Effects)
 import Http exposing (..)
 import Login exposing (Model)
 
+accessTokenSuite : Test
+accessTokenSuite =
+  let
+    pass =
+      .loginForm >> .pass
+  in
+    suite "Set access token tests"
+      [ test "on empty set access token, password is reset" (assertEqual "" (pass <| fst(setAccessToken "")))
+      , test "on set access token, password is reset" (assertEqual "" (pass <| fst(setAccessToken "accessToken")))
+      ]
 
 formSuite : Test
 formSuite =
@@ -18,7 +28,7 @@ formSuite =
     pass =
       .loginForm >> .pass
   in
-    suite "Login form suite"
+    suite "Login form tests"
       [ test "empty name" (assertEqual "" (name <| fst(updateName "")))
       , test "simple name" (assertEqual "foo" (name <| fst(updateName "foo")))
       -- Password
@@ -27,8 +37,6 @@ formSuite =
 
       -- Submit form
       , test "first submit, status is Fetching" (assertEqual Login.Fetching (.status <| fst(submitForm Login.Init)))
-      , test "first submit, password is reset" (assertEqual "" (pass <| fst(submitForm Login.Init)))
-
       , test "ongoing submit" (assertEqual Login.Fetching (.status <| fst(submitForm Login.Fetching)))
       , test "submit done without errors" (assertEqual Login.Fetched (.status <| fst(submitForm Login.Fetched)))
       , test "submit after another submit with errors" (assertEqual Login.Fetching (.status <| fst(submitForm <| Login.HttpError NetworkError)))
@@ -54,8 +62,13 @@ submitForm status =
   in
     Login.update Login.SubmitForm model'
 
+setAccessToken : String -> (Login.Model, Effects Login.Action)
+setAccessToken val =
+  Login.update (Login.SetAccessToken val) Login.initialModel
+
 all : Test
 all =
   suite "All Login tests"
-    [ formSuite
+    [ accessTokenSuite
+    , formSuite
     ]

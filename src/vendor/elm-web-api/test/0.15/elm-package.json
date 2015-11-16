@@ -1,0 +1,23 @@
+{
+    "version": "1.0.0",
+    "summary": "Tests for the WebAPI module",
+    "repository": "https://github.com/rgrempel/elm-web-api.git",
+    "license": "BSD3",
+    "source-directories": [
+        "../src/elm",
+        "../../src",
+        "../../examples/src"
+    ],
+    "exposed-modules": [],
+    "native-modules": true,
+    "dependencies": {
+        "Apanatshka/elm-signal-extra": "5.6.0 <= v < 6.0.0",
+        "deadfoxygrandpa/Elm-Test": "1.0.4 <= v < 2.0.0",
+        "elm-lang/core": "2.0.0 <= v < 3.0.0",
+        "evancz/elm-html": "4.0.1 <= v < 5.0.0",
+        "maxsnew/IO": "1.0.1 <= v < 2.0.0",
+        "evancz/elm-effects": "2.0.0 <= v < 3.0.0",
+        "evancz/start-app": "2.0.1 <= v < 3.0.0"
+    },
+    "elm-version": "0.15.0 <= v < 0.16.0"
+}

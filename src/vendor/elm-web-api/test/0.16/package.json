@@ -1,0 +1,24 @@
+{
+  "name": "elm-web-api",
+  "version": "1.0.0",
+  "description": "Tests for elm-web-api",
+  "main": "elm.js",
+  "dependencies": {
+    "node-localstorage": "^0.6.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "elm-make ../src/Browser.elm --output elm.html && open elm.html;",
+    "console": "elm-make ../src/CommandLine.elm --output elm.js && cat ../src/shim.js >> elm.js && node elm.js;"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rgrempel/elm-web-api.git"
+  },
+  "author": "Ryan Rempel <rgrempel@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/rgrempel/elm-web-api/issues"
+  },
+  "homepage": "https://github.com/rgrempel/elm-web-api#readme"
+}

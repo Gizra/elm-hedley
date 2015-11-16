@@ -197,6 +197,20 @@ view address model =
     isFetchStatus =
       model.status == Fetching || model.status == Fetched
 
+    githubUrl =
+      "https://github.com/login/oauth/authorize?client_id=" ++ Config.githubClientId ++ "&scope=user:email"
+
+    githubLogin =
+      div
+      [ class "btn btn-lg btn-primary btn-block"]
+      [ a
+        [ href githubUrl]
+        [ i [ class "fa fa-github", style [("margin-right", "10px")] ] []
+        , span [] [ text "Login with GitHub" ]
+        ]
+
+      ]
+
     loginForm =
       Html.form
         [ onSubmit address SubmitForm
@@ -210,6 +224,10 @@ view address model =
         -- Form title
         [ h2 [] [ text "Please login" ]
         -- UserName
+        , githubLogin
+        , div
+          [ style [("margin-bottom", "20px"), ("margin-top", "20px"), ("text-align", "center")] ]
+          [ text "OR" ]
         , div
             [ class "input-group" ]
             [ span

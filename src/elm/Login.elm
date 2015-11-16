@@ -6,7 +6,7 @@ import Effects exposing (Effects, Never)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (on, onClick, onSubmit, targetValue)
-import Http
+import Http exposing (Error)
 import Json.Decode as JD exposing ((:=))
 import Storage exposing (..)
 import String exposing (length)
@@ -25,27 +25,33 @@ type alias LoginForm =
   , pass : String
   }
 
-type Status =
-  Init
+type UserMessage
+  = None
+  | Error String
+
+type Status
+  = Init
   | Fetching
   | Fetched
   | HttpError Http.Error
 
 type alias Model =
   { accessToken: AccessToken
+  , hasAccessTokenInStorage : Bool
   , loginForm : LoginForm
   , status : Status
-  , hasAccessTokenInStorage : Bool
+  , userMessage : UserMessage
   }
 
 initialModel : Model
 initialModel =
   { accessToken = ""
-  , loginForm = LoginForm "demo" "1234"
-  , status = Init
   -- We start by assuming there's already an access token it the localStorage.
   -- While this property is set to True, the login form will not appear.
   , hasAccessTokenInStorage = True
+  , loginForm = LoginForm "demo" "1234"
+  , status = Init
+  , userMessage = None
   }
 
 
@@ -60,15 +66,13 @@ init =
 -- UPDATE
 
 type Action
-  = UpdateName String
-  | UpdatePass String
-  | SubmitForm
-  | UpdateAccessTokenFromServer (Result Http.Error AccessToken)
-
-  -- Storage
-  | SetAccessToken AccessToken
+  = UpdateAccessTokenFromServer (Result Http.Error AccessToken)
   | UpdateAccessTokenFromStorage (Result String AccessToken)
-
+  | UpdateName String
+  | UpdatePass String
+  | SetAccessToken AccessToken
+  | SetUserMessage UserMessage
+  | SubmitForm
 
 update : Action -> Model -> (Model, Effects Action)
 update action model =
@@ -78,14 +82,18 @@ update action model =
         loginForm = model.loginForm
         updatedLoginForm = { loginForm | name <- name }
       in
-      ({model | loginForm <- updatedLoginForm }, Effects.none)
+        ( { model | loginForm <- updatedLoginForm }
+        , Effects.none
+        )
 
     UpdatePass pass ->
       let
         loginForm = model.loginForm
         updatedLoginForm = { loginForm | pass <- pass }
       in
-      ({model | loginForm <- updatedLoginForm }, Effects.none)
+        ( {model | loginForm <- updatedLoginForm }
+        , Effects.none
+        )
 
     SubmitForm ->
       let
@@ -99,16 +107,24 @@ update action model =
           then
             (model, Effects.none)
           else
-            ( { model
-              | status <- Fetching
-              -- Hide the password.
-              , loginForm <- LoginForm model.loginForm.name ""
-              }
-            , getJson url credentials
+            ( { model | status <- Fetching }
+            , Effects.batch
+              [ Task.succeed (SetUserMessage None) |> Effects.task
+              , getJson url credentials
+              ]
             )
 
     SetAccessToken token ->
-      ( { model | accessToken <- token }
+      ( { model
+        | accessToken <- token
+        -- This is a good time also to hide the password.
+        , loginForm <- LoginForm model.loginForm.name ""
+        }
+      , Effects.none
+      )
+
+    SetUserMessage userMessage ->
+      ( { model | userMessage <- userMessage }
       , Effects.none
       )
 
@@ -118,10 +134,14 @@ update action model =
           ( { model | status <- Fetched }
           , Task.succeed (SetAccessToken token) |> Effects.task
           )
-        Err msg ->
-          ( { model | status <- HttpError msg }
-          , Effects.none
-          )
+        Err err ->
+          let
+            message =
+              getErrorMessageFromHttpResponse err
+          in
+            ( { model | status <- HttpError err }
+            , Task.succeed (SetUserMessage <| Error message) |> Effects.task
+            )
 
     UpdateAccessTokenFromStorage result ->
       case result of
@@ -134,6 +154,25 @@ update action model =
           ( { model | hasAccessTokenInStorage <- False }
           , Effects.none
           )
+
+getErrorMessageFromHttpResponse : Http.Error -> String
+getErrorMessageFromHttpResponse err =
+  case err of
+    Http.Timeout ->
+      "Connection has timed out"
+
+    Http.BadResponse code _ ->
+      if | code == 401 -> "Wrong username or password"
+         | code == 429 -> "Too many login requests with the wrong username or password. Wait a few hours before trying again"
+         | code >= 500 -> "Some error has occured on the server"
+         | otherwise -> "Unknow error has occured"
+
+    Http.NetworkError ->
+      "A network error has occured"
+
+    _ ->
+      "Unknow error has occured"
+
 
 getInputFromStorage : Effects Action
 getInputFromStorage =
@@ -158,79 +197,93 @@ view address model =
     isFetchStatus =
       model.status == Fetching || model.status == Fetched
 
+    loginForm =
+      Html.form
+        [ onSubmit address SubmitForm
+        , action "javascript:void(0);"
+        , class "form-signin"
+        -- Don't show the form while checking for the access token from the
+        -- storage.
+        , hidden model.hasAccessTokenInStorage
+        ]
+
+        -- Form title
+        [ h2 [] [ text "Please login" ]
+        -- UserName
+        , div
+            [ class "input-group" ]
+            [ span
+                [ class "input-group-addon" ]
+                [ i [ class "glyphicon glyphicon-user" ] [] ]
+                , input
+                    [ type' "text"
+                    , class "form-control"
+                    , placeholder "Name"
+                    , value model.loginForm.name
+                    , on "input" targetValue (Signal.message address << UpdateName)
+                    , size 40
+                    , required True
+                    , disabled (isFetchStatus)
+                    ]
+                    []
+           ]
+        -- Password
+        , div
+          [ class "input-group"]
+          [ span
+              [ class "input-group-addon" ]
+              [ i [ class "fa fa-lock fa-lg" ] []
+            ]
+            , input
+              [ type' "password"
+              , class "form-control"
+              , placeholder "Password"
+              , value modelForm.pass
+              , on "input" targetValue (Signal.message address << UpdatePass)
+              , size 40
+              , required True
+              , disabled (isFetchStatus)
+              ]
+              []
+           ]
+
+        -- Submit button
+        , button
+            [ onClick address SubmitForm
+            , class "btn btn-lg btn-primary btn-block"
+            , disabled (isFetchStatus || isFormEmpty)
+            ]
+            [ span [ hidden <| not isFetchStatus] [ spinner ]
+            , span [ hidden isFetchStatus ] [ text "Login" ] ]
+            ]
+
     spinner =
       i [ class "fa fa-spinner fa-spin" ] []
+
+    userMessage =
+      case model.userMessage of
+        None ->
+          div [] []
+        Error message ->
+          div [ style [("text-align", "center")]] [ text message ]
 
   in
     div [ id "login-page" ] [
       hr [] []
-      , div [ class "container" ] [
-        div [ class "wrapper" ]
-          [ Html.form
-            [ onSubmit address SubmitForm
-            , action "javascript:void(0);"
-            , class "form-signin"
-            -- Don't show the form while checking for the access token from the
-            -- storage.
-            , hidden model.hasAccessTokenInStorage
+      , div
+          [ class "container" ]
+          [ userMessage
+          , div
+              [ class "wrapper" ]
+              [ loginForm
+              , div
+                  [ class "text-center"
+                  , hidden (not (model.status == Fetching) && not model.hasAccessTokenInStorage) ]
+                  [ text "Loading ..." ]
+              ]
             ]
-            -- Form title
-            [ h2 [] [ text "Please login" ]
-            -- UserName
-            , div
-              [ class "input-group" ]
-              [ span
-                [ class "input-group-addon"]
-                [ i [ class "glyphicon glyphicon-user" ] []
-              ]
-              , input
-                [ type' "text"
-                , class "form-control"
-                , placeholder "Name"
-                , value model.loginForm.name
-                , on "input" targetValue (Signal.message address << UpdateName)
-                , size 40
-                , required True
-                , disabled (isFetchStatus)
-                ]
-                []
-               ]
-            -- Password
-            , div
-              [ class "input-group"]
-              [ span
-                [ class "input-group-addon" ]
-                [ i [ class "fa fa-lock fa-lg" ] []
-              ]
-              , input
-                [ type' "password"
-                , class "form-control"
-                , placeholder "Password"
-                , value modelForm.pass
-                , on "input" targetValue (Signal.message address << UpdatePass)
-                , size 40
-                , required True
-                , disabled (isFetchStatus)
-                ]
-                []
-               ]
-            -- Submit button
-            , button
-              [ onClick address SubmitForm
-              , class "btn btn-lg btn-primary btn-block"
-              , disabled (isFetchStatus || isFormEmpty)
-              ]
-            [ span [ hidden <| not isFetchStatus] [ spinner ]
-            , span [ hidden isFetchStatus ] [ text "Login" ] ]
-            ]
-            , div
-              [ class "text-center"
-              , hidden (not (model.status == Fetching) && not model.hasAccessTokenInStorage) ]
-              [ text "Loading ..." ]
+            , hr [] []
           ]
-        ]
-        , hr [] []
-      ]
 
 -- EFFECTS
 

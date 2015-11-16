@@ -8,7 +8,6 @@ import Http exposing (..)
 import Login exposing (Model)
 
 
-
 formSuite : Test
 formSuite =
   let
@@ -19,21 +18,21 @@ formSuite =
     pass =
       .loginForm >> .pass
   in
-  suite "Login form suite"
-    [ test "empty name" (assertEqual "" (name <| fst(updateName "")))
-    , test "simple name" (assertEqual "foo" (name <| fst(updateName "foo")))
-    -- Password
-    , test "empty password" (assertEqual "" (pass <| fst(updatePass "")))
-    , test "simple password" (assertEqual "bar" (pass <| fst(updatePass "bar")))
+    suite "Login form suite"
+      [ test "empty name" (assertEqual "" (name <| fst(updateName "")))
+      , test "simple name" (assertEqual "foo" (name <| fst(updateName "foo")))
+      -- Password
+      , test "empty password" (assertEqual "" (pass <| fst(updatePass "")))
+      , test "simple password" (assertEqual "bar" (pass <| fst(updatePass "bar")))
 
-    -- Submit form
-    , test "first submit, status is Fetching" (assertEqual Login.Fetching (.status <| fst(submitForm Login.Init)))
-    , test "first submit, password is reset" (assertEqual "" (pass <| fst(submitForm Login.Init)))
+      -- Submit form
+      , test "first submit, status is Fetching" (assertEqual Login.Fetching (.status <| fst(submitForm Login.Init)))
+      , test "first submit, password is reset" (assertEqual "" (pass <| fst(submitForm Login.Init)))
 
-    , test "ongoing submit" (assertEqual Login.Fetching (.status <| fst(submitForm Login.Fetching)))
-    , test "submit done without errors" (assertEqual Login.Fetched (.status <| fst(submitForm Login.Fetched)))
-    , test "submit after another submit with errors" (assertEqual Login.Fetching (.status <| fst(submitForm <| Login.HttpError NetworkError)))
-    ]
+      , test "ongoing submit" (assertEqual Login.Fetching (.status <| fst(submitForm Login.Fetching)))
+      , test "submit done without errors" (assertEqual Login.Fetched (.status <| fst(submitForm Login.Fetched)))
+      , test "submit after another submit with errors" (assertEqual Login.Fetching (.status <| fst(submitForm <| Login.HttpError NetworkError)))
+      ]
 
 updateName : String -> (Login.Model, Effects Login.Action)
 updateName val =
@@ -53,7 +52,7 @@ submitForm status =
       { model | status <- status }
 
   in
-  Login.update Login.SubmitForm model'
+    Login.update Login.SubmitForm model'
 
 all : Test
 all =

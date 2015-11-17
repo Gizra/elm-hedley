@@ -4,6 +4,7 @@ module App where
 import Company exposing (Model)
 import Effects exposing (Effects)
 import Event exposing (Model, initialModel, update)
+import GithubAuth exposing (Model)
 import Html exposing (a, div, i, li, node, span, text, ul, Html)
 import Html.Attributes exposing (class, href, style, target)
 import Html.Events exposing (onClick)
@@ -25,6 +26,7 @@ type alias CompanyId = Int
 
 type Page
   = Event (Maybe CompanyId)
+  | GithubAuth
   | Login
   | PageNotFound
   | User
@@ -34,6 +36,7 @@ type alias Model =
   , user : User.Model
   , companies : List Company.Model
   , events : Event.Model
+  , githubAuth: GithubAuth.Model
   , login: Login.Model
   , activePage : Page
   -- If the user is anonymous, we want to know where to redirect them.
@@ -46,6 +49,7 @@ initialModel =
   , user = User.initialModel
   , companies = []
   , events = Event.initialModel
+  , githubAuth = GithubAuth.initialModel
   , login = Login.initialModel
   , activePage = Login
   , nextPage = Nothing
@@ -65,6 +69,7 @@ init =
 
 type Action
   = ChildEventAction Event.Action
+  | ChildGithubAuthAction GithubAuth.Action
   | ChildLoginAction Login.Action
   | ChildUserAction User.Action
   | Logout
@@ -93,6 +98,35 @@ update action model =
       in
         ( {model | events <- childModel }
         , Effects.map ChildEventAction childEffects
+        )
+
+    ChildGithubAuthAction act ->
+      let
+        (childModel, childEffects) = GithubAuth.update act model.githubAuth
+
+        defaultEffect =
+          Effects.map ChildGithubAuthAction childEffects
+
+        -- A convinence variable to hold the default effect as a list.
+        defaultEffects =
+          [ defaultEffect ]
+
+        effects' =
+          case act of
+            -- User's token was fetched, so we can set it in the accessToken
+            -- root property, and also get the user info, which will in turn
+            -- redirect the user from the login page.
+            GithubAuth.SetAccessToken token ->
+              (Task.succeed (SetAccessToken token) |> Effects.task)
+              ::
+              defaultEffects
+
+            _ ->
+              defaultEffects
+
+      in
+        ( {model | githubAuth <- childModel }
+        , Effects.batch effects'
         )
 
     ChildLoginAction act ->
@@ -226,17 +260,20 @@ update action model =
           if model.user.name == Anonymous
             then
               case page of
-                -- When the page is not found, we should keep the URL as is,
-                -- and even after the user info was fetched, we should keep it
-                -- so we set the next Page also to the error page.
-                PageNotFound ->
-                  (page, Just page)
+                GithubAuth ->
+                  (GithubAuth, model.nextPage)
 
                 -- The user is anonymous and we are asked to set the active page
                 -- to login, then we make sure that the next page doesn't
                 -- change, so they won't be rediected back to the login page.
                 Login ->
                   (Login, model.nextPage)
+
+                -- When the page is not found, we should keep the URL as is,
+                -- and even after the user info was fetched, we should keep it
+                -- so we set the next Page also to the error page.
+                PageNotFound ->
+                  (page, Just page)
 
                 _ ->
                   (Login, Just page)
@@ -256,6 +293,9 @@ update action model =
           case page' of
             Event companyId ->
               Task.succeed (ChildEventAction <| Event.Activate companyId) |> Effects.task
+
+            GithubAuth ->
+              Task.succeed (ChildGithubAuthAction GithubAuth.Activate) |> Effects.task
 
             _ ->
               Effects.none
@@ -309,6 +349,13 @@ mainContent address model =
           { companies = model.companies}
       in
         div [ style myStyle ] [ Event.view context childAddress model.events ]
+
+    GithubAuth ->
+      let
+        childAddress =
+          Signal.forwardTo address ChildGithubAuthAction
+      in
+        div [ style myStyle ] [ GithubAuth.view childAddress model.githubAuth ]
 
     Login ->
       let
@@ -411,6 +458,9 @@ delta2update previous current =
       RouteHash.map ((::) "events") <|
         Event.delta2update previous.events current.events
 
+    GithubAuth ->
+      RouteHash.map (\_ -> ["auth", "github"]) Nothing
+
     Login ->
       if current.login.hasAccessTokenInStorage
         -- The user has access token, but not yet logged in, so we don't change
@@ -431,6 +481,9 @@ delta2update previous current =
 location2action : List String -> List Action
 location2action list =
   case list of
+    ["auth", "github"] ->
+      ( SetActivePage GithubAuth ) :: []
+
     "login" :: rest ->
       ( SetActivePage Login ) :: []
 
@@ -439,6 +492,7 @@ location2action list =
 
     "events" :: rest ->
       ( SetActivePage <| Event (Event.location2company rest) ) :: []
+
 
     "" :: rest ->
       ( SetActivePage <| Event Nothing ) :: []

@@ -3,6 +3,7 @@ module EventTest where
 import ElmTest.Assertion exposing (..)
 import ElmTest.Test exposing (..)
 
+import ConfigType exposing (initialBackendConfig)
 import Company exposing (Model)
 import Effects exposing (Effects)
 import Event exposing (initialModel, UpdateContext)
@@ -18,7 +19,7 @@ selectCompanySuite =
 
 selectCompany : Maybe Int -> (Event.Model, Effects Event.Action)
 selectCompany val =
-  Event.update contextData (Event.SelectCompany val) Event.initialModel
+  Event.update updateContext (Event.SelectCompany val) Event.initialModel
 
 companies : List Company.Model
 companies =
@@ -27,9 +28,12 @@ companies =
   , Company.Model 3 "baz"
   ]
 
-contextData : Event.UpdateContext
-contextData =
-  Event.UpdateContext "" companies
+updateContext : Event.UpdateContext
+updateContext =
+  { accessToken = ""
+  , backendConfig = ConfigType.initialBackendConfig
+  , companies = companies
+  }
 
 all : Test
 all =

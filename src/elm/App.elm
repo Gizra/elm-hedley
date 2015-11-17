@@ -1,11 +1,11 @@
 module App where
 
-
+import ConfigManager exposing (Model)
 import Company exposing (Model)
 import Effects exposing (Effects)
 import Event exposing (Model, initialModel, update)
 import GithubAuth exposing (Model)
-import Html exposing (a, div, i, li, node, span, text, ul, Html)
+import Html exposing (a, div, h2, i, li, node, span, text, ul, Html)
 import Html.Attributes exposing (class, href, style, target)
 import Html.Events exposing (onClick)
 import Json.Encode as JE exposing (string, Value)
@@ -31,33 +31,43 @@ type Page
   | PageNotFound
   | User
 
+type Status
+  = Init
+  | ConfigError
+
 type alias Model =
   { accessToken : AccessToken
-  , user : User.Model
+  , activePage : Page
+  , config : ConfigManager.Model
   , companies : List Company.Model
   , events : Event.Model
   , githubAuth: GithubAuth.Model
   , login: Login.Model
-  , activePage : Page
   -- If the user is anonymous, we want to know where to redirect them.
   , nextPage : Maybe Page
+  , status : Status
+  , user : User.Model
   }
 
 initialModel : Model
 initialModel =
   { accessToken = ""
-  , user = User.initialModel
+  , activePage = Login
+  , config = ConfigManager.initialModel
   , companies = []
   , events = Event.initialModel
   , githubAuth = GithubAuth.initialModel
   , login = Login.initialModel
-  , activePage = Login
   , nextPage = Nothing
+  , status = Init
+  , user = User.initialModel
   }
 
 initialEffects : List (Effects Action)
 initialEffects =
-  [ Effects.map ChildLoginAction <| snd Login.init ]
+  [ Effects.map ChildConfigAction <| snd ConfigManager.init
+  , Effects.map ChildLoginAction <| snd Login.init
+  ]
 
 init : (Model, Effects Action)
 init =
@@ -68,13 +78,15 @@ init =
 -- UPDATE
 
 type Action
-  = ChildEventAction Event.Action
+  = ChildConfigAction ConfigManager.Action
+  | ChildEventAction Event.Action
   | ChildGithubAuthAction GithubAuth.Action
   | ChildLoginAction Login.Action
   | ChildUserAction User.Action
   | Logout
   | SetAccessToken AccessToken
   | SetActivePage Page
+  | SetStatus Status
   | UpdateCompanies (List Company.Model)
 
   -- NoOp actions
@@ -86,11 +98,34 @@ type Action
 update : Action -> Model -> (Model, Effects Action)
 update action model =
   case action of
+    ChildConfigAction act ->
+      let
+        (childModel, childEffects) = ConfigManager.update act model.config
+
+        status =
+          case act of
+            ConfigManager.SetStatus status ->
+              if status == ConfigManager.Error
+                then ConfigError
+                else model.status
+
+            _ ->
+              model.status
+
+      in
+        ( {model
+          | config <- childModel
+          , status <- status
+          }
+        , Effects.map ChildConfigAction childEffects
+        )
+
     ChildEventAction act ->
       let
         -- Pass the access token along to the child components.
         context =
           { accessToken = model.accessToken
+          , backendConfig = (.config >> .backendConfig) model
           , companies = model.companies
           }
 
@@ -102,7 +137,11 @@ update action model =
 
     ChildGithubAuthAction act ->
       let
-        (childModel, childEffects) = GithubAuth.update act model.githubAuth
+
+        context =
+          { backendConfig = (.config >> .backendConfig) model }
+
+        (childModel, childEffects) = GithubAuth.update context act model.githubAuth
 
         defaultEffect =
           Effects.map ChildGithubAuthAction childEffects
@@ -131,8 +170,10 @@ update action model =
 
     ChildLoginAction act ->
       let
+        context =
+          { backendConfig = (.config >> .backendConfig) model }
 
-        (childModel, childEffects) = Login.update act model.login
+        (childModel, childEffects) = Login.update context act model.login
 
         defaultEffect =
           Effects.map ChildLoginAction childEffects
@@ -165,7 +206,9 @@ update action model =
     ChildUserAction act ->
       let
         context =
-          { accessToken = model.accessToken }
+          { accessToken = model.accessToken
+          , backendConfig = (.config >> .backendConfig) model
+          }
 
         (childModel, childEffects) = User.update context act model.user
 
@@ -225,7 +268,6 @@ update action model =
 
       in
         (model'', Effects.batch effects')
-
 
     Logout ->
       ( initialModel
@@ -318,6 +360,11 @@ update action model =
               ]
             )
 
+    SetStatus status ->
+      ( { model | status <- status}
+      , Effects.none
+      )
+
     UpdateCompanies companies ->
       ( { model | companies <- companies}
       , Effects.none
@@ -331,11 +378,20 @@ update action model =
 
 view : Signal.Address Action -> Model -> Html
 view address model =
-  div []
-    [ (navbar address model)
-    , (mainContent address model)
-    , footer
-    ]
+  if model.status == ConfigError
+    then
+      div
+      [ class "config-error"]
+      [ h2 [] [ text "Configuration error" ]
+      , div [] [ text "Check your Config.elm file and make sure you have defined the enviorement properly" ]
+      ]
+    else
+      div
+      []
+      [ (navbar address model)
+      , (mainContent address model)
+      , footer
+      ]
 
 mainContent : Signal.Address Action -> Model -> Html
 mainContent address model =
@@ -361,8 +417,12 @@ mainContent address model =
       let
         childAddress =
           Signal.forwardTo address ChildLoginAction
+
+        context =
+          { backendConfig = (.config >> .backendConfig) model }
+
       in
-        div [ style myStyle ] [ Login.view childAddress model.login ]
+        div [ style myStyle ] [ Login.view context childAddress model.login ]
 
     PageNotFound ->
       div [] [ PageNotFound.view ]

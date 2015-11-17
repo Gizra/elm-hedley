@@ -1,6 +1,7 @@
 module Event where
 
-import Config exposing (backendUrl)
+import Config exposing (cacheTtl)
+import ConfigType exposing (BackendConfig)
 import Company exposing (Model)
 import Dict exposing (Dict)
 import Effects exposing (Effects, Never)
@@ -103,6 +104,7 @@ type Action
 
 type alias UpdateContext =
   { accessToken : String
+  , backendConfig : BackendConfig
   , companies : List Company.Model
   }
 
@@ -137,8 +139,11 @@ update context action model =
 
     GetDataFromServer maybeCompanyId ->
       let
-        url : String
-        url = Config.backendUrl ++ "/api/v1.0/events"
+        backendUrl =
+          (.backendConfig >> .backendUrl) context
+
+        url =
+          backendUrl ++ "/api/v1.0/events"
       in
         ( { model | status <- Fetching maybeCompanyId}
         , getJson url maybeCompanyId context.accessToken
@@ -268,6 +273,7 @@ update context action model =
         ( {model | leaflet <- childModel }
         , Effects.map ChildLeafletAction childEffects
         )
+
 
 -- Build the Leaflet's markers data from the events
 leafletMarkers : Model -> List Leaflet.Marker

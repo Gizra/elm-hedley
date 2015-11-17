@@ -1,7 +1,7 @@
 module User where
 
 import Company exposing (..)
-import Config exposing (backendUrl)
+import ConfigType exposing (BackendConfig)
 import Effects exposing (Effects, Never)
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -64,10 +64,12 @@ type Action
   -- NoOp actions
   | NoOp (Maybe ())
 
-type alias Context =
-  { accessToken : AccessToken}
+type alias UpdateContext =
+  { accessToken : AccessToken
+  , backendConfig : BackendConfig
+  }
 
-update : Context -> Action -> Model -> (Model, Effects Action)
+update : UpdateContext -> Action -> Model -> (Model, Effects Action)
 update context action model =
   case action of
     NoOp _ ->
@@ -75,8 +77,11 @@ update context action model =
 
     GetDataFromServer ->
       let
-        url : String
-        url = Config.backendUrl ++ "/api/v1.0/me"
+        backendUrl =
+          (.backendConfig >> .backendUrl) context
+
+        url =
+          backendUrl ++ "/api/v1.0/me"
       in
         if model.status == Fetching || model.status == Fetched
           then

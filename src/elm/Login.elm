@@ -1,7 +1,7 @@
 module Login where
 
 import Base64 exposing (encode)
-import Config exposing (backendUrl)
+import ConfigType exposing (BackendConfig)
 import Effects exposing (Effects, Never)
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -74,8 +74,16 @@ type Action
   | SetUserMessage UserMessage
   | SubmitForm
 
-update : Action -> Model -> (Model, Effects Action)
-update action model =
+type alias UpdateContext =
+  { backendConfig : BackendConfig
+  }
+
+type alias ViewContext =
+  { backendConfig : BackendConfig
+  }
+
+update : UpdateContext -> Action -> Model -> (Model, Effects Action)
+update context action model =
   case action of
     UpdateName name ->
       let
@@ -97,8 +105,11 @@ update action model =
 
     SubmitForm ->
       let
-        url : String
-        url = Config.backendUrl ++ "/api/login-token"
+        backendUrl =
+          (.backendConfig >> .backendUrl) context
+
+        url =
+          backendUrl ++ "/api/login-token"
 
         credentials : String
         credentials = encodeCredentials(model.loginForm.name, model.loginForm.pass)
@@ -185,8 +196,8 @@ getInputFromStorage =
 
 -- VIEW
 
-view : Signal.Address Action -> Model -> Html
-view address model =
+view : ViewContext -> Signal.Address Action -> Model -> Html
+view context address model =
   let
     modelForm =
       model.loginForm
@@ -197,8 +208,12 @@ view address model =
     isFetchStatus =
       model.status == Fetching || model.status == Fetched
 
+    githubClientId =
+      (.backendConfig >> .githubClientId) context
+
     githubUrl =
-      "https://github.com/login/oauth/authorize?client_id=" ++ Config.githubClientId ++ "&scope=user:email"
+      "https://github.com/login/oauth/authorize?client_id=" ++ githubClientId ++ "&scope=user:email"
+
 
     githubLogin =
       div
@@ -208,7 +223,6 @@ view address model =
         [ i [ class "fa fa-github", style [("margin-right", "10px")] ] []
         , span [] [ text "Login with GitHub" ]
         ]
-
       ]
 
     loginForm =

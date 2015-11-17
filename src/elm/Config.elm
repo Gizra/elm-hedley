@@ -1,12 +1,29 @@
 module Config where
 
+import ConfigType as Config exposing (BackendConfig)
 import Time exposing (Time)
 
-backendUrl : String
-backendUrl = "http://localhost/hedley-server/www"
+localBackend : BackendConfig
+localBackend =
+  { backendUrl = "http://localhost/hedley-server/www"
+  , githubClientId = "e5661c832ed931ae176c"
+  , name = "local"
+  , hostname = "localhost"
+  }
+
+prodBackend : BackendConfig
+prodBackend =
+  { backendUrl = "https://live-hedley-elm.pantheon.io"
+  , githubClientId = "4aef0ced83d72bd48d00"
+  , name = "gh-pages"
+  , hostname = "gizra.github.io"
+  }
+
+backends : List BackendConfig
+backends =
+  [ localBackend
+  , prodBackend
+  ]
 
 cacheTtl : Time.Time
 cacheTtl = (5 * Time.second)
-
-githubClientId : String
-githubClientId = "e5661c832ed931ae176c"

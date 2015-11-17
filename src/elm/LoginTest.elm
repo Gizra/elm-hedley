@@ -3,6 +3,7 @@ module LoginTest where
 import ElmTest.Assertion exposing (..)
 import ElmTest.Test exposing (..)
 
+import ConfigType exposing (initialBackendConfig)
 import Effects exposing (Effects)
 import Http exposing (..)
 import Login exposing (Model)
@@ -44,11 +45,11 @@ formSuite =
 
 updateName : String -> (Login.Model, Effects Login.Action)
 updateName val =
-  Login.update (Login.UpdateName val) Login.initialModel
+  Login.update updateContext (Login.UpdateName val) Login.initialModel
 
 updatePass : String -> (Login.Model, Effects Login.Action)
 updatePass val =
-  Login.update (Login.UpdatePass val) Login.initialModel
+  Login.update updateContext (Login.UpdatePass val) Login.initialModel
 
 submitForm : Login.Status -> (Login.Model, Effects Login.Action)
 submitForm status =
@@ -60,11 +61,17 @@ submitForm status =
       { model | status <- status }
 
   in
-    Login.update Login.SubmitForm model'
+    Login.update updateContext Login.SubmitForm model'
 
 setAccessToken : String -> (Login.Model, Effects Login.Action)
 setAccessToken val =
-  Login.update (Login.SetAccessToken val) Login.initialModel
+  Login.update updateContext (Login.SetAccessToken val) Login.initialModel
+
+
+updateContext : Login.UpdateContext
+updateContext =
+  { backendConfig = ConfigType.initialBackendConfig
+  }
 
 all : Test
 all =

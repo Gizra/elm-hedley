@@ -1,6 +1,7 @@
 module GithubAuth where
 
-import Config exposing (backendUrl)
+
+import ConfigType exposing (BackendConfig)
 import Dict exposing (get)
 import Effects exposing (Effects)
 import Html exposing (a, div, i, text, Html)
@@ -8,7 +9,7 @@ import Html.Attributes exposing (class, href, id)
 import Http exposing (Error)
 import Json.Decode as JD exposing ((:=))
 import Json.Encode as JE exposing (..)
-import Task
+import Task exposing (map)
 import UrlParameterParser exposing (ParseResult, parseSearchString)
 import WebAPI.Location exposing (location)
 
@@ -56,14 +57,24 @@ type Action
   | SetAccessToken AccessToken
   | UpdateAccessTokenFromServer (Result Http.Error AccessToken)
 
-update : Action -> Model -> (Model, Effects Action)
-update action model =
+type alias UpdateContext =
+  { backendConfig : BackendConfig
+  }
+
+update : UpdateContext -> Action -> Model -> (Model, Effects Action)
+update context action model =
   case action of
     Activate ->
       (model, getCodeFromUrl)
 
     AuthorizeUser code ->
-      (model, getJson code)
+      let
+        backendUrl =
+          (.backendConfig >> .backendUrl) context
+      in
+        ( model
+        , getJson backendUrl code
+        )
 
     SetError msg ->
       ( { model | status <- Error msg }
@@ -138,11 +149,11 @@ getCodeFromUrl =
     Effects.task actionTask
 
 
-getJson : String -> Effects Action
-getJson code =
+getJson : String -> String -> Effects Action
+getJson backendUrl code =
   Http.post
     decodeAccessToken
-    (Config.backendUrl ++ "/auth/github")
+    (backendUrl ++ "/auth/github")
     (Http.string <| dataToJson code )
     |> Task.toResult
     |> Task.map UpdateAccessTokenFromServer

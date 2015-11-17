@@ -2,7 +2,7 @@
 
 # elm-hedley
 
-Port of the [hedley demo](http://hedley-demo.gizra.com/) client to Elm
+An Elm single page application.
 
 ## Install
 

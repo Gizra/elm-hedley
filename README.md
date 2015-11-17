@@ -17,4 +17,4 @@ Execute with `gulp`
 
 ## Testing
 
-In order to view the tests on the browser Start elm reactor (`elm-reactor`) and navigate to http://localhost:8000/src/elm/TestRunner.elm
+In order to view the tests on the browser Start elm reactor (`elm-reactor`) and navigate to [http://localhost:8000/src/elm/TestRunner.elm](http://localhost:8000/src/elm/TestRunner.elm)

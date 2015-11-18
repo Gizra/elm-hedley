@@ -2,7 +2,7 @@
 
 # elm-hedley
 
-An Elm single page application.
+An Elm single page application. The server side code is [here](https://github.com/Gizra/hedley-server).
 
 ## Install
 

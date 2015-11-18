@@ -4,9 +4,9 @@ import Config exposing (cacheTtl)
 import ConfigType exposing (BackendConfig)
 import Company exposing (Model)
 import Dict exposing (Dict)
-import Effects exposing (Effects, Never)
-import Html exposing (..)
-import Html.Attributes exposing (..)
+import Effects exposing (Effects)
+import Html exposing (a, div, input, text, select, span, li, option, ul, Html)
+import Html.Attributes exposing (class, hidden, href, id, placeholder, selected, style, value)
 import Html.Events exposing (on, onClick, targetValue)
 import Http
 import Json.Decode as Json exposing ((:=))
@@ -557,7 +557,8 @@ getJson url maybeCompanyId accessToken =
           params
 
 
-    encodedUrl = Http.url url params'
+    encodedUrl =
+      Http.url url params'
 
     httpTask =
       Task.toResult <|

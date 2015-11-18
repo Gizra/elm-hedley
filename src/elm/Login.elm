@@ -10,7 +10,8 @@ import Http exposing (Error)
 import Json.Decode as JD exposing ((:=))
 import Storage exposing (..)
 import String exposing (length)
-import Task
+import Task exposing  (Task)
+import Utils.Http exposing (getErrorMessageFromHttpResponse)
 
 
 import Debug
@@ -165,24 +166,6 @@ update context action model =
           ( { model | hasAccessTokenInStorage <- False }
           , Effects.none
           )
-
-getErrorMessageFromHttpResponse : Http.Error -> String
-getErrorMessageFromHttpResponse err =
-  case err of
-    Http.Timeout ->
-      "Connection has timed out"
-
-    Http.BadResponse code _ ->
-      if | code == 401 -> "Wrong username or password"
-         | code == 429 -> "Too many login requests with the wrong username or password. Wait a few hours before trying again"
-         | code >= 500 -> "Some error has occured on the server"
-         | otherwise -> "Unknow error has occured"
-
-    Http.NetworkError ->
-      "A network error has occured"
-
-    _ ->
-      "Unknow error has occured"
 
 
 getInputFromStorage : Effects Action

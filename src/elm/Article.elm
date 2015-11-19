@@ -299,6 +299,12 @@ viewForm address model =
             ]
          ] -- End body
 
+        -- File upload
+        , div
+          [ class "dropzone"]
+          []
+
+
         -- Submit button
         , button
             [ onClick address SubmitForm

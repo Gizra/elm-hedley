@@ -1,5 +1,3 @@
-[![Build Status](https://travis-ci.org/Gizra/elm-hedley.svg?branch=master)](https://travis-ci.org/Gizra/elm-hedley)
-
 # elm-hedley
 
 An Elm single page application. The server side code is [here](https://github.com/Gizra/hedley-server).

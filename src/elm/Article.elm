@@ -3,8 +3,8 @@ module Article where
 import Config exposing (cacheTtl)
 import ConfigType exposing (BackendConfig)
 import Effects exposing (Effects)
-import Html exposing (button, div, h2, input, li, text, span, ul, Html)
-import Html.Attributes exposing (action, class, disabled, placeholder, required, size, style, type', value)
+import Html exposing (button, div, h2, input, img, li, text, textarea, span, ul, Html)
+import Html.Attributes exposing (action, class, disabled, placeholder, required, size, src, style, type', value)
 import Html.Events exposing (on, onClick, onSubmit, targetValue)
 import Http exposing (post)
 import Json.Decode as JD exposing ((:=))
@@ -28,7 +28,7 @@ type Status =
   | Fetched Time.Time
   | HttpError Http.Error
 
-type PostStatus = Ready | Busy
+type PostStatus = Busy | Done | Ready
 
 type UserMessage
   = None
@@ -41,21 +41,26 @@ type alias Author =
   }
 
 type alias Article =
-  { id : Id
-  , label : String
+  { author : Author
   , body : String
-  , author : Author
+  , id : Id
+  , image : Maybe String
+  , label : String
   }
 
 type alias ArticleForm =
   { label : String
   , body : String
+  , image : Maybe Int
+  , show : Bool
   }
 
 initialArticleForm : ArticleForm
 initialArticleForm =
   { label = ""
   , body = ""
+  , image = Nothing
+  , show = True
   }
 
 type alias Model =
@@ -95,8 +100,10 @@ type Action
 
   | ResetForm
   | SubmitForm
-  | UpdateLabel String
+  | SetImageId (Maybe Int)
   | UpdateBody String
+  | UpdateLabel String
+
 
 
 type alias UpdateContext =
@@ -143,7 +150,10 @@ update context action model =
       case result of
         Ok val ->
           -- Append the new article to the articles list.
-          ( { model | articles <- val :: model.articles }
+          ( { model
+            | articles <- val :: model.articles
+            , postStatus <- Done
+            }
           -- We can reset the form, as it was posted successfully.
           , Task.succeed ResetForm |> Effects.task
           )
@@ -199,6 +209,18 @@ update context action model =
         , Effects.none
         )
 
+    SetImageId maybeVal ->
+      let
+        articleForm =
+          model.articleForm
+
+        articleForm' =
+          { articleForm | image <- maybeVal }
+      in
+        ( { model | articleForm <- articleForm' }
+        , Effects.none
+        )
+
     ResetForm ->
       ( { model
         | articleForm <- initialArticleForm
@@ -247,7 +269,19 @@ viewUserMessage userMessage =
 
 viewArticles : Article -> Html
 viewArticles article =
-  li [] [ text article.label ]
+  let
+    image =
+      case article.image of
+        Just val -> img [ src val ] []
+        Nothing -> div [] []
+  in
+    li
+    []
+    [ div [] [ text article.label ]
+    -- @todo: Uncomment, when we can encode the escaped HTML.
+    -- , div [] [ text article.body ]
+    , image
+    ]
 
 
 viewRecentArticles : List Article -> Html
@@ -288,9 +322,8 @@ viewForm address model =
         [ class "input-group" ]
         [ span
             [ class "input-group-addon" ]
-            [ input
-                [ type' "text"
-                , class "form-control"
+            [ textarea
+                [ class "form-control"
                 , placeholder "Body"
                 , value model.articleForm.body
                 , on "input" targetValue (Signal.message address << UpdateBody)
@@ -385,11 +418,18 @@ postArticle url accessToken data =
 
 dataToJson : ArticleForm -> String
 dataToJson data =
-  JE.encode 0
-    <| JE.object
-        [ ("label", JE.string data.label)
-        , ("body", JE.string data.body)
-        ]
+  let
+    intOrNull maybeVal =
+      case maybeVal of
+        Just val -> JE.int val
+        Nothing -> JE.null
+  in
+    JE.encode 0
+      <| JE.object
+          [ ("label", JE.string data.label)
+          , ("body", JE.string data.body)
+          , ("image", intOrNull data.image)
+          ]
 
 decodePostArticle : JD.Decoder Article
 decodePostArticle =
@@ -409,13 +449,19 @@ decodeArticle =
     numberFloat =
       JD.oneOf [ JD.float, JD.customDecoder JD.string String.toFloat ]
 
-    author =
+    decodeAuthor =
       JD.object2 Author
         ("id" := number)
         ("label" := JD.string)
+
+    decodeImage =
+      JD.at ["styles"]
+        ("thumbnail" := JD.string)
+
   in
-    JD.object4 Article
+    JD.object5 Article
+      ("user" := decodeAuthor)
+      (JD.oneOf [ "body" := JD.string, JD.succeed "" ])
       ("id" := number)
+      (JD.maybe ("image" := decodeImage))
       ("label" := JD.string)
-      ("body" := JD.string)
-      ("user" := author)

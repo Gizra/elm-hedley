@@ -4,7 +4,7 @@ import Config exposing (cacheTtl)
 import ConfigType exposing (BackendConfig)
 import Effects exposing (Effects)
 import Html exposing (button, div, h2, input, img, li, text, textarea, span, ul, Html)
-import Html.Attributes exposing (action, class, disabled, placeholder, required, size, src, style, type', value)
+import Html.Attributes exposing (action, class, disabled, placeholder, property, required, size, src, style, type', value)
 import Html.Events exposing (on, onClick, onSubmit, targetValue)
 import Http exposing (post)
 import Json.Decode as JD exposing ((:=))
@@ -278,8 +278,7 @@ viewArticles article =
     li
     []
     [ div [] [ text article.label ]
-    -- @todo: Uncomment, when we can encode the escaped HTML.
-    -- , div [] [ text article.body ]
+    , div [ property "innerHTML" <| JE.string article.body ] []
     , image
     ]
 

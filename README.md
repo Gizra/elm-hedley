@@ -4,7 +4,7 @@ An Elm single page application. The server side code is [here](https://github.co
 
 ## Install
 
-Install [Elm](http://elm-lang.org/install).
+Install Elm v0.15.1 (`npm install -g elm@0.15.1`)
 
 ```
 npm install

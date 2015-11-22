@@ -1,0 +1,19 @@
+{
+    "version": "1.0.0",
+    "summary": "library for base64 encoding and decoding",
+    "repository": "https://github.com/truqu/elm-base64.git",
+    "license": "BSD3",
+    "source-directories": [
+        "."
+    ],
+    "exposed-modules": ["Base64"],
+    "dependencies": {
+      "elm-lang/core": "2.0.0 <= v < 3.0.0",
+      "maxsnew/IO": "1.0.0 <= v < 2.0.0",
+      "deadfoxygrandpa/elm-test": "1.0.0 <= v < 2.0.0",
+      "TheSeamau5/elm-check": "3.0.0 <= v < 4.0.0",
+      "TheSeamau5/elm-shrink": "2.0.0 <= v < 3.0.0",
+      "TheSeamau5/elm-random-extra": "2.1.0 <= v < 3.0.0"
+    },
+    "elm-version": "0.15.0 <= v < 0.16.0"
+}

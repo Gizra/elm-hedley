@@ -5,6 +5,7 @@
     "license": "BSD3",
     "source-directories": [
         "src/elm",
+        "src/vendor/elm-base64",
         "src/vendor/elm-storage/src",
         "src/vendor/elm-web-api/src"
     ],
@@ -20,8 +21,7 @@
         "evancz/task-tutorial": "1.0.2 <= v < 2.0.0",
         "jessitron/elm-param-parsing": "1.0.3 <= v < 2.0.0",
         "laszlopandy/elm-console": "1.0.2 <= v < 2.0.0",
-        "rgrempel/elm-route-hash": "1.0.3 <= v < 2.0.0",
-        "truqu/elm-base64": "1.0.0 <= v < 2.0.0"
+        "rgrempel/elm-route-hash": "1.0.3 <= v < 2.0.0"
     },
     "elm-version": "0.15.1 <= v < 0.16.0"
 }

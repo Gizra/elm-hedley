@@ -124,6 +124,12 @@ gulp.task('bower', function () {
     .pipe(gulp.dest("serve"));
 });
 
+gulp.task('ga', function(){
+  gulp.src('./index.html')
+  .pipe(ga({url: 'gizra.github.io/elm-hedley', uid: 'UA-6558346-13'}))
+  .pipe(gulp.dest('./'));
+});
+
 
 // Optimizes all the CSS, HTML and concats the JS etc
 gulp.task("minify", ["styles"], function () {

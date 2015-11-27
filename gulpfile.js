@@ -229,5 +229,5 @@ gulp.task("build", gulpSequence("clean:dev", ["styles", "copy:dev", "elm"]));
 // Builds your site with the "build" command and then runs all the optimizations on
 // it and outputs it to "./dist"
 gulp.task("publish", ["build", "clean:prod"], function () {
-  gulp.start("minify", "cname", "images", "fonts");
+  gulp.start("ga", "minify", "cname", "images", "fonts");
 });

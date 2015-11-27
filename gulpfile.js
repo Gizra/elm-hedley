@@ -17,6 +17,8 @@ var elm  = require('gulp-elm');
 
 var fs = require('fs');
 
+var ga = require('gulp-ga');
+
 // merge is used to merge the output from two different streams into the same stream
 var merge = require("merge-stream");
 // Need a command for reloading webpages using BrowserSync
@@ -124,6 +126,12 @@ gulp.task('bower', function () {
     .pipe(gulp.dest("serve"));
 });
 
+gulp.task('ga', function(){
+  gulp.src('./index.html')
+  .pipe(ga({url: 'gizra.github.io/elm-hedley', uid: 'UA-6558346-13'}))
+  .pipe(gulp.dest('./'));
+});
+
 
 // Optimizes all the CSS, HTML and concats the JS etc
 gulp.task("minify", ["styles"], function () {
@@ -223,5 +231,5 @@ gulp.task("build", gulpSequence("clean:dev", ["styles", "copy:dev", "elm"]));
 // Builds your site with the "build" command and then runs all the optimizations on
 // it and outputs it to "./dist"
 gulp.task("publish", ["build", "clean:prod"], function () {
-  gulp.start("minify", "cname", "images", "fonts");
+  gulp.start("ga", "minify", "cname", "images", "fonts");
 });

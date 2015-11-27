@@ -14,6 +14,7 @@
     "gulp-changed": "1.0.0",
     "gulp-elm": "0.2.0",
     "gulp-filter": "2.0.2",
+    "gulp-ga": "0.0.6",
     "gulp-gh-pages": "0.4.0",
     "gulp-gzip": "0.0.8",
     "gulp-htmlmin": "0.2.0",

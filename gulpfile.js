@@ -127,9 +127,9 @@ gulp.task('bower', function () {
 });
 
 gulp.task('ga', function(){
-  gulp.src('./index.html')
+  gulp.src('src/index.html')
   .pipe(ga({url: 'gizra.github.io/elm-hedley', uid: 'UA-6558346-13'}))
-  .pipe(gulp.dest('./'));
+  .pipe(gulp.dest('serve'));
 });
 
 
@@ -226,10 +226,10 @@ gulp.task("default", ["serve:dev", "watch"]);
 
 // Builds the site but doesnt serve it to you
 // @todo: Add "bower" here
-gulp.task("build", gulpSequence("clean:dev", ["styles", "copy:dev", "elm"]));
+gulp.task("build", gulpSequence("clean:dev", ["styles", "copy:dev", "elm"], "ga"));
 
 // Builds your site with the "build" command and then runs all the optimizations on
 // it and outputs it to "./dist"
 gulp.task("publish", ["build", "clean:prod"], function () {
-  gulp.start("ga", "minify", "cname", "images", "fonts");
+  gulp.start("minify", "cname", "images", "fonts");
 });

@@ -128,7 +128,12 @@ gulp.task('bower', function () {
 
 gulp.task('ga', function(){
   gulp.src('src/index.html')
-  .pipe(ga({url: 'gizra.github.io', uid: 'UA-6558346-13'}))
+  .pipe(ga({
+    anonymizeIp: false,
+    sendPageView: true,
+    url: 'auto',
+    uid: 'UA-6558346-13'
+  }))
   .pipe(gulp.dest('serve'));
 });
 

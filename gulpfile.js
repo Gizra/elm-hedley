@@ -17,6 +17,8 @@ var elm  = require('gulp-elm');
 
 var fs = require('fs');
 
+var ga = require('gulp-ga');
+
 // merge is used to merge the output from two different streams into the same stream
 var merge = require("merge-stream");
 // Need a command for reloading webpages using BrowserSync

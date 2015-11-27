@@ -16,6 +16,7 @@ app =
     , inputs =
         [ messages.signal
         , Signal.map (App.ChildArticleAction << Article.SetImageId) dropzoneUploadedFile
+        , Signal.map (App.ChildArticleAction << Article.UpdateBody) ckeditor
         , Signal.map (App.ChildEventAction << Event.SelectEvent) selectEvent
         ]
     }
@@ -104,3 +105,5 @@ port activePage =
     Signal.map getPortData app.model
 
 port dropzoneUploadedFile : Signal (Maybe Int)
+
+port ckeditor : Signal String

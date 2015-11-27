@@ -4,7 +4,7 @@ import Config exposing (cacheTtl)
 import ConfigType exposing (BackendConfig)
 import Effects exposing (Effects)
 import Html exposing (button, div, h2, input, img, li, text, textarea, span, ul, Html)
-import Html.Attributes exposing (action, class, disabled, placeholder, property, required, size, src, style, type', value)
+import Html.Attributes exposing (action, class, disabled, name, placeholder, property, required, size, src, style, type', value)
 import Html.Events exposing (on, onClick, onSubmit, targetValue)
 import Http exposing (post)
 import Json.Decode as JD exposing ((:=))
@@ -323,6 +323,7 @@ viewForm address model =
             [ class "input-group-addon" ]
             [ textarea
                 [ class "form-control"
+                , name "body"
                 , placeholder "Body"
                 , value model.articleForm.body
                 , on "input" targetValue (Signal.message address << UpdateBody)

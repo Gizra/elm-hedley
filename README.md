@@ -9,7 +9,7 @@ An Elm single page application. The server side code is [here](https://github.co
 Install Elm v0.15.1 (`npm install -g elm@0.15.1`)
 
 ```
-npm install
+npm install && bower install
 elm-package install -y
 ```
 

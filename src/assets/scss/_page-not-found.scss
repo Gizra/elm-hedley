@@ -1,0 +1,17 @@
+#page-not-found {
+
+  a {
+    display: inline-block;
+    margin-top: 5px;
+    padding: 7px;
+    color: white;
+    background: $blue;
+    border-radius: 2px;
+    text-decoration: none;
+    transition: background 0.4s ease-in;
+
+    &:hover {
+      background: $dark-blue;
+    }
+  }
+}

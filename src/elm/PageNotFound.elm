@@ -1,18 +1,20 @@
 module PageNotFound where
 
-import Html exposing (a, div, h2, text, Html)
-import Html.Attributes exposing (class, href, style)
+import Html exposing (a, i, div, h2, text, Html)
+import Html.Attributes exposing (class, id, href, style)
 
 -- VIEW
 
 view : Html
 view =
   div
-    [ class "container", style elementStyle ]
-    [ h2 [] [ text "This is a 404 page!"]
-    , a [ href "#!/"] [ text "Back to safety"]
+    [
+    id "page-not-found"
+    , class "container wrapper text-center"
     ]
-
-elementStyle : List (String, String)
-elementStyle =
-  [ ("text-align", "center") ]
+    [ div
+        [ class "box" ]
+        [ h2 [] [ text "This is a 404 page!" ]
+        , a [ href "#!/" ] [ text "Back to safety" ]
+      ]
+    ]

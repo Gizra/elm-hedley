@@ -1,6 +1,7 @@
 @import "mixin";
 @import "footer";
 @import "login";
+@import "page-not-found";
 
 html {
   position: relative;
@@ -27,6 +28,13 @@ hr {
   border-radius: 5px;
   background: white;
   box-shadow: 0px 7px 2px 0px rgba(0, 0, 0, 0.05);
+}
+
+.box {
+  padding: 15px;
+  color: white;
+  background: $dark-gray;
+  border: 1px solid rgba(0,0,0,0.1);
 }
 
 a.gizra-logo {

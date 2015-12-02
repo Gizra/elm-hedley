@@ -7,12 +7,8 @@
   }
 
   .form-signin {
-    margin: auto 0px;
-    padding: 15px;
+    @extend .box;
     max-width: 380px;
-    color: white;
-    background: $dark-gray;
-    border: 1px solid rgba(0,0,0,0.1);
 
     h2 {
       margin-top: 0px;
@@ -47,7 +43,7 @@
       }
 
       &:hover {
-        background: darken($blue, 15%);
+        background: $dark-blue;
       }
     }
 

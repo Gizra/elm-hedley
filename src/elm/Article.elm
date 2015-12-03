@@ -4,7 +4,7 @@ import Config exposing (cacheTtl)
 import ConfigType exposing (BackendConfig)
 import Effects exposing (Effects)
 import Html exposing (button, div, h2, input, img, li, text, textarea, span, ul, Html)
-import Html.Attributes exposing (action, class, disabled, name, placeholder, property, required, size, src, style, type', value)
+import Html.Attributes exposing (action, class, id, disabled, name, placeholder, property, required, size, src, style, type', value)
 import Html.Events exposing (on, onClick, onSubmit, targetValue)
 import Http exposing (post)
 import Json.Decode as JD exposing ((:=))
@@ -253,10 +253,15 @@ update context action model =
 
 view :Signal.Address Action -> Model -> Html
 view address model =
-  div [class "container"]
-    [ viewUserMessage model.userMessage
-    , viewForm address model
-    , viewRecentArticles model.articles
+  div [ class "container" ]
+    [ div
+        [ id "article-page"
+        , class "wrapper"
+        ]
+        [ viewUserMessage model.userMessage
+        , viewForm address model
+        , viewRecentArticles model.articles
+        ]
     ]
 
 viewUserMessage : UserMessage -> Html

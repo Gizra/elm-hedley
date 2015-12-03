@@ -293,7 +293,11 @@ viewRecentArticles : List Article -> Html
 viewRecentArticles articles =
   div
     []
-    [ h3 [ class "title" ] [ text "Recent articles" ]
+    [ h3
+        [ class "title" ]
+        [ i [ class "fa fa-file-o icon" ] []
+        , text "Recent articles"
+        ]
     , ul [] (List.map viewArticles articles)
     ]
 
@@ -306,7 +310,9 @@ viewForm address model =
     ]
     [ h3
       [ class "title" ]
-      [ i [ class "fa fa-file-o" ] [] , text " Add new article" ]
+      [ i [ class "fa fa-pencil" ] []
+      , text " Add new article"
+      ]
     -- Label
     , div
       [ class "input-group" ]
@@ -343,11 +349,10 @@ viewForm address model =
             , div [ class "dropzone" ] []
             ]
 
-
         -- Submit button
         , button
             [ onClick address SubmitForm
-            , class "btn btn-lg btn-primary btn-block"
+            , class "btn btn-lg btn-primary"
             , disabled (String.isEmpty model.articleForm.label)
             ]
             [ text "Submit" ] -- End submit button

@@ -56,10 +56,15 @@ hr {
 h3.title {
   margin: -13px -13px 5px -13px;
   padding: 12px;
-  color: white;
+  color: $text-gray;
   background: $dark-gray;
   font-size: 18px;
   border-radius: 5px 5px 0 0;
+
+  .icon {
+    margin-right: 5px
+  }
+
 }
 
 .box {

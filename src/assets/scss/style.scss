@@ -28,6 +28,10 @@ hr {
   background: #EAE9E3;
 }
 
+.shadow {
+  box-shadow: 0px 7px 2px 0px rgba(0, 0, 0, 0.05);
+}
+
 .container {
 
   .wrapper {
@@ -35,7 +39,7 @@ hr {
     border: 1px solid #C8C8CB;
     border-radius: 5px;
     background: white;
-    box-shadow: 0px 7px 2px 0px rgba(0, 0, 0, 0.05);
+    @extend .shadow;
 
     &:nth-child(n+2) {
       margin-top: 45px;

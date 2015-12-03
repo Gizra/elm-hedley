@@ -1,4 +1,4 @@
-$br: 3px;
+$br: 2px;
 
 #article-page {
 
@@ -37,10 +37,38 @@ $br: 3px;
     }
   }
 
+  .articles {
+    margin-bottom: 20px;
+    padding: 0;
+    list-style: none;
+
+    li {
+      padding: 12px;
+      border-radius: 2px;
+      border: 1px solid #ccc;
+      @extend .shadow;
+
+      &:nth-child(n+2) {
+        margin-top: 30px;
+      }
+
+      .title {
+        display: inline-block;
+        margin-bottom: 12px;
+        padding: 2px 7px;
+        color: $blue;
+        background: rgba(186, 219, 249, 0.28);
+        border-radius: 2px;
+        border: 1px solid rgba(186, 219, 249, 0.63);
+      }
+    }
+  }
+
   input,
   .dropzone,
   #cke_body {
     border-radius: $br;
+    @extend .shadow;
   }
 
   #cke_body {

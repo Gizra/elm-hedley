@@ -283,7 +283,7 @@ viewArticles article =
   in
     li
     []
-    [ div [] [ text article.label ]
+    [ div [ class "title" ] [ text article.label ]
     , div [ property "innerHTML" <| JE.string article.body ] []
     , image
     ]
@@ -298,7 +298,7 @@ viewRecentArticles articles =
         [ i [ class "fa fa-file-o icon" ] []
         , text "Recent articles"
         ]
-    , ul [] (List.map viewArticles articles)
+    , ul [ class "articles" ] (List.map viewArticles articles)
     ]
 
 

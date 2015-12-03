@@ -1,0 +1,20 @@
+#article-page {
+
+  form {
+    .input-group {
+        width: 100%;
+
+      &:nth-child(n+3) {
+        margin-top: 25px;
+      }
+    }
+
+    label {
+      font-weight: 400;
+    }
+
+    input {
+      border-radius: 3px;
+    }
+  }
+}

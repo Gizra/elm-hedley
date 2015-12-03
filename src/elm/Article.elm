@@ -258,11 +258,11 @@ view address model =
     , class "container"
     ]
     [ div
-        [ class "wrapper"]
+        [ class "wrapper -suffix"]
         [ viewUserMessage model.userMessage
         , viewForm address model
         ]
-        , div [ class "wrapper" ] [ viewRecentArticles model.articles ]
+        , div [ class "wrapper -suffix" ] [ viewRecentArticles model.articles ]
     ]
 
 viewUserMessage : UserMessage -> Html

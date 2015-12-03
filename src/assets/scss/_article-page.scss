@@ -22,13 +22,18 @@ $br: 3px;
     }
 
     button {
-      display: inline-block;
       margin: 18px 0;
       padding: 2px 7px;
       color: $blue;
       background: rgba(186, 219, 249, 0.28);
       border-radius: 2px;
       border: 1px solid rgba(186, 219, 249, 0.63);
+      transition: all 0.4s ease-in;
+
+      &:hover:not([disabled]) {
+        color: white;
+        background: $blue;
+      }
     }
   }
 

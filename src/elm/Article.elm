@@ -253,11 +253,12 @@ update context action model =
 
 view :Signal.Address Action -> Model -> Html
 view address model =
-  div [ class "container" ]
+  div
+    [ id "article-page"
+    , class "container"
+    ]
     [ div
-        [ id "article-page"
-        , class "wrapper"
-        ]
+        [ class "wrapper"]
         [ viewUserMessage model.userMessage
         , viewForm address model
         ]

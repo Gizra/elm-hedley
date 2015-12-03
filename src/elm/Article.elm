@@ -260,8 +260,8 @@ view address model =
         ]
         [ viewUserMessage model.userMessage
         , viewForm address model
-        , viewRecentArticles model.articles
         ]
+        , div [ class "wrapper" ] [ viewRecentArticles model.articles ]
     ]
 
 viewUserMessage : UserMessage -> Html
@@ -270,7 +270,7 @@ viewUserMessage userMessage =
     None ->
       div [] []
     Error message ->
-      div [ style [("text-align", "center")]] [ text message ]
+      div [ style [("text-align", "center")] ] [ text message ]
 
 viewArticles : Article -> Html
 viewArticles article =
@@ -292,8 +292,8 @@ viewRecentArticles : List Article -> Html
 viewRecentArticles articles =
   div
     []
-    [ h2 [] [ text "Recent articles"]
-    , ul  [] (List.map viewArticles articles)
+    [ h2 [] [ text "Recent articles" ]
+    , ul [] (List.map viewArticles articles)
     ]
 
 
@@ -303,7 +303,7 @@ viewForm address model =
     [ onSubmit address SubmitForm
     , action "javascript:void(0);"
     ]
-    [ h2 [] [ text "Add new article"]
+    [ h2 [] [ text "Add new article" ]
     -- Label
     , div
         [ class "input-group" ]
@@ -339,7 +339,7 @@ viewForm address model =
 
         -- File upload
         , div
-          [ class "dropzone"]
+          [ class "dropzone" ]
           []
 
 

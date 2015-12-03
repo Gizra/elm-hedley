@@ -518,7 +518,8 @@ navbarLoggedIn address model =
 
   in
     node "nav"
-      [ class "navbar navbar-default" ]
+      [ id "header"
+      , class "navbar navbar-default" ]
       [ div
         [ class "container-fluid" ]
         [ div [ class "navbar-header" ] [ navCollapseButton ]

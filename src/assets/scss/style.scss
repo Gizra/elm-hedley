@@ -2,6 +2,7 @@
 @import "footer";
 @import "login";
 @import "page-not-found";
+@import "article-page";
 
 html {
   position: relative;
@@ -10,8 +11,13 @@ html {
 
 body {
   font-family: 'Roboto Condensed', arial, sans-serif;
+  font-weight: 300;
   background: $main-bg;
-  padding-bottom: 60px;
+  padding-bottom: 100px;
+}
+
+#header {
+  margin-bottom: 50px;
 }
 
 hr {
@@ -22,12 +28,51 @@ hr {
   background: #EAE9E3;
 }
 
-.wrapper {
-  padding: 12px;
-  border: 1px solid rgba(45, 45, 56, 0.26);
-  border-radius: 5px;
-  background: white;
+.shadow {
   box-shadow: 0px 7px 2px 0px rgba(0, 0, 0, 0.05);
+}
+
+.container {
+
+  .wrapper {
+    padding: 12px;
+    border: 1px solid #C8C8CB;
+    border-radius: 5px;
+    background: white;
+    @extend .shadow;
+
+    &:nth-child(n+2) {
+      margin-top: 45px;
+    }
+
+    &.-suffix {
+      position: relative;
+
+      &:after {
+      content: "";
+      position: absolute;
+      bottom: 9px;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: rgba(200, 200, 203, 0.64);
+      }
+    }
+  }
+}
+
+h3.title {
+  margin: -13px -13px 5px -13px;
+  padding: 12px;
+  color: $text-gray;
+  background: $dark-gray;
+  font-size: 18px;
+  border-radius: 5px 5px 0 0;
+
+  .icon {
+    margin-right: 5px
+  }
+
 }
 
 .box {

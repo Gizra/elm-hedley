@@ -3,7 +3,7 @@ module Article where
 import Config exposing (cacheTtl)
 import ConfigType exposing (BackendConfig)
 import Effects exposing (Effects)
-import Html exposing (button, div, label, h2, h3, input, img, li, text, textarea, span, ul, Html)
+import Html exposing (i, button, div, label, h2, h3, input, img, li, text, textarea, span, ul, Html)
 import Html.Attributes exposing (action, class, id, disabled, name, placeholder, property, required, size, src, style, type', value)
 import Html.Events exposing (on, onClick, onSubmit, targetValue)
 import Http exposing (post)
@@ -306,7 +306,7 @@ viewForm address model =
     ]
     [ h3
       [ class "title" ]
-      [ text " Add new article" ]
+      [ i [ class "fa fa-file-o" ] [] , text " Add new article" ]
     -- Label
     , div
       [ class "input-group" ]

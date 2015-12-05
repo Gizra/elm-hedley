@@ -152,15 +152,27 @@ view address model =
 
     LoggedIn name ->
       let
-        italicName : Html
-        italicName =
-          em [] [text name]
-      in
-        div [class "container"]
-          [ div [] [ text "Welcome ", italicName ]
-          , div [] [ text "Your companies are:"]
-          , ul  [] (List.map viewCompanies model.companies)
+        mainTitle =
+          h3
+          [ class "title" ]
+          [ i [ class "glyphicon glyphicon-user" ] []
+          , text " My account"
           ]
+      in
+        div
+          [
+          id "my-account"
+          , class "container"
+          ]
+          [ div
+              [ class "wrapper -suffix"]
+              [ mainTitle
+              , h4 [ class "name" ] [ text <| "Welcome " ++ name ]
+              , h4 [ class "company-title"] [ text "Your companies are:" ]
+              , ul  [ class "companies" ] (List.map viewCompanies model.companies)
+              ]
+          ]
+
 
 viewCompanies : Company.Model -> Html
 viewCompanies company =

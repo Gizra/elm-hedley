@@ -23,12 +23,8 @@ $br: 2px;
 
     button {
       margin: 18px 0;
-      padding: 2px 7px;
-      color: $blue;
-      background: rgba(186, 219, 249, 0.28);
-      border-radius: 2px;
-      border: 1px solid rgba(186, 219, 249, 0.63);
       transition: all 0.4s ease-in;
+      @extend .blue-pill ;
 
       &:hover:not([disabled]) {
         color: white;
@@ -53,13 +49,8 @@ $br: 2px;
       }
 
       .title {
-        display: inline-block;
         margin-bottom: 12px;
-        padding: 2px 7px;
-        color: $blue;
-        background: rgba(186, 219, 249, 0.28);
-        border-radius: 2px;
-        border: 1px solid rgba(186, 219, 249, 0.63);
+        @extend .blue-pill ;
       }
     }
   }

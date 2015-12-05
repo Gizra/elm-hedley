@@ -8,13 +8,16 @@ import Html.Attributes exposing (class, id, href, style)
 view : Html
 view =
   div
-    [
-    id "page-not-found"
-    , class "container wrapper text-center"
+    [ id "page-not-found"
+    , class "container"
     ]
     [ div
-        [ class "box" ]
-        [ h2 [] [ text "This is a 404 page!" ]
-        , a [ href "#!/" ] [ text "Back to safety" ]
-      ]
+        [ class "wrapper text-center" ]
+        [
+        div
+          [ class "box" ]
+          [ h2 [] [ text "This is a 404 page!" ]
+          , a [ href "#!/" ] [ text "Back to safety" ]
+          ]
+        ]
     ]

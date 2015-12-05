@@ -2,6 +2,7 @@
 @import "footer";
 @import "login";
 @import "page-not-found";
+@import "my-account";
 @import "article-page";
 
 html {
@@ -14,6 +15,10 @@ body {
   font-weight: 300;
   background: $main-bg;
   padding-bottom: 100px;
+}
+
+h4 {
+  font-weight: 300;
 }
 
 #header {
@@ -32,31 +37,37 @@ hr {
   box-shadow: 0px 7px 2px 0px rgba(0, 0, 0, 0.05);
 }
 
-.container {
+.blue-pill {
+  display: inline-block;
+  padding: 2px 7px;
+  color: $blue;
+  background: rgba(186, 219, 249, 0.28);
+  border-radius: 2px;
+  border: 1px solid rgba(186, 219, 249, 0.63);
+}
 
-  .wrapper {
-    padding: 12px;
-    border: 1px solid #C8C8CB;
-    border-radius: 5px;
-    background: white;
-    @extend .shadow;
+.container .wrapper:nth-child(n+2) {
+  margin-top: 45px;
+}
 
-    &:nth-child(n+2) {
-      margin-top: 45px;
-    }
+.wrapper {
+  padding: 12px;
+  border: 1px solid #C8C8CB;
+  border-radius: 5px;
+  background: white;
+  @extend .shadow;
 
-    &.-suffix {
-      position: relative;
+  &.-suffix {
+    position: relative;
 
-      &:after {
-      content: "";
-      position: absolute;
-      bottom: 9px;
-      left: 0;
-      right: 0;
-      height: 1px;
-      background: rgba(200, 200, 203, 0.64);
-      }
+    &:after {
+    content: "";
+    position: absolute;
+    bottom: 9px;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: rgba(200, 200, 203, 0.64);
     }
   }
 }

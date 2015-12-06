@@ -15,8 +15,6 @@ import TaskTutorial exposing (getCurrentTime)
 import Time exposing (Time)
 import Utils.Http exposing (getErrorMessageFromHttpResponse)
 
-import Debug
-
 -- MODEL
 
 type alias Id = Int

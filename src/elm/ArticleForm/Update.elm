@@ -1,8 +1,8 @@
 module ArticleForm.Update where
 
-import ArticleForm.Model exposing (initialArticleForm, initialModel, ArticleForm, Model)
+import Article.Model as Article exposing (Author, Model)
+import ArticleForm.Model as ArticleForm exposing (initialArticleForm, initialModel, ArticleForm, Model, UserMessage)
 
-import Config exposing (cacheTtl)
 import ConfigType exposing (BackendConfig)
 import Effects exposing (Effects)
 import Http exposing (post, Error)
@@ -10,11 +10,8 @@ import Json.Decode as JD exposing ((:=))
 import Json.Encode as JE exposing (string)
 import String exposing (toInt, toFloat)
 import Task  exposing (andThen, Task)
-import TaskTutorial exposing (getCurrentTime)
-import Time exposing (Time)
-import Utils.Http exposing (getErrorMessageFromHttpResponse)
 
-init : (Model, Effects Action)
+init : (ArticleForm.Model, Effects Action)
 init =
   ( initialModel
   , Effects.none
@@ -26,7 +23,7 @@ type Action
   | SetImageId (Maybe Int)
   | UpdateBody String
   | UpdateLabel String
-  | UpdatePostArticle (Result Http.Error Model)
+  | UpdatePostArticle (Result Http.Error Article.Model)
 
 
 
@@ -35,7 +32,7 @@ type alias UpdateContext =
   , backendConfig : BackendConfig
   }
 
-update : UpdateContext -> Action -> Model -> (Model, Effects Action)
+update : UpdateContext -> Action -> ArticleForm.Model -> (ArticleForm.Model, Effects Action)
 update context action model =
   case action of
     -- @todo: Create a helper function.
@@ -78,7 +75,7 @@ update context action model =
     ResetForm ->
       ( { model
         | articleForm <- initialArticleForm
-        , postStatus <- ArticleForm.Model.Ready
+        , postStatus <- ArticleForm.Ready
         }
       , Effects.none
       )
@@ -91,9 +88,9 @@ update context action model =
         url =
           backendUrl ++ "/api/v1.0/articles"
       in
-        if model.postStatus == ArticleForm.Model.Ready
+        if model.postStatus == ArticleForm.Ready
           then
-            ( { model | postStatus <- ArticleForm.Model.Busy }
+            ( { model | postStatus <- ArticleForm.Busy }
             , postArticle url context.accessToken model.articleForm
             )
 
@@ -103,7 +100,7 @@ update context action model =
 
 -- EFFECTS
 
-postArticle : String -> String -> ArticleForm.Model.ArticleForm -> Effects Action
+postArticle : String -> String -> ArticleForm.ArticleForm -> Effects Action
 postArticle url accessToken data =
   let
     params =
@@ -121,7 +118,7 @@ postArticle url accessToken data =
       |> Effects.task
 
 
-dataToJson : ArticleForm.Model.ArticleForm -> String
+dataToJson : ArticleForm.ArticleForm -> String
 dataToJson data =
   let
     intOrNull maybeVal =
@@ -136,12 +133,12 @@ dataToJson data =
           , ("image", intOrNull data.image)
           ]
 
-decodePostArticle : JD.Decoder Article
+decodePostArticle : JD.Decoder Article.Model
 decodePostArticle =
   JD.at ["data", "0"] <| decodeArticle
 
 
-decodeArticle : JD.Decoder Article
+decodeArticle : JD.Decoder Article.Model
 decodeArticle =
   let
     -- Cast String to Int.
@@ -155,7 +152,7 @@ decodeArticle =
       JD.oneOf [ JD.float, JD.customDecoder JD.string String.toFloat ]
 
     decodeAuthor =
-      JD.object2 ArticleForm.Model.Author
+      JD.object2 Article.Author
         ("id" := number)
         ("label" := JD.string)
 
@@ -164,7 +161,7 @@ decodeArticle =
         ("thumbnail" := JD.string)
 
   in
-    JD.object5 Article
+    JD.object5 Article.Model
       ("user" := decodeAuthor)
       (JD.oneOf [ "body" := JD.string, JD.succeed "" ])
       ("id" := number)

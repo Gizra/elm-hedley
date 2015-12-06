@@ -3,12 +3,12 @@
   left: 0px;
   right: 0px;
   bottom: 0px;
+  text-align: center;
   padding: 9px;
   border-top: 7px solid white;
   color: white;
-  background-color: $dark-gray;
+  background-color: #2D2D38;
   font-size: 15px;
-  text-align: center;
 
   &:before {
     content: "";

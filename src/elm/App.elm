@@ -423,7 +423,7 @@ mainContent address model =
         childAddress =
           Signal.forwardTo address ChildArticleAction
       in
-        div [ style myStyle ] [ Article.view childAddress model.article ]
+        div [] [ Article.view childAddress model.article ]
 
     Event companyId ->
       let
@@ -433,14 +433,14 @@ mainContent address model =
         context =
           { companies = model.companies}
       in
-        div [ style myStyle ] [ Event.view context childAddress model.events ]
+        div [] [ Event.view context childAddress model.events ]
 
     GithubAuth ->
       let
         childAddress =
           Signal.forwardTo address ChildGithubAuthAction
       in
-        div [ style myStyle ] [ GithubAuth.view childAddress model.githubAuth ]
+        div [] [ GithubAuth.view childAddress model.githubAuth ]
 
     Login ->
       let
@@ -451,7 +451,7 @@ mainContent address model =
           { backendConfig = (.config >> .backendConfig) model }
 
       in
-        div [ style myStyle ] [ Login.view context childAddress model.login ]
+        div [] [ Login.view context childAddress model.login ]
 
     PageNotFound ->
       div [] [ PageNotFound.view ]
@@ -462,7 +462,7 @@ mainContent address model =
         childAddress =
           Signal.forwardTo address ChildUserAction
       in
-        div [ style myStyle ] [ User.view childAddress model.user ]
+        div [] [ User.view childAddress model.user ]
 
 navbar : Signal.Address Action -> Model -> Html
 navbar address model =
@@ -534,11 +534,6 @@ navbarLoggedIn address model =
           ]
         ]
       ]
-
-
-myStyle : List (String, String)
-myStyle =
-  [ ("font-size", "1.2em") ]
 
 -- EFFECTS
 

@@ -285,33 +285,36 @@ leafletMarkers model =
 
 view : ViewContext -> Signal.Address Action -> Model -> Html
 view context address model =
-  div [class "container"]
-    [ div [class "row"]
-      [ div [class "col-md-3"]
-          [ div []
-              [ div [class "h2"] [ text "Companies"]
-              , companyListForSelect address context.companies model.selectedCompany
-              ]
+  div
+    [ class "container" ]
+    [ div
+        [ class "row" ]
+        [ div
+            [ class "col-md-3" ]
+            [ div []
+                [ div [ class "h2" ] [ text "Companies" ]
+                , companyListForSelect address context.companies model.selectedCompany
+                ]
 
-          , div []
-              [ div [class "h2"] [ text "Event Authors"]
-              , ul [] (viewEventsByAuthors address model.events model.selectedAuthor)
-              , div [ hidden (isFetched model.status)] [ text "Loading..."]
-              ]
+            , div []
+                [ div [class "h2"] [ text "Event Authors" ]
+                , ul [] (viewEventsByAuthors address model.events model.selectedAuthor)
+                , div [ hidden (isFetched model.status) ] [ text "Loading..." ]
+                ]
 
-          , div []
-              [ div [class "h2"] [ text "Event list"]
-              , (viewFilterString address model)
-              , (viewListEvents address model)
-              ]
-          ]
+            , div []
+                [ div [class "h2"] [ text "Event list" ]
+                , (viewFilterString address model)
+                , (viewListEvents address model)
+                ]
+            ]
 
-      , div [class "col-md-9"]
-          [ div [class "h2"] [ text "Map"]
-          , div [ style mapStyle, id "map" ] []
-          , viewEventInfo model
-          ]
-      ]
+        , div [ class "col-md-9" ]
+            [ div [ class "h2" ] [ text "Map" ]
+            , div [ style mapStyle, id "map" ] []
+            , viewEventInfo model
+            ]
+        ]
     ]
 
 companyListForSelect : Signal.Address Action -> List Company.Model -> Maybe CompanyId -> Html

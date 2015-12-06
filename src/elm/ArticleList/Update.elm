@@ -1,14 +1,15 @@
 module ArticleList.Update where
 
+import Article.Decoder exposing (decode)
 import Article.Model as Article exposing (Model)
 import ArticleList.Model exposing (initialModel, Model)
+
 
 import Config exposing (cacheTtl)
 import ConfigType exposing (BackendConfig)
 import Effects exposing (Effects)
 import Http exposing (post, Error)
 import Json.Decode as JD exposing ((:=))
-import String exposing (toInt, toFloat)
 import Task  exposing (andThen, Task)
 import TaskTutorial exposing (getCurrentTime)
 import Time exposing (Time)
@@ -143,35 +144,4 @@ getJson url accessToken =
 
 decodeData : JD.Decoder (List Article.Model)
 decodeData =
-  JD.at ["data"] <| JD.list <| decodeArticle
-
-
-decodeArticle : JD.Decoder Article.Model
-decodeArticle =
-  let
-    -- Cast String to Int.
-    number : JD.Decoder Int
-    number =
-      JD.oneOf [ JD.int, JD.customDecoder JD.string String.toInt ]
-
-
-    numberFloat : JD.Decoder Float
-    numberFloat =
-      JD.oneOf [ JD.float, JD.customDecoder JD.string String.toFloat ]
-
-    decodeAuthor =
-      JD.object2 Article.Author
-        ("id" := number)
-        ("label" := JD.string)
-
-    decodeImage =
-      JD.at ["styles"]
-        ("thumbnail" := JD.string)
-
-  in
-    JD.object5 Article.Model
-      ("user" := decodeAuthor)
-      (JD.oneOf [ "body" := JD.string, JD.succeed "" ])
-      ("id" := number)
-      (JD.maybe ("image" := decodeImage))
-      ("label" := JD.string)
+  JD.at ["data"] <| JD.list <| Article.Decoder.decode

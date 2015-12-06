@@ -1,5 +1,6 @@
 module ArticleForm.Update where
 
+import Article.Decoder exposing (decode)
 import Article.Model as Article exposing (Author, Model)
 import ArticleForm.Model as ArticleForm exposing (initialArticleForm, initialModel, ArticleForm, Model, UserMessage)
 
@@ -135,35 +136,4 @@ dataToJson data =
 
 decodePostArticle : JD.Decoder Article.Model
 decodePostArticle =
-  JD.at ["data", "0"] <| decodeArticle
-
-
-decodeArticle : JD.Decoder Article.Model
-decodeArticle =
-  let
-    -- Cast String to Int.
-    number : JD.Decoder Int
-    number =
-      JD.oneOf [ JD.int, JD.customDecoder JD.string String.toInt ]
-
-
-    numberFloat : JD.Decoder Float
-    numberFloat =
-      JD.oneOf [ JD.float, JD.customDecoder JD.string String.toFloat ]
-
-    decodeAuthor =
-      JD.object2 Article.Author
-        ("id" := number)
-        ("label" := JD.string)
-
-    decodeImage =
-      JD.at ["styles"]
-        ("thumbnail" := JD.string)
-
-  in
-    JD.object5 Article.Model
-      ("user" := decodeAuthor)
-      (JD.oneOf [ "body" := JD.string, JD.succeed "" ])
-      ("id" := number)
-      (JD.maybe ("image" := decodeImage))
-      ("label" := JD.string)
+  JD.at ["data", "0"] <| Article.Decoder.decode

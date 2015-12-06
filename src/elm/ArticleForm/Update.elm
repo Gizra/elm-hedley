@@ -1,6 +1,6 @@
 module ArticleForm.Update where
 
-import ArticleForm.Model exposing (initialModel, Model)
+import ArticleForm.Model exposing (initialArticleForm, initialModel, ArticleForm, Model)
 
 import Config exposing (cacheTtl)
 import ConfigType exposing (BackendConfig)

@@ -11,12 +11,6 @@ type Status =
   | Fetched Time.Time
   | HttpError Http.Error
 
-type PostStatus = Busy | Done | Ready
-
-type UserMessage
-  = None
-  | Error String
-
 
 type alias Author =
   { id : Id
@@ -47,18 +41,12 @@ initialArticleList =
   }
 
 type alias Model =
-  { ArticleList : ArticleList
-  , articles : List Article
-  , postStatus : PostStatus
+  { articles : List Article
   , status : Status
-  , userMessage : UserMessage
   }
 
 initialModel : Model
 initialModel =
-  { ArticleList = initialArticleList
-  , articles = []
-  , postStatus = Ready
+  { articles = []
   , status = Init
-  , userMessage = None
   }

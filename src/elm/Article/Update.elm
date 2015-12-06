@@ -20,6 +20,12 @@ type alias UpdateContext =
   , backendConfig : BackendConfig
   }
 
+init : (Model, Effects Action)
+init =
+  ( Article.Page.initialModel
+  , Effects.none
+  )
+
 update : UpdateContext -> Action -> Article.Page.Model -> (Article.Page.Model, Effects Action)
 update context action model =
   case action of

@@ -2,7 +2,7 @@ module Article.Model where
 
 type alias Id = Int
 
-type alias Article =
+type alias Model =
   { author : Author
   , body : String
   , id : Id

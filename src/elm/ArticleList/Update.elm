@@ -1,40 +1,30 @@
 module ArticleList.Update where
 
-import ArticleList.Model exposing (initialArticleList, initialModel, Article, Model, UserMessage)
+import Article.Model as Article exposing (Model)
+import ArticleList.Model exposing (initialModel, Model)
 
 import Config exposing (cacheTtl)
 import ConfigType exposing (BackendConfig)
 import Effects exposing (Effects)
 import Http exposing (post, Error)
 import Json.Decode as JD exposing ((:=))
-import Json.Encode as JE exposing (string)
 import String exposing (toInt, toFloat)
 import Task  exposing (andThen, Task)
 import TaskTutorial exposing (getCurrentTime)
 import Time exposing (Time)
-import Utils.Http exposing (getErrorMessageFromHttpResponse)
 
-init : (Model, Effects Action)
+init : (ArticleList.Model.Model, Effects Action)
 init =
   ( initialModel
   , Effects.none
   )
 
 type Action
-  = Activate
-  | GetData
+  = GetData
   | GetDataFromServer
   | NoOp
-  | SetUserMessage UserMessage
-  | UpdateDataFromServer (Result Http.Error (List Article)) Time.Time
-  | UpdatePostArticle (Result Http.Error Article)
-
-  | ResetForm
-  | SubmitForm
-  | SetImageId (Maybe Int)
-  | UpdateBody String
-  | UpdateLabel String
-
+  | UpdateDataFromServer (Result Http.Error (List Article.Model)) Time.Time
+  | UpdatePostArticle (Result Http.Error Article.Model)
 
 
 type alias UpdateContext =
@@ -42,14 +32,9 @@ type alias UpdateContext =
   , backendConfig : BackendConfig
   }
 
-update : UpdateContext -> Action -> Model -> (Model, Effects Action)
+update : UpdateContext -> Action -> ArticleList.Model.Model -> (ArticleList.Model.Model, Effects Action)
 update context action model =
   case action of
-    Activate ->
-      ( model
-      , Task.succeed GetData |> Effects.task
-      )
-
     GetData ->
       let
         effects =
@@ -81,24 +66,16 @@ update context action model =
       case result of
         Ok val ->
           -- Append the new article to the articles list.
-          ( { model
-            | articles <- val :: model.articles
-            , postStatus <- ArticleList.Model.Done
-            }
-          -- We can reset the form, as it was posted successfully.
-          , Task.succeed ResetForm |> Effects.task
+          ( { model | articles <- val :: model.articles }
+          -- @todo: We can reset the form, as it was posted successfully.
+          , Effects.none
           )
 
         Err err ->
           ( { model | status <- ArticleList.Model.HttpError err }
-          , Task.succeed (SetUserMessage <| ArticleList.Model.Error (getErrorMessageFromHttpResponse err)) |> Effects.task
+          , Effects.none
           )
 
-
-    SetUserMessage userMessage ->
-      ( { model | userMessage <- userMessage }
-      , Effects.none
-      )
 
     UpdateDataFromServer result timestamp' ->
       case result of
@@ -112,70 +89,8 @@ update context action model =
 
         Err err ->
           ( { model | status <- ArticleList.Model.HttpError err }
-          , Task.succeed (SetUserMessage <| ArticleList.Model.Error (getErrorMessageFromHttpResponse err)) |> Effects.task
+          , Effects.none
           )
-
-    -- @todo: Create a helper function.
-    UpdateBody val ->
-      let
-        ArticleList =
-          model.ArticleList
-
-        ArticleList' =
-          { ArticleList | body <- val }
-      in
-        ( { model | ArticleList <- ArticleList' }
-        , Effects.none
-        )
-
-    UpdateLabel val ->
-      let
-        ArticleList =
-          model.ArticleList
-
-        ArticleList' =
-          { ArticleList | label <- val }
-      in
-        ( { model | ArticleList <- ArticleList' }
-        , Effects.none
-        )
-
-    SetImageId maybeVal ->
-      let
-        ArticleList =
-          model.ArticleList
-
-        ArticleList' =
-          { ArticleList | image <- maybeVal }
-      in
-        ( { model | ArticleList <- ArticleList' }
-        , Effects.none
-        )
-
-    ResetForm ->
-      ( { model
-        | ArticleList <- initialArticleList
-        , postStatus <- ArticleList.Model.Ready
-        }
-      , Effects.none
-      )
-
-    SubmitForm ->
-      let
-        backendUrl =
-          (.backendConfig >> .backendUrl) context
-
-        url =
-          backendUrl ++ "/api/v1.0/articles"
-      in
-        if model.postStatus == ArticleList.Model.Ready
-          then
-            ( { model | postStatus <- ArticleList.Model.Busy }
-            , postArticle url context.accessToken model.ArticleList
-            )
-
-          else
-            (model, Effects.none)
 
     NoOp ->
       (model, Effects.none)
@@ -226,50 +141,12 @@ getJson url accessToken =
     Effects.task actionTask
 
 
-decodeData : JD.Decoder (List Article)
+decodeData : JD.Decoder (List Article.Model)
 decodeData =
   JD.at ["data"] <| JD.list <| decodeArticle
 
 
-postArticle : String -> String -> ArticleList.Model.ArticleList -> Effects Action
-postArticle url accessToken data =
-  let
-    params =
-      [ ("access_token", accessToken) ]
-
-    encodedUrl =
-      Http.url url params
-  in
-    Http.post
-      decodePostArticle
-      encodedUrl
-      (Http.string <| dataToJson data )
-      |> Task.toResult
-      |> Task.map UpdatePostArticle
-      |> Effects.task
-
-
-dataToJson : ArticleList.Model.ArticleList -> String
-dataToJson data =
-  let
-    intOrNull maybeVal =
-      case maybeVal of
-        Just val -> JE.int val
-        Nothing -> JE.null
-  in
-    JE.encode 0
-      <| JE.object
-          [ ("label", JE.string data.label)
-          , ("body", JE.string data.body)
-          , ("image", intOrNull data.image)
-          ]
-
-decodePostArticle : JD.Decoder Article
-decodePostArticle =
-  JD.at ["data", "0"] <| decodeArticle
-
-
-decodeArticle : JD.Decoder Article
+decodeArticle : JD.Decoder Article.Model
 decodeArticle =
   let
     -- Cast String to Int.
@@ -283,7 +160,7 @@ decodeArticle =
       JD.oneOf [ JD.float, JD.customDecoder JD.string String.toFloat ]
 
     decodeAuthor =
-      JD.object2 ArticleList.Model.Author
+      JD.object2 Article.Author
         ("id" := number)
         ("label" := JD.string)
 
@@ -292,7 +169,7 @@ decodeArticle =
         ("thumbnail" := JD.string)
 
   in
-    JD.object5 Article
+    JD.object5 Article.Model
       ("user" := decodeAuthor)
       (JD.oneOf [ "body" := JD.string, JD.succeed "" ])
       ("id" := number)

@@ -1,6 +1,6 @@
 module ArticleList.Model where
 
-import Article.Model exposing (Article)
+import Article.Model as Article exposing (Model)
 import Http exposing (Error)
 import Time exposing (Time)
 
@@ -14,7 +14,7 @@ type Status =
 
 
 type alias Model =
-  { articles : List Article
+  { articles : List Article.Model
   , status : Status
   }
 

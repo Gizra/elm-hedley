@@ -1,5 +1,6 @@
 import App exposing (init, update, view)
-import Article.Article as Article exposing (Action, PostStatus)
+import Article.Model exposing (PostStatus)
+import Article.Update exposing (Action)
 import StartApp as StartApp
 import Effects exposing (Never)
 import Event exposing (Action)

@@ -1,5 +1,5 @@
 import App exposing (init, update, view)
-import Article.Model exposing (PostStatus)
+import ArticleForm.Model exposing (PostStatus)
 import Article.Update exposing (Action)
 import StartApp as StartApp
 import Effects exposing (Never)
@@ -16,8 +16,8 @@ app =
     , view = view
     , inputs =
         [ messages.signal
-        , Signal.map (App.ChildArticleAction << Article.SetImageId) dropzoneUploadedFile
-        , Signal.map (App.ChildArticleAction << Article.UpdateBody) ckeditor
+        -- , Signal.map (App.ChildArticleAction << Article.SetImageId) dropzoneUploadedFile
+        -- , Signal.map (App.ChildArticleAction << Article.UpdateBody) ckeditor
         , Signal.map (App.ChildEventAction << Event.SelectEvent) selectEvent
         ]
     }
@@ -90,21 +90,21 @@ port activePage =
         App.PageNotFound -> "PageNotFound"
         App.User -> "User"
 
-    postStatusAsString status =
-      case status of
-        Article.Busy -> "Busy"
-        Article.Done -> "Done"
-        Article.Ready -> "Ready"
+    -- postStatusAsString status =
+    --   case status of
+    --     Article.Busy -> "Busy"
+    --     Article.Done -> "Done"
+    --     Article.Ready -> "Ready"
 
     getPortData model =
       { accessToken = model.accessToken
       , activePage = pageAsString model.activePage
       , backendUrl = (.config >> .backendConfig >> .backendUrl) model
-      , postStatus = postStatusAsString model.article.postStatus
+      -- , postStatus = postStatusAsString model.article.postStatus
       }
   in
     Signal.map getPortData app.model
 
-port dropzoneUploadedFile : Signal (Maybe Int)
+-- port dropzoneUploadedFile : Signal (Maybe Int)
 
 port ckeditor : Signal String

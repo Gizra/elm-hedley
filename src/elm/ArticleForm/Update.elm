@@ -9,7 +9,6 @@ import Effects exposing (Effects)
 import Http exposing (post, Error)
 import Json.Decode as JD exposing ((:=))
 import Json.Encode as JE exposing (string)
-import String exposing (toInt, toFloat)
 import Task  exposing (andThen, Task)
 
 init : (ArticleForm.Model, Effects Action)

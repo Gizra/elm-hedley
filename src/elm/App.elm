@@ -1,6 +1,9 @@
 module App where
 
-import Article.Article as Article exposing (Model)
+import Article.Page as Article exposing (initialModel, Model)
+import Article.Update exposing (Action)
+import Article.View exposing (view)
+
 import ConfigManager exposing (Model)
 import Company exposing (Model)
 import Effects exposing (Effects)
@@ -82,7 +85,7 @@ init =
 -- UPDATE
 
 type Action
-  = ChildArticleAction Article.Action
+  = ChildArticleAction Article.Update.Action
   | ChildConfigAction ConfigManager.Action
   | ChildEventAction Event.Action
   | ChildGithubAuthAction GithubAuth.Action
@@ -111,7 +114,7 @@ update action model =
           , backendConfig = (.config >> .backendConfig) model
           }
 
-        (childModel, childEffects) = Article.update context act model.article
+        (childModel, childEffects) = Article.Update.update context act model.article
       in
         ( {model | article <- childModel }
         , Effects.map ChildArticleAction childEffects
@@ -353,7 +356,7 @@ update action model =
         newPageEffects =
           case page' of
             Article ->
-              Task.succeed (ChildArticleAction Article.Activate) |> Effects.task
+              Task.succeed (ChildArticleAction Article.Update.Activate) |> Effects.task
 
             Event companyId ->
               Task.succeed (ChildEventAction <| Event.Activate companyId) |> Effects.task
@@ -423,7 +426,7 @@ mainContent address model =
         childAddress =
           Signal.forwardTo address ChildArticleAction
       in
-        div [ style myStyle ] [ Article.view childAddress model.article ]
+        div [ style myStyle ] [ Article.View.view childAddress model.article ]
 
     Event companyId ->
       let

@@ -1,6 +1,6 @@
 module ArticleForm.Update where
 
-import ArticleForm.Model exposing (initialArticleForm, initialModel, Article, Model, UserMessage)
+import ArticleForm.Model exposing (initialModel, Model)
 
 import Config exposing (cacheTtl)
 import ConfigType exposing (BackendConfig)
@@ -21,19 +21,12 @@ init =
   )
 
 type Action
-  = Activate
-  | GetData
-  | GetDataFromServer
-  | NoOp
-  | SetUserMessage UserMessage
-  | UpdateDataFromServer (Result Http.Error (List Article)) Time.Time
-  | UpdatePostArticle (Result Http.Error Article)
-
-  | ResetForm
+  = ResetForm
   | SubmitForm
   | SetImageId (Maybe Int)
   | UpdateBody String
   | UpdateLabel String
+  | UpdatePostArticle (Result Http.Error Model)
 
 
 
@@ -45,76 +38,6 @@ type alias UpdateContext =
 update : UpdateContext -> Action -> Model -> (Model, Effects Action)
 update context action model =
   case action of
-    Activate ->
-      ( model
-      , Task.succeed GetData |> Effects.task
-      )
-
-    GetData ->
-      let
-        effects =
-          case model.status of
-            ArticleForm.Model.Fetching ->
-              Effects.none
-
-            _ ->
-              getDataFromCache model.status
-      in
-        ( model
-        , effects
-        )
-
-
-    GetDataFromServer ->
-      let
-        backendUrl =
-          (.backendConfig >> .backendUrl) context
-
-        url =
-          backendUrl ++ "/api/v1.0/articles"
-      in
-        ( { model | status <- ArticleForm.Model.Fetching }
-        , getJson url context.accessToken
-        )
-
-    UpdatePostArticle result ->
-      case result of
-        Ok val ->
-          -- Append the new article to the articles list.
-          ( { model
-            | articles <- val :: model.articles
-            , postStatus <- ArticleForm.Model.Done
-            }
-          -- We can reset the form, as it was posted successfully.
-          , Task.succeed ResetForm |> Effects.task
-          )
-
-        Err err ->
-          ( { model | status <- ArticleForm.Model.HttpError err }
-          , Task.succeed (SetUserMessage <| ArticleForm.Model.Error (getErrorMessageFromHttpResponse err)) |> Effects.task
-          )
-
-
-    SetUserMessage userMessage ->
-      ( { model | userMessage <- userMessage }
-      , Effects.none
-      )
-
-    UpdateDataFromServer result timestamp' ->
-      case result of
-        Ok articles ->
-          ( { model
-            | articles <- articles
-            , status <- ArticleForm.Model.Fetched timestamp'
-            }
-          , Effects.none
-          )
-
-        Err err ->
-          ( { model | status <- ArticleForm.Model.HttpError err }
-          , Task.succeed (SetUserMessage <| ArticleForm.Model.Error (getErrorMessageFromHttpResponse err)) |> Effects.task
-          )
-
     -- @todo: Create a helper function.
     UpdateBody val ->
       let
@@ -177,59 +100,8 @@ update context action model =
           else
             (model, Effects.none)
 
-    NoOp ->
-      (model, Effects.none)
 
 -- EFFECTS
-
-getDataFromCache : ArticleForm.Model.Status -> Effects Action
-getDataFromCache status =
-  let
-    actionTask =
-      case status of
-        ArticleForm.Model.Fetched fetchTime ->
-          Task.map (\currentTime ->
-            if fetchTime + Config.cacheTtl > currentTime
-              then NoOp
-              else GetDataFromServer
-          ) getCurrentTime
-
-        _ ->
-          Task.succeed GetDataFromServer
-
-  in
-    Effects.task actionTask
-
-
-getJson : String -> String -> Effects Action
-getJson url accessToken =
-  let
-    params =
-      [ ("access_token", accessToken)
-      , ("sort", "-id")
-      ]
-
-    encodedUrl = Http.url url params
-
-    httpTask =
-      Task.toResult <|
-        Http.get decodeData encodedUrl
-
-    actionTask =
-      httpTask `andThen` (\result ->
-        Task.map (\timestamp' ->
-          UpdateDataFromServer result timestamp'
-        ) getCurrentTime
-      )
-
-  in
-    Effects.task actionTask
-
-
-decodeData : JD.Decoder (List Article)
-decodeData =
-  JD.at ["data"] <| JD.list <| decodeArticle
-
 
 postArticle : String -> String -> ArticleForm.Model.ArticleForm -> Effects Action
 postArticle url accessToken data =

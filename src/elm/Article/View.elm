@@ -16,8 +16,12 @@ view address model =
   let
     childArticleFormAddress =
       Signal.forwardTo address Article.Update.ChildArticleFormAction
+
+    childArticleListAddress =
+      Signal.forwardTo address Article.Update.ChildArticleListAction
   in
     div
       []
       [ ArticleForm.view childArticleFormAddress model.articleForm
+      , ArticleList.view childArticleListAddress model.articleList
       ]

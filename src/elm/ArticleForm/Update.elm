@@ -1,21 +1,24 @@
 module ArticleForm.Update where
 
--- import Config exposing (cacheTtl)
--- import ConfigType exposing (BackendConfig)
--- import Effects exposing (Effects)
--- import Html exposing (i, button, div, label, h2, h3, input, img, li, text, textarea, span, ul, Html)
--- import Html.Attributes exposing (action, class, id, disabled, name, placeholder, property, required, size, src, style, type', value)
--- import Html.Events exposing (on, onClick, onSubmit, targetValue)
--- import Http exposing (post)
--- import Json.Decode as JD exposing ((:=))
--- import Json.Encode as JE exposing (string)
--- import String exposing (toInt, toFloat)
--- import Task  exposing (andThen, Task)
--- import TaskTutorial exposing (getCurrentTime)
--- import Time exposing (Time)
--- import Utils.Http exposing (getErrorMessageFromHttpResponse)
+import ArticleForm.Model exposing (initialArticleForm, initialModel, Article, Model, UserMessage)
 
-import Debug
+import Config exposing (cacheTtl)
+import ConfigType exposing (BackendConfig)
+import Effects exposing (Effects)
+import Http exposing (post, Error)
+import Json.Decode as JD exposing ((:=))
+import Json.Encode as JE exposing (string)
+import String exposing (toInt, toFloat)
+import Task  exposing (andThen, Task)
+import TaskTutorial exposing (getCurrentTime)
+import Time exposing (Time)
+import Utils.Http exposing (getErrorMessageFromHttpResponse)
+
+init : (Model, Effects Action)
+init =
+  ( initialModel
+  , Effects.none
+  )
 
 type Action
   = Activate
@@ -51,7 +54,7 @@ update context action model =
       let
         effects =
           case model.status of
-            Fetching ->
+            ArticleForm.Model.Fetching ->
               Effects.none
 
             _ ->
@@ -70,7 +73,7 @@ update context action model =
         url =
           backendUrl ++ "/api/v1.0/articles"
       in
-        ( { model | status <- Fetching }
+        ( { model | status <- ArticleForm.Model.Fetching }
         , getJson url context.accessToken
         )
 
@@ -80,15 +83,15 @@ update context action model =
           -- Append the new article to the articles list.
           ( { model
             | articles <- val :: model.articles
-            , postStatus <- Done
+            , postStatus <- ArticleForm.Model.Done
             }
           -- We can reset the form, as it was posted successfully.
           , Task.succeed ResetForm |> Effects.task
           )
 
         Err err ->
-          ( { model | status <- HttpError err }
-          , Task.succeed (SetUserMessage <| Error (getErrorMessageFromHttpResponse err)) |> Effects.task
+          ( { model | status <- ArticleForm.Model.HttpError err }
+          , Task.succeed (SetUserMessage <| ArticleForm.Model.Error (getErrorMessageFromHttpResponse err)) |> Effects.task
           )
 
 
@@ -102,14 +105,14 @@ update context action model =
         Ok articles ->
           ( { model
             | articles <- articles
-            , status <- Fetched timestamp'
+            , status <- ArticleForm.Model.Fetched timestamp'
             }
           , Effects.none
           )
 
         Err err ->
-          ( { model | status <- HttpError err }
-          , Task.succeed (SetUserMessage <| Error (getErrorMessageFromHttpResponse err)) |> Effects.task
+          ( { model | status <- ArticleForm.Model.HttpError err }
+          , Task.succeed (SetUserMessage <| ArticleForm.Model.Error (getErrorMessageFromHttpResponse err)) |> Effects.task
           )
 
     -- @todo: Create a helper function.
@@ -152,7 +155,7 @@ update context action model =
     ResetForm ->
       ( { model
         | articleForm <- initialArticleForm
-        , postStatus <- Ready
+        , postStatus <- ArticleForm.Model.Ready
         }
       , Effects.none
       )
@@ -165,9 +168,9 @@ update context action model =
         url =
           backendUrl ++ "/api/v1.0/articles"
       in
-        if model.postStatus == Ready
+        if model.postStatus == ArticleForm.Model.Ready
           then
-            ( { model | postStatus <- Busy }
+            ( { model | postStatus <- ArticleForm.Model.Busy }
             , postArticle url context.accessToken model.articleForm
             )
 
@@ -179,12 +182,12 @@ update context action model =
 
 -- EFFECTS
 
-getDataFromCache : Status -> Effects Action
+getDataFromCache : ArticleForm.Model.Status -> Effects Action
 getDataFromCache status =
   let
     actionTask =
       case status of
-        Fetched fetchTime ->
+        ArticleForm.Model.Fetched fetchTime ->
           Task.map (\currentTime ->
             if fetchTime + Config.cacheTtl > currentTime
               then NoOp
@@ -228,7 +231,7 @@ decodeData =
   JD.at ["data"] <| JD.list <| decodeArticle
 
 
-postArticle : String -> String -> ArticleForm -> Effects Action
+postArticle : String -> String -> ArticleForm.Model.ArticleForm -> Effects Action
 postArticle url accessToken data =
   let
     params =
@@ -246,7 +249,7 @@ postArticle url accessToken data =
       |> Effects.task
 
 
-dataToJson : ArticleForm -> String
+dataToJson : ArticleForm.Model.ArticleForm -> String
 dataToJson data =
   let
     intOrNull maybeVal =
@@ -280,7 +283,7 @@ decodeArticle =
       JD.oneOf [ JD.float, JD.customDecoder JD.string String.toFloat ]
 
     decodeAuthor =
-      JD.object2 Author
+      JD.object2 ArticleForm.Model.Author
         ("id" := number)
         ("label" := JD.string)
 

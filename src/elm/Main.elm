@@ -78,32 +78,32 @@ type alias ActivePagePort =
   , postStatus : String
   }
 
-port activePage : Signal ActivePagePort
-port activePage =
-  let
-    pageAsString page =
-      case page of
-        App.Article -> "Article"
-        App.Event _ -> "Event"
-        App.GithubAuth -> "GithubAuth"
-        App.Login -> "Login"
-        App.PageNotFound -> "PageNotFound"
-        App.User -> "User"
-
-    -- postStatusAsString status =
-    --   case status of
-    --     Article.Busy -> "Busy"
-    --     Article.Done -> "Done"
-    --     Article.Ready -> "Ready"
-
-    getPortData model =
-      { accessToken = model.accessToken
-      , activePage = pageAsString model.activePage
-      , backendUrl = (.config >> .backendConfig >> .backendUrl) model
-      -- , postStatus = postStatusAsString model.article.postStatus
-      }
-  in
-    Signal.map getPortData app.model
+-- port activePage : Signal ActivePagePort
+-- port activePage =
+--   let
+--     pageAsString page =
+--       case page of
+--         App.Article -> "Article"
+--         App.Event _ -> "Event"
+--         App.GithubAuth -> "GithubAuth"
+--         App.Login -> "Login"
+--         App.PageNotFound -> "PageNotFound"
+--         App.User -> "User"
+--
+--     -- postStatusAsString status =
+--     --   case status of
+--     --     Article.Busy -> "Busy"
+--     --     Article.Done -> "Done"
+--     --     Article.Ready -> "Ready"
+--
+--     getPortData model =
+--       { accessToken = model.accessToken
+--       , activePage = pageAsString model.activePage
+--       , backendUrl = (.config >> .backendConfig >> .backendUrl) model
+--       -- , postStatus = postStatusAsString model.article.postStatus
+--       }
+--   in
+--     Signal.map getPortData app.model
 
 -- port dropzoneUploadedFile : Signal (Maybe Int)
 

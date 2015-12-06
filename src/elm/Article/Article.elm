@@ -1,4 +1,4 @@
-module Article where
+module Article.Article where
 
 import Config exposing (cacheTtl)
 import ConfigType exposing (BackendConfig)
@@ -14,7 +14,6 @@ import Task  exposing (andThen, Task)
 import TaskTutorial exposing (getCurrentTime)
 import Time exposing (Time)
 import Utils.Http exposing (getErrorMessageFromHttpResponse)
-
 
 import Debug
 

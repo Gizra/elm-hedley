@@ -1,6 +1,6 @@
 module App where
 
-import Article exposing (Model)
+import Article.Article as Article exposing (Model)
 import ConfigManager exposing (Model)
 import Company exposing (Model)
 import Effects exposing (Effects)

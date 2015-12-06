@@ -36,3 +36,19 @@ update context action model =
         ( {model | articleList <- childModel }
         , Effects.map ChildArticleListAction childEffects
         )
+
+    ChildArticleFormAction act ->
+      let
+        (childModel, childEffects) = ArticleForm.Update.update context act model.articleForm
+      in
+        ( {model | articleForm <- childModel }
+        , Effects.map ChildArticleFormAction childEffects
+        )
+
+    ChildArticleListAction act ->
+      let
+        (childModel, childEffects) = ArticleList.Update.update context ArticleList.Update.GetData model.articleList
+      in
+        ( {model | articleList <- childModel }
+        , Effects.map ChildArticleListAction childEffects
+        )

@@ -6,8 +6,6 @@ import ArticleForm.Update exposing (Action)
 import ArticleList.Update exposing (Action)
 
 import ConfigType exposing (BackendConfig)
-import Effects exposing (Effects)
-
 
 type Action
   = Activate
@@ -19,13 +17,13 @@ type alias UpdateContext =
   , backendConfig : BackendConfig
   }
 
-update : UpdateContext -> Action -> Model -> (Model, Effects ArticleList.Update.Action)
+update : UpdateContext -> Action -> Model -> (Model, Effects Action)
 update context action model =
   case action of
     Activate ->
       let
-        (childModel, childEffects) = ArticleList.Update.update context ArticleList.Update.GetData model.articleList
+        (childModel, childEffects) = ArticleList.update context ArticleList.GetData model.articleList
       in
-        ( { model | articleList <- childModel }
+        ( {model | articleList <- childModel }
         , Effects.map ChildArticleListAction childEffects
         )

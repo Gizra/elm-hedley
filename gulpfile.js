@@ -211,7 +211,7 @@ gulp.task("serve:dev", ["build"], function () {
 gulp.task("watch", function () {
   // We need to copy dev, so index.html may be replaced by error messages.
   gulp.watch(["src/index.html", "src/js/**/*.js"], ["copy:dev", reload]);
-  gulp.watch(["src/elm/*.elm"], ["elm", "copy:dev", reload]);
+  gulp.watch(["src/elm/**/*.elm"], ["elm", "copy:dev", reload]);
   gulp.watch(["src/assets/scss/**/*.scss"], ["styles", "copy:dev", reload]);
 });
 

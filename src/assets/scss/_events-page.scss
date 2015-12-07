@@ -1,0 +1,29 @@
+
+#events-page {
+
+  .first .wrapper:nth-child(n+2) {
+    margin-top: 30px;
+  }
+
+  .companies {
+    margin: 10px 0;
+    padding: 4px;
+    width: 100%;
+    border-radius: 3px;
+    color:$blue;
+    background: white;
+  }
+
+  .authors {
+    @extend .list-theme;
+
+    li {
+      margin-top: 20px;
+      transition: background 0.4s ease-in;
+
+      &:hover {
+        background: $light-blue;
+      }
+    }
+  }
+}

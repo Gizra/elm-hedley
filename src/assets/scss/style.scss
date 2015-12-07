@@ -5,6 +5,7 @@
 @import "page-not-found";
 @import "my-account";
 @import "article-page";
+@import "events-page";
 
 html {
   position: relative;
@@ -28,6 +29,30 @@ hr {
   height: 1px;
   border-bottom: 1px solid rgb(218, 217, 209);
   background: #EAE9E3;
+}
+
+.list-theme {
+  list-style: none;
+  padding: 0;
+
+  li {
+    position: relative;
+    padding: 5px 9px 5px 12px;
+    border-radius: 3px;
+    border: 1px solid $gray;
+    @extend .shadow;
+
+    &:before {
+      content: "";
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      width: 6px;
+      background: rgba(95, 144, 187, 0.19);
+      border-right: 1px solid $gray;
+    }
+  }
 }
 
 .shadow {

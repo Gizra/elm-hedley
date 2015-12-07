@@ -5,7 +5,7 @@ import ConfigType exposing (BackendConfig)
 import Company exposing (Model)
 import Dict exposing (Dict)
 import Effects exposing (Effects)
-import Html exposing (a, div, input, text, select, span, li, option, ul, Html)
+import Html exposing (a, div, h3, i, input, text, select, span, li, option, ul, Html)
 import Html.Attributes exposing (class, hidden, href, id, placeholder, selected, style, value)
 import Html.Events exposing (on, onClick, targetValue)
 import Http
@@ -286,33 +286,60 @@ leafletMarkers model =
 view : ViewContext -> Signal.Address Action -> Model -> Html
 view context address model =
   div
-    [ class "container" ]
+    [ id "events-page"
+    , class "container"
+    ]
     [ div
         [ class "row" ]
         [ div
-            [ class "col-md-3" ]
-            [ div []
-                [ div [ class "h2" ] [ text "Companies" ]
+            [ class "col-md-3 first" ]
+            [ div
+                [ class "wrapper -suffix" ]
+                [ h3
+                    [ class "title" ]
+                    [ i [ class "fa fa-briefcase" ] []
+                    , text <| " " ++ "Companies"
+                    ]
                 , companyListForSelect address context.companies model.selectedCompany
                 ]
 
-            , div []
-                [ div [class "h2"] [ text "Event Authors" ]
-                , ul [] (viewEventsByAuthors address model.events model.selectedAuthor)
+            , div
+                [ class "wrapper -suffix" ]
+                [ h3
+                    [ class "title" ]
+                    [ i [ class "glyphicon glyphicon-user" ] []
+                    , text <| " " ++ "Event Authors"
+                    ]
+                , ul
+                    [ class "authors" ]
+                    (viewEventsByAuthors address model.events model.selectedAuthor)
                 , div [ hidden (isFetched model.status) ] [ text "Loading..." ]
                 ]
 
-            , div []
-                [ div [class "h2"] [ text "Event list" ]
+            , div
+                [ class "wrapper -suffix" ]
+                [ h3
+                    [ class "title" ]
+                    [ i [ class "fa fa-map-marker" ] []
+                    , text <| " " ++ "Event List"
+                    ]
                 , (viewFilterString address model)
                 , (viewListEvents address model)
                 ]
             ]
 
-        , div [ class "col-md-9" ]
-            [ div [ class "h2" ] [ text "Map" ]
-            , div [ style mapStyle, id "map" ] []
-            , viewEventInfo model
+        , div
+            [ class "col-md-9 last" ]
+            [ div
+                [ class "wrapper -suffix" ]
+                [ h3
+                    [ class "title" ]
+                    [ i [ class "fa fa-globe" ] []
+                    ,  text <| " " ++ "Map"
+                    ]
+                , div [ style mapStyle, id "map" ] []
+                , viewEventInfo model
+                ]
             ]
         ]
     ]
@@ -355,7 +382,8 @@ companyListForSelect address companies selectedCompany  =
       option [value <| toString company.id, selected (company.id == selectedId)] [ text company.label]
   in
     select
-      [ value selectedText
+      [ class "companies"
+      , value selectedText
       , on "change" targetValue (\str -> Signal.message address <| SelectCompany <| textToMaybe str)
       ]
       (List.map getOption companies')

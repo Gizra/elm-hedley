@@ -41,8 +41,10 @@ viewArticles article =
         Nothing -> div [] []
   in
     li
-    []
-    [ div [ class "title" ] [ text article.label ]
-    , div [ property "innerHTML" <| JE.string article.body ] []
-    , image
-    ]
+      []
+      [ div [ class "title" ] [ text article.label ]
+      -- Allow attaching HTML without escaping it. XSS is escaped in the server
+      -- side.
+      , div [ property "innerHTML" <| JE.string article.body ] []
+      , image
+      ]

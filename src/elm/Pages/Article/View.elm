@@ -1,7 +1,7 @@
-module Article.View where
+module Pages.Article.View where
 
-import Article.Page as Article exposing (Model)
-import Article.Update exposing (Action)
+import Pages.Article.Model as Article exposing (Model)
+import Pages.Article.Update exposing (Action)
 
 import ArticleForm.View as ArticleForm exposing (view)
 import ArticleList.View as ArticleList exposing (view)
@@ -15,10 +15,10 @@ view : Signal.Address Action -> Article.Model -> Html
 view address model =
   let
     childArticleFormAddress =
-      Signal.forwardTo address Article.Update.ChildArticleFormAction
+      Signal.forwardTo address Pages.Article.Update.ChildArticleFormAction
 
     childArticleListAddress =
-      Signal.forwardTo address Article.Update.ChildArticleListAction
+      Signal.forwardTo address Pages.Article.Update.ChildArticleListAction
   in
     div
       []

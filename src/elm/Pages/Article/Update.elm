@@ -1,6 +1,6 @@
-module Article.Update where
+module Pages.Article.Update where
 
-import Article.Page exposing (Model)
+import Pages.Article.Model exposing (Model)
 
 import ArticleForm.Update exposing (Action)
 
@@ -22,11 +22,11 @@ type alias UpdateContext =
 
 init : (Model, Effects Action)
 init =
-  ( Article.Page.initialModel
+  ( Pages.Article.Model.initialModel
   , Effects.none
   )
 
-update : UpdateContext -> Action -> Article.Page.Model -> (Article.Page.Model, Effects Action)
+update : UpdateContext -> Action -> Pages.Article.Model.Model -> (Pages.Article.Model.Model, Effects Action)
 update context action model =
   case action of
     Activate ->

@@ -1,6 +1,6 @@
 import App exposing (init, update, view)
 import ArticleForm.Model exposing (PostStatus)
-import Article.Update exposing (Action)
+import Pages.Article.Update exposing (Action)
 import StartApp as StartApp
 import Effects exposing (Never)
 import Event exposing (Action)

@@ -2,7 +2,7 @@
 
 var initialValues = {
   ckeditor : '',
-  // dropzoneUploadedFile : null,
+  dropzoneUploadedFile : null,
   selectEvent: null
 };
 

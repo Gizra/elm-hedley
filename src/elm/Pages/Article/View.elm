@@ -21,7 +21,9 @@ view address model =
       Signal.forwardTo address Pages.Article.Update.ChildArticleListAction
   in
     div
-      []
+      [ id "article-page"
+      , class "container"
+      ]      
       [ ArticleForm.view childArticleFormAddress model.articleForm
       , ArticleList.view childArticleListAddress model.articleList
       ]

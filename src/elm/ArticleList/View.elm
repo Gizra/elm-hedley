@@ -23,7 +23,7 @@ view address model =
 viewRecentArticles : List Article -> Html
 viewRecentArticles articles =
   div
-    []
+    [ class "wrapper -suffix" ]
     [ h3
         [ class "title" ]
         [ i [ class "fa fa-file-o icon" ] []

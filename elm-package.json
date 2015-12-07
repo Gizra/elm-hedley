@@ -20,8 +20,7 @@
         "evancz/start-app": "2.0.1 <= v < 3.0.0",
         "evancz/task-tutorial": "1.0.2 <= v < 2.0.0",
         "jessitron/elm-param-parsing": "1.0.3 <= v < 2.0.0",
-        "laszlopandy/elm-console": "1.0.2 <= v < 2.0.0",
-        "rgrempel/elm-route-hash": "1.0.3 <= v < 2.0.0"
+        "rgrempel/elm-route-hash": "1.0.4 <= v < 1.0.5"
     },
     "elm-version": "0.15.1 <= v < 0.16.0"
 }

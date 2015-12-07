@@ -10,9 +10,6 @@ import Html.Events exposing (on, onClick, onSubmit, targetValue)
 import Json.Encode as JE exposing (string)
 import String exposing (toInt, toFloat)
 
-
--- VIEW
-
 view :Signal.Address Action -> Model -> Html
 view address model =
   div
@@ -23,12 +20,11 @@ view address model =
 
 viewUserMessage : UserMessage -> Html
 viewUserMessage userMessage =
-  div [] []
-  -- case userMessage of
-  --   None ->
-  --     div [] []
-  --   Error message ->
-  --     div [ style [("text-align", "center")] ] [ text message ]
+  case userMessage of
+    ArticleForm.Model.None ->
+      div [] []
+    ArticleForm.Model.Error message ->
+      div [ style [("text-align", "center")] ] [ text message ]
 
 viewForm :Signal.Address Action -> Model -> Html
 viewForm address model =

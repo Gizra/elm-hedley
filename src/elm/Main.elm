@@ -1,11 +1,12 @@
 import App exposing (init, update, view)
 import ArticleForm.Model exposing (PostStatus)
-import Pages.Article.Update exposing (Action)
-import StartApp as StartApp
+import ArticleForm.Update exposing (Action)
 import Effects exposing (Never)
 import Event exposing (Action)
 import Leaflet exposing (Action, Model)
+import Pages.Article.Update exposing (Action)
 import RouteHash
+import StartApp as StartApp
 import Task exposing (Task)
 
 
@@ -17,7 +18,7 @@ app =
     , inputs =
         [ messages.signal
         -- , Signal.map (App.ChildArticleAction << Article.SetImageId) dropzoneUploadedFile
-        -- , Signal.map (App.ChildArticleAction << Article.UpdateBody) ckeditor
+        , Signal.map (App.ChildArticleAction << Pages.Article.Update.ChildArticleFormAction << ArticleForm.Update.UpdateBody) ckeditor
         , Signal.map (App.ChildEventAction << Event.SelectEvent) selectEvent
         ]
     }

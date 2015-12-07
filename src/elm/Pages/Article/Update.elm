@@ -5,6 +5,7 @@ import ArticleList.Update exposing (Action)
 import ConfigType exposing (BackendConfig)
 import Effects exposing (Effects)
 import Pages.Article.Model exposing (Model)
+import Task exposing (succeed)
 
 type Action
   = Activate
@@ -26,19 +27,30 @@ update : UpdateContext -> Action -> Pages.Article.Model.Model -> (Pages.Article.
 update context action model =
   case action of
     Activate ->
-      let
-        (childModel, childEffects) = ArticleList.Update.update context ArticleList.Update.GetData model.articleList
-      in
-        ( { model | articleList <- childModel }
-        , Effects.map ChildArticleListAction childEffects
+        ( model
+        , Task.succeed (ChildArticleListAction ArticleList.Update.GetData) |> Effects.task
         )
 
     ChildArticleFormAction act ->
       let
-        (childModel, childEffects) = ArticleForm.Update.update context act model.articleForm
+        (childModel, childEffects, maybeArticle) = ArticleForm.Update.update context act model.articleForm
+
+        defaultEffects =
+          [ childEffects ]
+
+        effects' =
+          case maybeArticle of
+            Just article ->
+              (Task.succeed (ChildArticleListAction <| ArticleList.Update.AppendArticle article) |> Effects.task)
+              ::
+              defaultEffects
+            Nothing ->
+              defaultEffects
+
       in
+
         ( { model | articleForm <- childModel }
-        , Effects.map ChildArticleFormAction childEffects
+        , Effects.batch effects'
         )
 
     ChildArticleListAction act ->

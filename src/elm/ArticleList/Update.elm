@@ -19,11 +19,12 @@ init =
   )
 
 type Action
-  = GetData
+  = AppendArticle Article.Model
+  | GetData
   | GetDataFromServer
   | NoOp
   | UpdateDataFromServer (Result Http.Error (List Article.Model)) Time.Time
-  | UpdatePostArticle (Result Http.Error Article.Model)
+
 
 
 type alias UpdateContext =
@@ -34,6 +35,11 @@ type alias UpdateContext =
 update : UpdateContext -> Action -> ArticleList.Model.Model -> (ArticleList.Model.Model, Effects Action)
 update context action model =
   case action of
+    AppendArticle article ->
+      ( { model | articles <- article :: model.articles }      
+      , Effects.none
+      )
+
     GetData ->
       let
         effects =
@@ -60,20 +66,6 @@ update context action model =
         ( { model | status <- ArticleList.Model.Fetching }
         , getJson url context.accessToken
         )
-
-    UpdatePostArticle result ->
-      case result of
-        Ok val ->
-          -- Append the new article to the articles list.
-          ( { model | articles <- val :: model.articles }
-          -- @todo: We can reset the form, as it was posted successfully.
-          , Effects.none
-          )
-
-        Err err ->
-          ( { model | status <- ArticleList.Model.HttpError err }
-          , Effects.none
-          )
 
 
     UpdateDataFromServer result timestamp' ->

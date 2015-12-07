@@ -9,7 +9,8 @@ import Effects exposing (Effects)
 import Http exposing (post, Error)
 import Json.Decode as JD exposing ((:=))
 import Json.Encode as JE exposing (string)
-import Task  exposing (andThen, Task)
+import Task exposing (andThen, Task)
+import Utils.Http exposing (getErrorMessageFromHttpResponse)
 
 init : (ArticleForm.Model, Effects Action)
 init =
@@ -21,6 +22,7 @@ type Action
   = ResetForm
   | SubmitForm
   | SetImageId (Maybe Int)
+  | SetUserMessage UserMessage
   | UpdateBody String
   | UpdateLabel String
   | UpdatePostArticle (Result Http.Error Article.Model)
@@ -32,33 +34,17 @@ type alias UpdateContext =
   , backendConfig : BackendConfig
   }
 
-update : UpdateContext -> Action -> ArticleForm.Model -> (ArticleForm.Model, Effects Action)
+update : UpdateContext -> Action -> ArticleForm.Model -> (ArticleForm.Model, Effects Action, Maybe Article.Model)
 update context action model =
   case action of
-    -- @todo: Create a helper function.
-    UpdateBody val ->
-      let
-        articleForm =
-          model.articleForm
-
-        articleForm' =
-          { articleForm | body <- val }
-      in
-        ( { model | articleForm <- articleForm' }
-        , Effects.none
-        )
-
-    UpdateLabel val ->
-      let
-        articleForm =
-          model.articleForm
-
-        articleForm' =
-          { articleForm | label <- val }
-      in
-        ( { model | articleForm <- articleForm' }
-        , Effects.none
-        )
+    ResetForm ->
+      ( { model
+        | articleForm <- initialArticleForm
+        , postStatus <- ArticleForm.Ready
+        }
+      , Effects.none
+      , Nothing
+      )
 
     SetImageId maybeVal ->
       let
@@ -70,14 +56,13 @@ update context action model =
       in
         ( { model | articleForm <- articleForm' }
         , Effects.none
+        , Nothing
         )
 
-    ResetForm ->
-      ( { model
-        | articleForm <- initialArticleForm
-        , postStatus <- ArticleForm.Ready
-        }
+    SetUserMessage userMessage ->
+      ( { model | userMessage <- userMessage }
       , Effects.none
+      , Nothing
       )
 
     SubmitForm ->
@@ -92,10 +77,58 @@ update context action model =
           then
             ( { model | postStatus <- ArticleForm.Busy }
             , postArticle url context.accessToken model.articleForm
+            , Nothing
             )
 
           else
-            (model, Effects.none)
+            ( model
+            , Effects.none
+            , Nothing
+            )
+
+    -- @todo: Create a helper function.
+    UpdateBody val ->
+      let
+        articleForm =
+          model.articleForm
+
+        articleForm' =
+          { articleForm | body <- val }
+      in
+        ( { model | articleForm <- articleForm' }
+        , Effects.none
+        , Nothing
+        )
+
+    UpdateLabel val ->
+      let
+        articleForm =
+          model.articleForm
+
+        articleForm' =
+          { articleForm | label <- val }
+      in
+        ( { model | articleForm <- articleForm' }
+        , Effects.none
+        , Nothing
+        )
+
+    UpdatePostArticle result ->
+      case result of
+        Ok article ->
+          -- Append the new article to the articles list.
+          ( { model | postStatus <- ArticleForm.Done }
+          -- We can reset the form, as it was posted successfully.
+          , Task.succeed ResetForm |> Effects.task
+          -- Return the article to the parent component.
+          , Just article
+          )
+
+        Err err ->
+          ( model
+          , Task.succeed (SetUserMessage <| ArticleForm.Error (getErrorMessageFromHttpResponse err)) |> Effects.task
+          , Nothing
+          )
 
 
 -- EFFECTS

@@ -1,5 +1,7 @@
 module ArticleList.View where
 
+import Article.Model exposing (Model)
+
 import ArticleList.Model exposing (initialModel, Model)
 import ArticleList.Update exposing (Action)
 
@@ -10,8 +12,37 @@ import Json.Encode as JE exposing (string)
 import String exposing (toInt, toFloat)
 
 
--- VIEW
+type alias Article = Article.Model.Model
 
-view :Signal.Address Action -> Model -> Html
+type alias Model = ArticleList.Model.Model
+
+view : Signal.Address Action -> Model -> Html
 view address model =
-  div [] [ text "Article List" ]
+  viewRecentArticles model.articles
+
+viewRecentArticles : List Article -> Html
+viewRecentArticles articles =
+  div
+    []
+    [ h3
+        [ class "title" ]
+        [ i [ class "fa fa-file-o icon" ] []
+        , text "Recent articles"
+        ]
+    , ul [ class "articles" ] (List.map viewArticles articles)
+    ]
+
+viewArticles : Article -> Html
+viewArticles article =
+  let
+    image =
+      case article.image of
+        Just val -> img [ src val ] []
+        Nothing -> div [] []
+  in
+    li
+    []
+    [ div [ class "title" ] [ text article.label ]
+    , div [ property "innerHTML" <| JE.string article.body ] []
+    , image
+    ]

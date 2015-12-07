@@ -1,14 +1,10 @@
 module Pages.Article.Update where
 
-import Pages.Article.Model exposing (Model)
-
 import ArticleForm.Update exposing (Action)
-
 import ArticleList.Update exposing (Action)
-
 import ConfigType exposing (BackendConfig)
 import Effects exposing (Effects)
-
+import Pages.Article.Model exposing (Model)
 
 type Action
   = Activate
@@ -33,7 +29,7 @@ update context action model =
       let
         (childModel, childEffects) = ArticleList.Update.update context ArticleList.Update.GetData model.articleList
       in
-        ( {model | articleList <- childModel }
+        ( { model | articleList <- childModel }
         , Effects.map ChildArticleListAction childEffects
         )
 
@@ -41,14 +37,14 @@ update context action model =
       let
         (childModel, childEffects) = ArticleForm.Update.update context act model.articleForm
       in
-        ( {model | articleForm <- childModel }
+        ( { model | articleForm <- childModel }
         , Effects.map ChildArticleFormAction childEffects
         )
 
     ChildArticleListAction act ->
       let
-        (childModel, childEffects) = ArticleList.Update.update context ArticleList.Update.GetData model.articleList
+        (childModel, childEffects) = ArticleList.Update.update context act model.articleList
       in
-        ( {model | articleList <- childModel }
+        ( { model | articleList <- childModel }
         , Effects.map ChildArticleListAction childEffects
         )

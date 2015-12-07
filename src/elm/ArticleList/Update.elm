@@ -3,8 +3,6 @@ module ArticleList.Update where
 import Article.Decoder exposing (decode)
 import Article.Model as Article exposing (Model)
 import ArticleList.Model exposing (initialModel, Model)
-
-
 import Config exposing (cacheTtl)
 import ConfigType exposing (BackendConfig)
 import Effects exposing (Effects)

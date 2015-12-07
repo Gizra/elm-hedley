@@ -1,5 +1,6 @@
 @import "mixin";
 @import "footer";
+@import "header";
 @import "login";
 @import "page-not-found";
 @import "my-account";
@@ -19,10 +20,6 @@ body {
 
 h4 {
   font-weight: 300;
-}
-
-#header {
-  margin-bottom: 50px;
 }
 
 hr {

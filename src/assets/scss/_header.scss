@@ -1,0 +1,119 @@
+#main-header {
+  margin-bottom: 50px;
+  position: relative;
+  padding: 17px 9px 9px 9px;
+  border-bottom: 7px solid white;
+  color: white;
+  background-color: #2D2D38;
+  font-size: 15px;
+
+  &:before {
+    content: "";
+    position: absolute;
+    width: 100%;
+    left: 0px;
+    bottom: -7px;
+    border-bottom: 1px solid #C8C8CB;
+  }
+
+  .brand {
+    color: $blue;
+    font-size: 30px;
+    font-family: 'Fjalla One', sans-serif;
+    transition: color 0.3s ease-in;
+
+    &:hover {
+      color: $dark-blue;
+    }
+  }
+
+  .navbar-header {
+    a {
+      margin-top: 2px;
+      text-decoration: none;
+    }
+
+    .navbar-toggle {
+      border-color: $blue;
+      margin-right: 0;
+      transition: all 0.3s ease-in;
+
+      &:hover,
+      &:focus {
+        background: $dark-blue;
+        border-color: $dark-blue;
+
+        .icon-bar {
+          background: white;
+        }
+      }
+
+      .icon-bar {
+        background: $blue;
+        transition: all 0.3s ease-in;
+      }
+    }
+  }
+
+  .main-nav {
+
+    ul.nav {
+      li {
+        padding: 8px;
+
+        &:hover {
+          a,
+          i {
+            color: $blue;
+          }
+        }
+
+        a,
+        i {
+          transition: color 0.3s ease-in;
+        }
+
+        a {
+          padding: 0 12px 0 10px;
+          display: inline-block;
+          color: white;
+
+          &.brand {
+            @extend .brand;
+          }
+        }
+      }
+    }
+  }
+
+  .main-nav {
+    @media only screen and (max-width : 767px) {
+      border: none;
+      box-shadow: none;
+    }
+
+    ul.nav {
+      li {
+
+        @media only screen and (min-width : 768px) {
+          a {
+            border-right: 1px solid $blue;
+          }
+
+          &:first-child a,
+          &:last-child a {
+            border-right: none;
+          }
+        }
+
+        @media only screen and (max-width : 767px) {
+          border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+          a {
+            padding-top: 4px;
+            padding-bottom: 8px;
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,10 +1,12 @@
 import App exposing (init, update, view)
-import Article exposing (Action, PostStatus)
-import StartApp as StartApp
+import ArticleForm.Model exposing (PostStatus)
+import ArticleForm.Update exposing (Action)
 import Effects exposing (Never)
 import Event exposing (Action)
 import Leaflet exposing (Action, Model)
+import Pages.Article.Update exposing (Action)
 import RouteHash
+import StartApp as StartApp
 import Task exposing (Task)
 
 
@@ -15,8 +17,8 @@ app =
     , view = view
     , inputs =
         [ messages.signal
-        , Signal.map (App.ChildArticleAction << Article.SetImageId) dropzoneUploadedFile
-        , Signal.map (App.ChildArticleAction << Article.UpdateBody) ckeditor
+        , Signal.map (App.ChildArticleAction << Pages.Article.Update.ChildArticleFormAction << ArticleForm.Update.SetImageId) dropzoneUploadedFile
+        , Signal.map (App.ChildArticleAction << Pages.Article.Update.ChildArticleFormAction << ArticleForm.Update.UpdateBody) ckeditor
         , Signal.map (App.ChildEventAction << Event.SelectEvent) selectEvent
         ]
     }
@@ -91,15 +93,15 @@ port activePage =
 
     postStatusAsString status =
       case status of
-        Article.Busy -> "Busy"
-        Article.Done -> "Done"
-        Article.Ready -> "Ready"
+        ArticleForm.Model.Busy -> "Busy"
+        ArticleForm.Model.Done -> "Done"
+        ArticleForm.Model.Ready -> "Ready"
 
     getPortData model =
       { accessToken = model.accessToken
       , activePage = pageAsString model.activePage
       , backendUrl = (.config >> .backendConfig >> .backendUrl) model
-      , postStatus = postStatusAsString model.article.postStatus
+      , postStatus = postStatusAsString model.article.articleForm.postStatus
       }
   in
     Signal.map getPortData app.model

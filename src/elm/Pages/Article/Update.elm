@@ -36,7 +36,7 @@ update context action model =
         (childModel, childEffects, maybeArticle) = ArticleForm.Update.update context act model.articleForm
 
         defaultEffects =
-          [ childEffects ]
+          [ Effects.map ChildArticleFormAction childEffects ]
 
         effects' =
           case maybeArticle of

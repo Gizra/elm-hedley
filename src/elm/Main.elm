@@ -3,7 +3,8 @@ import ArticleForm.Model exposing (PostStatus)
 import ArticleForm.Update exposing (Action)
 import Effects exposing (Never)
 import Event exposing (Action)
-import Leaflet exposing (Action, Model)
+import Leaflet.Model exposing (Model)
+import Leaflet.Update exposing (Action)
 import Pages.Article.Update exposing (Action)
 import RouteHash
 import StartApp as StartApp
@@ -47,7 +48,7 @@ port routeTasks =
 -- Interactions with Leaflet maps
 
 type alias LeafletPort =
-  { leaflet : Leaflet.Model
+  { leaflet : Leaflet.Model.Model
   , events : List Int
   }
 

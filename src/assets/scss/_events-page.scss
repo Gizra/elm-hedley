@@ -36,6 +36,12 @@
     background: white;
   }
 
+  input.search {
+    margin-top: 13px;
+    border-radius: 3px;
+    color: $blue;
+  }
+
   .authors,
   .events {
     @extend .list-theme;
@@ -45,7 +51,8 @@
       margin-top: 20px;
       transition: background 0.4s ease-in;
 
-      &:hover {
+      &:hover,
+      &.-active {
         background: $light-blue;
       }
     }

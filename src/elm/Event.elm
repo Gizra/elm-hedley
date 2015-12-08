@@ -483,7 +483,8 @@ viewFilterString : Signal.Address Action -> Model -> Html
 viewFilterString address model =
   div []
     [ input
-        [ placeholder "Filter events"
+        [ class "search form-control"
+        , placeholder "Filter events"
         , value model.filterString
         , on "input" targetValue (Signal.message address << FilterEvents)
         ]
@@ -503,7 +504,8 @@ viewListEvents address model =
         [ a [ hrefVoid , onClick address (SelectEvent <| Just event.id) ] [ text event.label ] ]
 
     eventUnselect event =
-      li []
+      li
+        [ class "-active"]
         [ span []
           [ text event.label
           , a
@@ -529,7 +531,7 @@ viewListEvents address model =
       then
         ul [ class "events" ] (List.map getListItem filteredEvents)
       else
-        div [] [ text "No results found"]
+        div [ style [("margin" ,"8px 0")] ] [ text "No results found"]
 
 
 

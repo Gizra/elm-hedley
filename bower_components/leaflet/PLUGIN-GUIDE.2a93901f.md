@@ -88,7 +88,7 @@ An example of a more sophisticated plugin file structure:
 /examples   - HTML examples of plugin usage
 README.20e4c058.md
 LICENSE
-package.fd1f5a3d.json
+package.408e6441.json
 ```
 
 ### Code Conventions

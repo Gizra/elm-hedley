@@ -1,9 +1,5 @@
 module App where
 
-import Pages.Article.Model as Article exposing (initialModel, Model)
-import Pages.Article.Update exposing (Action)
-import Pages.Article.View exposing (view)
-
 import ConfigManager exposing (Model)
 import Company exposing (Model)
 import Effects exposing (Effects)
@@ -13,7 +9,6 @@ import Html exposing (a, div, h2, i, li, node, span, text, ul, button, Html)
 import Html.Attributes exposing (class, classList, id, href, style, target, attribute)
 import Html.Events exposing (onClick)
 import Json.Encode as JE exposing (string, Value)
-import Login exposing (Model, initialModel, update)
 import PageNotFound exposing (view)
 import RouteHash exposing (HashUpdate)
 import String exposing (isEmpty)
@@ -21,7 +16,15 @@ import Storage exposing (removeItem)
 import Task exposing (..)
 import User exposing (..)
 
-import Debug
+-- Pages import
+
+import Pages.Article.Model as Article exposing (initialModel, Model)
+import Pages.Article.Update exposing (Action)
+import Pages.Article.View exposing (view)
+
+import Pages.Login.Model as Login exposing (initialModel, Model)
+import Pages.Login.Update exposing (Action)
+import Pages.Login.View exposing (view)
 
 -- MODEL
 
@@ -73,7 +76,7 @@ initialModel =
 initialEffects : List (Effects Action)
 initialEffects =
   [ Effects.map ChildConfigAction <| snd ConfigManager.init
-  , Effects.map ChildLoginAction <| snd Login.init
+  , Effects.map ChildLoginAction <| snd Pages.Login.Update.init
   ]
 
 init : (Model, Effects Action)
@@ -89,7 +92,7 @@ type Action
   | ChildConfigAction ConfigManager.Action
   | ChildEventAction Event.Action
   | ChildGithubAuthAction GithubAuth.Action
-  | ChildLoginAction Login.Action
+  | ChildLoginAction Pages.Login.Update.Action
   | ChildUserAction User.Action
   | Logout
   | SetAccessToken AccessToken
@@ -195,7 +198,7 @@ update action model =
         context =
           { backendConfig = (.config >> .backendConfig) model }
 
-        (childModel, childEffects) = Login.update context act model.login
+        (childModel, childEffects) = Pages.Login.Update.update context act model.login
 
         defaultEffect =
           Effects.map ChildLoginAction childEffects
@@ -206,10 +209,10 @@ update action model =
 
         effects' =
           case act of
-            -- User's token was fetched, so we can set it in the accessToken
-            -- root property, and also get the user info, which will in turn
-            -- redirect the user from the login page.
-            Login.SetAccessToken token ->
+            -- -- User's token was fetched, so we can set it in the accessToken
+            -- -- root property, and also get the user info, which will in turn
+            -- -- redirect the user from the login page.
+            Pages.Login.Update.SetAccessToken token ->
               (Task.succeed (SetAccessToken token) |> Effects.task)
               ::
               (Task.succeed (ChildUserAction User.GetDataFromServer) |> Effects.task)
@@ -461,7 +464,7 @@ mainContent address model =
           { backendConfig = (.config >> .backendConfig) model }
 
       in
-        div [ style myStyle ] [ Login.view context childAddress model.login ]
+        div [ style myStyle ] [ Pages.Login.View.view context childAddress model.login ]
 
     PageNotFound ->
       div [] [ PageNotFound.view ]

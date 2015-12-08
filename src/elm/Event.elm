@@ -428,8 +428,13 @@ viewEventsByAuthors address events selectedAuthor =
 
         authorUnselect =
           span []
-            [ a [ href "javascript:void(0);", onClick address (UnSelectAuthor) ] [ text "x " ]
-            , authorRaw
+            [ authorRaw
+            , a
+              [ class "unselect fa fa-minus-circle"
+              , href "javascript:void(0);"
+              , onClick address (UnSelectAuthor)
+              ]
+              []
             ]
       in
         case selectedAuthor of
@@ -485,7 +490,6 @@ viewFilterString address model =
         []
     ]
 
-
 viewListEvents : Signal.Address Action -> Model -> Html
 viewListEvents address model =
   let
@@ -501,8 +505,14 @@ viewListEvents address model =
     eventUnselect event =
       li []
         [ span []
-          [ a [ href "javascript:void(0);", onClick address (UnSelectEvent) ] [ text "x " ]
-          , text event.label
+          [ text event.label
+          , a
+              [
+              class "unselect fa fa-minus-circle"
+              , hrefVoid
+              , onClick address (UnSelectEvent)
+              ]
+              []
           ]
         ]
 
@@ -517,7 +527,7 @@ viewListEvents address model =
   in
     if not <| List.isEmpty filteredEvents
       then
-        ul [] (List.map getListItem filteredEvents)
+        ul [ class "events" ] (List.map getListItem filteredEvents)
       else
         div [] [ text "No results found"]
 

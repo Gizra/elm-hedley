@@ -1,8 +1,30 @@
 
 #events-page {
 
+  .unselect {
+    position: absolute;
+    top: 0;
+    right: 7px;
+    color: $error;
+    line-height: 30px;
+    font-size: 18px;
+    text-decoration: none;
+    border-left: 1px solid $gray;
+    padding-left: 8px;
+    transition: color 0.4s ease-in;
+
+    &:hover {
+      color: $error-light;
+    }
+  }
+
   .first .wrapper:nth-child(n+2) {
     margin-top: 30px;
+  }
+
+  .events li,
+  .authors li {
+    position: relative;
   }
 
   .companies {
@@ -14,7 +36,8 @@
     background: white;
   }
 
-  .authors {
+  .authors,
+  .events {
     @extend .list-theme;
     margin-bottom: 15px;
 

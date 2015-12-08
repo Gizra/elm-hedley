@@ -82,6 +82,15 @@
             @extend .brand;
           }
         }
+
+        &.active {
+
+          a,
+          i {
+            color: $blue;
+            background: none;
+          }
+        }
       }
     }
   }

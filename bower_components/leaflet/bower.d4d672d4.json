@@ -1,14 +1,14 @@
 {
   "name": "leaflet",
-  "version": "0.7.7",
+  "version": "0.7.5",
   "description": "JavaScript library for mobile-friendly interactive maps",
   "main": [
-    "dist/leaflet.bc07ad3e.css",
-    "dist/leaflet-src.af565d10.js",
+    "dist/leaflet.0286869e.css",
+    "dist/leaflet-src.586addf3.js",
     "dist/images/layers-2x.4c58c7de.png",
-    "dist/images/layers.811d6bd3.png",
-    "dist/images/marker-icon-2x.fa3f8f68.png",
-    "dist/images/marker-icon.1d82e228.png",
+    "dist/images/layers.95b42783.png",
+    "dist/images/marker-icon-2x.41982846.png",
+    "dist/images/marker-icon.f6a871e6.png",
     "dist/images/marker-shadow.4bc9ba76.png"
   ],
   "ignore": [

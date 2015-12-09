@@ -3,20 +3,17 @@ module Pages.User.View where
 import Company exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import String
+import Pages.User.Model as User exposing (Model)
+import Pages.User.Update exposing (Action)
 
-import Pages.User.Model as User exposing (..)
-import Pages.User.Update exposing (..)
-
-import Debug
 
 view : Signal.Address Action -> User.Model -> Html
 view address model =
   case model.name of
-    Anonymous ->
+    User.Anonymous ->
       div [] [ text "This is wrong - anon user cannot reach this!"]
 
-    LoggedIn name ->
+    User.LoggedIn name ->
       let
         mainTitle =
           h3

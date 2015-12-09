@@ -1,4 +1,4 @@
-module PageNotFound where
+module Pages.PageNotFound.View where
 
 import Html exposing (a, i, div, h2, text, Html)
 import Html.Attributes exposing (class, id, href, style)

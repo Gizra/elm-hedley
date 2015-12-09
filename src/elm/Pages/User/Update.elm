@@ -1,27 +1,26 @@
 module Pages.User.Update where
 
-import Company exposing (..)
 import ConfigType exposing (BackendConfig)
 import Effects exposing (Effects, Never)
 import Http exposing (Error)
-import String
-import Task
+import Pages.User.Model as User exposing (AccessToken, Model)
+import Pages.User.Decoder exposing (decode)
+import Task exposing (succeed)
 
-import Pages.User.Model as User exposing (..)
-import Pages.User.Decoder exposing (..)
+type alias Action = User.Action
 
 type alias UpdateContext =
   { accessToken : AccessToken
   , backendConfig : BackendConfig
   }
 
-update : UpdateContext -> Action -> User.Model -> (User.Model, Effects Action)
+update : UpdateContext -> User.Action -> User.Model -> (User.Model, Effects Action)
 update context action model =
   case action of
-    NoOp _ ->
+    User.NoOp _ ->
       (model, Effects.none)
 
-    GetDataFromServer ->
+    User.GetDataFromServer ->
       let
         backendUrl =
           (.backendConfig >> .backendUrl) context
@@ -29,24 +28,24 @@ update context action model =
         url =
           backendUrl ++ "/api/v1.0/me"
       in
-        if model.status == Fetching || model.status == Fetched
+        if model.status == User.Fetching || model.status == User.Fetched
           then
             (model, Effects.none)
           else
-            ( { model | status <- Fetching }
+            ( { model | status <- User.Fetching }
             , getJson url context.accessToken
             )
 
-    UpdateDataFromServer result ->
+    User.UpdateDataFromServer result ->
       let
         model' =
-          { model | status <- Fetched}
+          { model | status <- User.Fetched}
       in
         case result of
           Ok (id, name, companies) ->
             ( {model'
                 | id <- id
-                , name <- LoggedIn name
+                , name <- User.LoggedIn name
                 , companies <- companies
               }
             , Effects.none
@@ -58,18 +57,30 @@ update context action model =
                   Http.BadResponse code _ ->
                     if (code == 401)
                       -- Token is wrong, so remove any existing one.
-                      then Task.succeed (SetAccessToken "") |> Effects.task
+                      then Task.succeed (User.SetAccessToken "") |> Effects.task
                       else Effects.none
 
                   _ ->
                     Effects.none
 
             in
-            ( { model' | status <- HttpError msg }
+            ( { model' | status <- User.HttpError msg }
             , effects
             )
 
-    SetAccessToken accessToken ->
+    User.SetAccessToken accessToken ->
       ( {model | accessToken <- accessToken}
       , Effects.none
       )
+
+-- Effects
+
+getJson : String -> AccessToken -> Effects Action
+getJson url accessToken =
+  let
+    encodedUrl = Http.url url [ ("access_token", accessToken) ]
+  in
+    Http.get decode encodedUrl
+      |> Task.toResult
+      |> Task.map User.UpdateDataFromServer
+      |> Effects.task

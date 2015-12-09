@@ -14,7 +14,6 @@ import RouteHash exposing (HashUpdate)
 import String exposing (isEmpty)
 import Storage exposing (removeItem)
 import Task exposing (..)
-import User exposing (..)
 
 -- Pages import
 
@@ -25,6 +24,10 @@ import Pages.Article.View exposing (view)
 import Pages.Login.Model as Login exposing (initialModel, Model)
 import Pages.Login.Update exposing (Action)
 import Pages.Login.View exposing (view)
+
+import Pages.User.Model as User exposing(..)
+import Pages.User.Update exposing (..)
+import Pages.User.View exposing (..)
 
 -- MODEL
 
@@ -235,7 +238,7 @@ update action model =
           , backendConfig = (.config >> .backendConfig) model
           }
 
-        (childModel, childEffects) = User.update context act model.user
+        (childModel, childEffects) = Pages.User.Update.update context act model.user
 
         defaultEffect =
           Effects.map ChildUserAction childEffects
@@ -475,7 +478,7 @@ mainContent address model =
         childAddress =
           Signal.forwardTo address ChildUserAction
       in
-        div [ style myStyle ] [ User.view childAddress model.user ]
+        div [ style myStyle ] [ Pages.User.View.view childAddress model.user ]
 
 navbar : Signal.Address Action -> Model -> Html
 navbar address model =

@@ -6,8 +6,6 @@ import Http exposing (Error)
 import String
 import Task
 
-import Debug
-
 type alias Id = Int
 type alias AccessToken = String
 
@@ -49,7 +47,6 @@ init =
 
 type Action
   = GetDataFromServer
+  | NoOp (Maybe ())
   | SetAccessToken AccessToken
   | UpdateDataFromServer (Result Http.Error (Id, String, List Company.Model))
-  -- NoOp actions
-  | NoOp (Maybe ())

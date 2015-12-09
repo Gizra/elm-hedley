@@ -1,11 +1,11 @@
 module Pages.User.Decoder where
 
 import Company exposing (..)
-import Json.Decode as Json exposing ((:=))
+import Effects exposing (Effects, Never)
 import Http exposing (Error)
+import Json.Decode as Json exposing ((:=))
 import String
 import Task
-import Effects exposing (Effects, Never)
 
 import Pages.User.Model as User exposing (..)
 

@@ -3,7 +3,7 @@ module Pages.Login.View where
 import Pages.Login.Model exposing (initialModel, Model)
 import Pages.Login.Update exposing (Action)
 
-import ConfigType exposing (BackendConfig)
+import Config.Model exposing (BackendConfig)
 import Html exposing (a, button, div, i, input, h2, hr, span, text, Html)
 import Html.Attributes exposing (action, class, disabled, id, hidden, href, placeholder, required, size, style, type', value)
 import Html.Events exposing (on, onClick, onSubmit, targetValue)

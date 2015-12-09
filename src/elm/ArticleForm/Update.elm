@@ -4,7 +4,7 @@ import Article.Decoder exposing (decode)
 import Article.Model as Article exposing (Author, Model)
 import ArticleForm.Model as ArticleForm exposing (initialArticleForm, initialModel, ArticleForm, Model, UserMessage)
 
-import ConfigType exposing (BackendConfig)
+import Config.Model exposing (BackendConfig)
 import Effects exposing (Effects)
 import Http exposing (post, Error)
 import Json.Decode as JD exposing ((:=))

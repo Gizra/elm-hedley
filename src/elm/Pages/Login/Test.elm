@@ -3,7 +3,7 @@ module Pages.Login.Test where
 import ElmTest.Assertion exposing (..)
 import ElmTest.Test exposing (..)
 
-import ConfigType exposing (initialBackendConfig)
+import Config.Model exposing (initialBackendConfig)
 import Effects exposing (Effects)
 import Http exposing (Error)
 import Pages.Login.Model exposing (initialModel, Model)
@@ -73,7 +73,7 @@ setAccessToken val =
 
 updateContext : Pages.Login.Update.Context
 updateContext =
-  { backendConfig = ConfigType.initialBackendConfig
+  { backendConfig = initialBackendConfig
   }
 
 all : Test

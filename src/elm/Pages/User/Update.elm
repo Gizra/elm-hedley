@@ -1,6 +1,6 @@
 module Pages.User.Update where
 
-import ConfigType exposing (BackendConfig)
+import Config.Model exposing (BackendConfig)
 import Effects exposing (Effects, Never)
 import Http exposing (Error)
 import Pages.User.Model as User exposing (AccessToken, Model)

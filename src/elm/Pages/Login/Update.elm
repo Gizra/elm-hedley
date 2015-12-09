@@ -3,7 +3,7 @@ module Pages.Login.Update where
 import Pages.Login.Model exposing (initialModel, Model)
 
 import Base64 exposing (encode)
-import ConfigType exposing (BackendConfig)
+import Config.Model exposing (BackendConfig)
 import Effects exposing (Effects)
 import Http exposing (Error)
 import Json.Decode as JD exposing ((:=))

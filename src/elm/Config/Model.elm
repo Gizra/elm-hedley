@@ -1,4 +1,4 @@
-module ConfigType where
+module Config.Model where
 
 type alias BackendConfig =
   { backendUrl : String
@@ -14,4 +14,15 @@ initialBackendConfig =
   , githubClientId = ""
   , name = ""
   , hostname = ""
+  }
+
+type alias Model =
+  { backendConfig : BackendConfig
+  , error : Bool
+  }
+
+initialModel : Model
+initialModel =
+  { backendConfig = initialBackendConfig
+  , error = False
   }

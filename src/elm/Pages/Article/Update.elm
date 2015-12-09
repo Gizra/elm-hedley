@@ -2,7 +2,7 @@ module Pages.Article.Update where
 
 import ArticleForm.Update exposing (Action)
 import ArticleList.Update exposing (Action)
-import ConfigType exposing (BackendConfig)
+import Config.Model exposing (BackendConfig)
 import Effects exposing (Effects)
 import Pages.Article.Model exposing (Model)
 import Task exposing (succeed)

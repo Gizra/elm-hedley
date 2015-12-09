@@ -73,16 +73,3 @@ update context action model =
       ( {model | accessToken <- accessToken}
       , Effects.none
       )
-
-
--- Determines if a call to the server should be done, based on having an access
--- token present.
-isAccessTokenInStorage : Result err String -> Bool
-isAccessTokenInStorage result =
-  case result of
-    -- If token is empty, no need to call the server.
-    Ok token ->
-      if String.isEmpty token then False else True
-
-    Err _ ->
-      False

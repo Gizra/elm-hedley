@@ -1,7 +1,6 @@
 module GithubAuth where
 
-
-import ConfigType exposing (BackendConfig)
+import Config.Model exposing (BackendConfig)
 import Dict exposing (get)
 import Effects exposing (Effects)
 import Html exposing (a, div, i, text, Html)
@@ -12,9 +11,6 @@ import Json.Encode as JE exposing (..)
 import Task exposing (map)
 import UrlParameterParser exposing (ParseResult, parseSearchString)
 import WebAPI.Location exposing (location)
-
-import Debug
-
 
 -- MODEL
 

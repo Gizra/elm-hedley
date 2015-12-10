@@ -1,6 +1,6 @@
 module Config where
 
-import ConfigType as Config exposing (BackendConfig)
+import Config.Model as Config exposing (BackendConfig)
 import Time exposing (Time)
 
 localBackend : BackendConfig

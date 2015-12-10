@@ -9,18 +9,8 @@ import Task
 
 import Pages.User.Model as User exposing (..)
 
-getJson : String -> AccessToken -> Effects Action
-getJson url accessToken =
-  let
-    encodedUrl = Http.url url [ ("access_token", accessToken) ]
-  in
-    Http.get decodeData encodedUrl
-      |> Task.toResult
-      |> Task.map UpdateDataFromServer
-      |> Effects.task
-
-decodeData : Json.Decoder (User.Id, String, List Company.Model)
-decodeData =
+decode : Json.Decoder (User.Id, String, List Company.Model)
+decode =
   let
     -- Cast String to Int.
     number : Json.Decoder Int

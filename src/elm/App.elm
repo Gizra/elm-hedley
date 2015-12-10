@@ -1,6 +1,8 @@
 module App where
 
-import ConfigManager exposing (Model)
+import Config.Model exposing (initialModel, Model)
+import Config.Update exposing (init, Action)
+import Config.View exposing (view)
 import Company exposing (Model)
 import Effects exposing (Effects)
 import Event exposing (Model, initialModel, update)
@@ -9,7 +11,7 @@ import Html exposing (a, div, h2, i, li, node, span, text, ul, button, Html)
 import Html.Attributes exposing (class, classList, id, href, style, target, attribute)
 import Html.Events exposing (onClick)
 import Json.Encode as JE exposing (string, Value)
-import PageNotFound exposing (view)
+import Pages.PageNotFound.View as PageNotFound exposing (view)
 import RouteHash exposing (HashUpdate)
 import String exposing (isEmpty)
 import Storage exposing (removeItem)
@@ -42,22 +44,18 @@ type Page
   | PageNotFound
   | User
 
-type Status
-  = Init
-  | ConfigError
-
 type alias Model =
   { accessToken : AccessToken
   , activePage : Page
   , article : Article.Model
-  , config : ConfigManager.Model
+  , config : Config.Model.Model
+  , configError : Bool
   , companies : List Company.Model
   , events : Event.Model
   , githubAuth: GithubAuth.Model
   , login: Login.Model
   -- If the user is anonymous, we want to know where to redirect them.
   , nextPage : Maybe Page
-  , status : Status
   , user : User.Model
   }
 
@@ -66,19 +64,19 @@ initialModel =
   { accessToken = ""
   , activePage = Login
   , article = Article.initialModel
-  , config = ConfigManager.initialModel
+  , config = Config.Model.initialModel
+  , configError = False
   , companies = []
   , events = Event.initialModel
   , githubAuth = GithubAuth.initialModel
   , login = Login.initialModel
   , nextPage = Nothing
-  , status = Init
   , user = User.initialModel
   }
 
 initialEffects : List (Effects Action)
 initialEffects =
-  [ Effects.map ChildConfigAction <| snd ConfigManager.init
+  [ Effects.map ChildConfigAction <| snd Config.Update.init
   , Effects.map ChildLoginAction <| snd Pages.Login.Update.init
   ]
 
@@ -92,7 +90,7 @@ init =
 
 type Action
   = ChildArticleAction Pages.Article.Update.Action
-  | ChildConfigAction ConfigManager.Action
+  | ChildConfigAction Config.Update.Action
   | ChildEventAction Event.Action
   | ChildGithubAuthAction GithubAuth.Action
   | ChildLoginAction Pages.Login.Update.Action
@@ -100,7 +98,7 @@ type Action
   | Logout
   | SetAccessToken AccessToken
   | SetActivePage Page
-  | SetStatus Status
+  | SetConfigError
   | UpdateCompanies (List Company.Model)
 
   -- NoOp actions
@@ -128,24 +126,26 @@ update action model =
 
     ChildConfigAction act ->
       let
-        (childModel, childEffects) = ConfigManager.update act model.config
+        (childModel, childEffects) = Config.Update.update act model.config
 
-        status =
+        defaultEffects =
+          [ Effects.map ChildConfigAction childEffects ]
+
+        effects' =
           case act of
-            ConfigManager.SetStatus status ->
-              if status == ConfigManager.Error
-                then ConfigError
-                else model.status
-
+            Config.Update.SetError ->
+              -- Set configuration error.
+              (Task.succeed SetConfigError |> Effects.task)
+              ::
+              defaultEffects
             _ ->
-              model.status
+              defaultEffects
 
       in
-        ( {model
+        ( { model
           | config <- childModel
-          , status <- status
           }
-        , Effects.map ChildConfigAction childEffects
+        , Effects.batch effects'
         )
 
     ChildEventAction act ->
@@ -391,8 +391,8 @@ update action model =
               ]
             )
 
-    SetStatus status ->
-      ( { model | status <- status}
+    SetConfigError ->
+      ( { model | configError <- True}
       , Effects.none
       )
 
@@ -407,6 +407,7 @@ update action model =
 
 -- VIEW
 
+isActivePage : Page -> Page -> Bool
 isActivePage activePage page =
   case activePage of
     Event companyId ->
@@ -416,20 +417,17 @@ isActivePage activePage page =
 
 view : Signal.Address Action -> Model -> Html
 view address model =
-  if model.status == ConfigError
+  if model.configError == True
     then
-      div
-        [ class "config-error"]
-        [ h2 [] [ text "Configuration error" ]
-        , div [] [ text "Check your Config.elm file and make sure you have defined the enviorement properly" ]
-        ]
+      Config.View.view
+
     else
       div
-      []
-      [ (navbar address model)
-      , (mainContent address model)
-      , footer
-      ]
+        []
+        [ (navbar address model)
+        , (mainContent address model)
+        , footer
+        ]
 
 mainContent : Signal.Address Action -> Model -> Html
 mainContent address model =

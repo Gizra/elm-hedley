@@ -3,7 +3,7 @@ module EventTest where
 import ElmTest.Assertion exposing (..)
 import ElmTest.Test exposing (..)
 
-import ConfigType exposing (initialBackendConfig)
+import Config.Model exposing (initialBackendConfig)
 import Company exposing (Model)
 import Effects exposing (Effects)
 import Event exposing (initialModel, UpdateContext)
@@ -31,7 +31,7 @@ companies =
 updateContext : Event.UpdateContext
 updateContext =
   { accessToken = ""
-  , backendConfig = ConfigType.initialBackendConfig
+  , backendConfig = initialBackendConfig
   , companies = companies
   }
 

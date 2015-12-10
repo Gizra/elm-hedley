@@ -1,7 +1,7 @@
 module Event where
 
 import Config exposing (cacheTtl)
-import ConfigType exposing (BackendConfig)
+import Config.Model exposing (BackendConfig)
 import Company exposing (Model)
 import Dict exposing (Dict)
 import Effects exposing (Effects)
@@ -12,14 +12,11 @@ import Http
 import Json.Decode as Json exposing ((:=))
 import Leaflet.Model exposing (initialModel, Model)
 import Leaflet.Update exposing (Action)
-import Leaflet.View exposing (view)
 import RouteHash exposing (HashUpdate)
 import String exposing (length)
 import Task  exposing (andThen, Task)
 import TaskTutorial exposing (getCurrentTime)
 import Time exposing (Time)
-
-import Debug
 
 -- MODEL
 

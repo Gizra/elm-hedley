@@ -6,12 +6,11 @@ import Config.View exposing (view)
 import Company exposing (Model)
 import Effects exposing (Effects)
 import Event exposing (Model, initialModel, update)
-import GithubAuth exposing (Model)
+
 import Html exposing (a, div, h2, i, li, node, span, text, ul, button, Html)
 import Html.Attributes exposing (class, classList, id, href, style, target, attribute)
 import Html.Events exposing (onClick)
 import Json.Encode as JE exposing (string, Value)
-import Pages.PageNotFound.View as PageNotFound exposing (view)
 import RouteHash exposing (HashUpdate)
 import String exposing (isEmpty)
 import Storage exposing (removeItem)
@@ -23,9 +22,16 @@ import Pages.Article.Model as Article exposing (initialModel, Model)
 import Pages.Article.Update exposing (Action)
 import Pages.Article.View exposing (view)
 
+import Pages.GithubAuth.Model as GithubAuth exposing (initialModel, Model)
+import Pages.GithubAuth.Update exposing (Action)
+import Pages.GithubAuth.View exposing (view)
+
 import Pages.Login.Model as Login exposing (initialModel, Model)
 import Pages.Login.Update exposing (Action)
 import Pages.Login.View exposing (view)
+
+import Pages.PageNotFound.View as PageNotFound exposing (view)
+
 
 import Pages.User.Model as User exposing(..)
 import Pages.User.Update exposing (..)
@@ -92,7 +98,7 @@ type Action
   = ChildArticleAction Pages.Article.Update.Action
   | ChildConfigAction Config.Update.Action
   | ChildEventAction Event.Action
-  | ChildGithubAuthAction GithubAuth.Action
+  | ChildGithubAuthAction Pages.GithubAuth.Update.Action
   | ChildLoginAction Pages.Login.Update.Action
   | ChildUserAction User.Action
   | Logout
@@ -169,7 +175,7 @@ update action model =
         context =
           { backendConfig = (.config >> .backendConfig) model }
 
-        (childModel, childEffects) = GithubAuth.update context act model.githubAuth
+        (childModel, childEffects) = Pages.GithubAuth.Update.update context act model.githubAuth
 
         defaultEffect =
           Effects.map ChildGithubAuthAction childEffects
@@ -183,7 +189,7 @@ update action model =
             -- User's token was fetched, so we can set it in the accessToken
             -- root property, and also get the user info, which will in turn
             -- redirect the user from the login page.
-            GithubAuth.SetAccessToken token ->
+            Pages.GithubAuth.Update.SetAccessToken token ->
               (Task.succeed (SetAccessToken token) |> Effects.task)
               ::
               defaultEffects
@@ -368,7 +374,7 @@ update action model =
               Task.succeed (ChildEventAction <| Event.Activate companyId) |> Effects.task
 
             GithubAuth ->
-              Task.succeed (ChildGithubAuthAction GithubAuth.Activate) |> Effects.task
+              Task.succeed (ChildGithubAuthAction Pages.GithubAuth.Update.Activate) |> Effects.task
 
             _ ->
               Effects.none
@@ -454,7 +460,7 @@ mainContent address model =
         childAddress =
           Signal.forwardTo address ChildGithubAuthAction
       in
-        div [ style myStyle ] [ GithubAuth.view childAddress model.githubAuth ]
+        div [ style myStyle ] [ Pages.GithubAuth.View.view childAddress model.githubAuth ]
 
     Login ->
       let

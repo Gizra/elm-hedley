@@ -2,7 +2,7 @@ module Event where
 
 import Config exposing (cacheTtl)
 import Config.Model exposing (BackendConfig)
-import Company exposing (Model)
+import Company.Model as Company exposing (Model)
 import Dict exposing (Dict)
 import Effects exposing (Effects)
 import Html exposing (a, div, input, text, select, span, li, option, ul, Html)

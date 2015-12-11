@@ -1,7 +1,7 @@
 module App.Model where
 
 import Config.Model exposing (initialModel, Model)
-import Company exposing (Model)
+import Company.Model as Company exposing (Model)
 import Event exposing (Model, initialModel, update)
 
 -- Pages import

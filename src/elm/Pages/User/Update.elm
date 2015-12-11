@@ -1,7 +1,7 @@
 module Pages.User.Update where
 
 import Config.Model exposing (BackendConfig)
-import Company exposing (initialModel, Model)
+import Company.Model as Company exposing (initialModel, Model)
 import Effects exposing (Effects, Never)
 import Http exposing (Error)
 import Pages.User.Model as User exposing (Model)

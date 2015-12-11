@@ -1,6 +1,6 @@
 module Pages.User.View where
 
-import Company exposing (..)
+import Company.Model as Company exposing (Model)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Pages.User.Model as User exposing (Model)

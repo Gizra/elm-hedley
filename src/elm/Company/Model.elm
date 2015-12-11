@@ -1,8 +1,4 @@
-module Company where
-
-import Debug
-
--- MODEL
+module Company.Model where
 
 type alias Id = Int
 

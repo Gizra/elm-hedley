@@ -17,9 +17,10 @@ import Task exposing (succeed)
 import Pages.Article.Update exposing (Action)
 import Pages.GithubAuth.Update exposing (Action)
 import Pages.Login.Update exposing (Action)
-import Pages.User.Model as User exposing (..)
+import Pages.User.Model exposing (User)
 import Pages.User.Update exposing (Action)
 
+type alias AccessToken = String
 type alias Model = App.Model
 
 initialEffects : List (Effects Action)
@@ -40,7 +41,7 @@ type Action
   | ChildEventAction Event.Action
   | ChildGithubAuthAction Pages.GithubAuth.Update.Action
   | ChildLoginAction Pages.Login.Update.Action
-  | ChildUserAction User.Action
+  | ChildUserAction Pages.User.Update.Action
   | Logout
   | SetAccessToken AccessToken
   | SetActivePage App.Page
@@ -164,7 +165,7 @@ update action model =
             Pages.Login.Update.SetAccessToken token ->
               (Task.succeed (SetAccessToken token) |> Effects.task)
               ::
-              (Task.succeed (ChildUserAction User.GetDataFromServer) |> Effects.task)
+              (Task.succeed (ChildUserAction Pages.User.Update.GetDataFromServer) |> Effects.task)
               ::
               defaultEffects
 
@@ -198,7 +199,7 @@ update action model =
         (model'', effects') =
           case act of
             -- Bubble up the SetAccessToken to the App level.
-            User.SetAccessToken token ->
+            Pages.User.Update.SetAccessToken token ->
               ( model'
               , (Task.succeed (SetAccessToken token) |> Effects.task)
                 ::
@@ -206,7 +207,7 @@ update action model =
               )
 
             -- Act when user was successfully fetched from the server.
-            User.UpdateDataFromServer result ->
+            Pages.User.Update.UpdateDataFromServer result ->
               case result of
                 -- We reach out into the companies that is passed to the child
                 -- action.
@@ -261,7 +262,7 @@ update action model =
               ::
               defaultEffects
             else
-              (Task.succeed (ChildUserAction User.GetDataFromServer) |> Effects.task)
+              (Task.succeed (ChildUserAction Pages.User.Update.GetDataFromServer) |> Effects.task)
               ::
               defaultEffects
 
@@ -273,7 +274,7 @@ update action model =
     SetActivePage page ->
       let
         (page', nextPage) =
-          if model.user.name == Anonymous
+          if model.user.name == Pages.User.Model.Anonymous
             then
               case page of
                 App.GithubAuth ->

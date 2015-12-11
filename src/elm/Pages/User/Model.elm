@@ -1,10 +1,7 @@
 module Pages.User.Model where
 
-import Company exposing (..)
-import Effects exposing (Effects)
+import Company exposing (initialModel, Model)
 import Http exposing (Error)
-import String
-import Task
 
 type alias Id = Int
 type alias AccessToken = String
@@ -38,15 +35,3 @@ initialModel =
   -- Child components
   , companies = [Company.initialModel]
   }
-
-init : (Model, Effects Action)
-init =
-  ( initialModel
-  , Effects.none
-  )
-
-type Action
-  = GetDataFromServer
-  | NoOp (Maybe ())
-  | SetAccessToken AccessToken
-  | UpdateDataFromServer (Result Http.Error (Id, String, List Company.Model))

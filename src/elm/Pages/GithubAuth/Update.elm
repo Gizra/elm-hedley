@@ -1,41 +1,17 @@
-module GithubAuth where
+module Pages.GithubAuth.Update where
 
 import Config.Model exposing (BackendConfig)
 import Dict exposing (get)
 import Effects exposing (Effects)
-import Html exposing (a, div, i, text, Html)
-import Html.Attributes exposing (class, href, id)
 import Http exposing (Error)
 import Json.Decode as JD exposing ((:=))
 import Json.Encode as JE exposing (..)
+import Pages.GithubAuth.Model as GithubAuth exposing (initialModel, Model)
 import Task exposing (map)
 import UrlParameterParser exposing (ParseResult, parseSearchString)
 import WebAPI.Location exposing (location)
 
--- MODEL
-
 type alias AccessToken = String
-
-type Status = Init
-  | Error String
-  | Fetching
-  | Fetched
-  | HttpError Http.Error
-
-
-type alias Model =
-  { accessToken: AccessToken
-  , status : Status
-  , code : Maybe String
-  }
-
-initialModel : Model
-initialModel =
-  { accessToken = ""
-  , status = Init
-  , code = Nothing
-  }
-
 
 init : (Model, Effects Action)
 init =
@@ -43,8 +19,6 @@ init =
   , Effects.none
   )
 
-
--- UPDATE
 
 type Action
   = Activate
@@ -73,7 +47,7 @@ update context action model =
         )
 
     SetError msg ->
-      ( { model | status <- Error msg }
+      ( { model | status <- GithubAuth.Error msg }
       , Effects.none
       )
 
@@ -85,39 +59,14 @@ update context action model =
     UpdateAccessTokenFromServer result ->
       case result of
         Ok token ->
-          ( { model | status <- Fetched }
+          ( { model | status <- GithubAuth.Fetched }
           , Task.succeed (SetAccessToken token) |> Effects.task
           )
         Err msg ->
-          ( { model | status <- HttpError msg }
+          ( { model | status <- GithubAuth.HttpError msg }
           -- @todo: Improve.
           , Task.succeed (SetError "HTTP error") |> Effects.task
           )
-
--- VIEW
-
-view : Signal.Address Action -> Model -> Html
-view address model =
-  let
-    spinner =
-      i [ class "fa fa-spinner fa-spin" ] []
-
-    content =
-      case model.status of
-        Error msg ->
-          div []
-            [text <| "Error:" ++ msg
-            , a [ href "#!/login"] [text "Back to Login"]
-            ]
-
-        _ ->
-          spinner
-
-  in
-    div
-      [ id "github-auth-page" ]
-      [ div [ class "container"] [ content ]
-      ]
 
 -- EFFECTS
 

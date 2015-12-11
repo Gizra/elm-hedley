@@ -1,78 +1,26 @@
-module App where
+module App.Update where
 
-import Config.Model exposing (initialModel, Model)
+import App.Model as App exposing (initialModel, Model)
+
 import Config.Update exposing (init, Action)
-import Config.View exposing (view)
 import Company exposing (Model)
 import Effects exposing (Effects)
 import Event exposing (Model, initialModel, update)
 import GithubAuth exposing (Model)
-import Html exposing (a, div, h2, i, li, node, span, text, ul, button, Html)
-import Html.Attributes exposing (class, classList, id, href, style, target, attribute)
-import Html.Events exposing (onClick)
 import Json.Encode as JE exposing (string, Value)
-import Pages.PageNotFound.View as PageNotFound exposing (view)
-import RouteHash exposing (HashUpdate)
 import String exposing (isEmpty)
-import Storage exposing (removeItem)
-import Task exposing (..)
+import Storage exposing (removeItem, setItem)
+import Task exposing (succeed)
 
 -- Pages import
 
-import Pages.Article.Model as Article exposing (initialModel, Model)
 import Pages.Article.Update exposing (Action)
-import Pages.Article.View exposing (view)
-
-import Pages.Login.Model as Login exposing (initialModel, Model)
 import Pages.Login.Update exposing (Action)
-import Pages.Login.View exposing (view)
 
 import Pages.User.Model as User exposing(..)
-import Pages.User.Update exposing (..)
-import Pages.User.View exposing (..)
+import Pages.User.Update exposing (Action)
 
--- MODEL
-
-type alias AccessToken = String
-type alias CompanyId = Int
-
-type Page
-  = Article
-  | Event (Maybe CompanyId)
-  | GithubAuth
-  | Login
-  | PageNotFound
-  | User
-
-type alias Model =
-  { accessToken : AccessToken
-  , activePage : Page
-  , article : Article.Model
-  , config : Config.Model.Model
-  , configError : Bool
-  , companies : List Company.Model
-  , events : Event.Model
-  , githubAuth: GithubAuth.Model
-  , login: Login.Model
-  -- If the user is anonymous, we want to know where to redirect them.
-  , nextPage : Maybe Page
-  , user : User.Model
-  }
-
-initialModel : Model
-initialModel =
-  { accessToken = ""
-  , activePage = Login
-  , article = Article.initialModel
-  , config = Config.Model.initialModel
-  , configError = False
-  , companies = []
-  , events = Event.initialModel
-  , githubAuth = GithubAuth.initialModel
-  , login = Login.initialModel
-  , nextPage = Nothing
-  , user = User.initialModel
-  }
+type alias Model = App.Model
 
 initialEffects : List (Effects Action)
 initialEffects =
@@ -82,11 +30,9 @@ initialEffects =
 
 init : (Model, Effects Action)
 init =
-  ( initialModel
+  ( App.initialModel
   , Effects.batch initialEffects
   )
-
--- UPDATE
 
 type Action
   = ChildArticleAction Pages.Article.Update.Action
@@ -97,7 +43,7 @@ type Action
   | ChildUserAction User.Action
   | Logout
   | SetAccessToken AccessToken
-  | SetActivePage Page
+  | SetActivePage App.Page
   | SetConfigError
   | UpdateCompanies (List Company.Model)
 
@@ -271,7 +217,7 @@ update action model =
                         Just page ->
                           page
                         Nothing ->
-                          Event Nothing
+                          App.Event Nothing
 
                   in
                     -- User data was successfully fetched, so we can redirect to
@@ -298,7 +244,7 @@ update action model =
         (model'', Effects.batch effects')
 
     Logout ->
-      ( initialModel
+      ( App.initialModel
       , Effects.batch <| removeStorageItem :: initialEffects
       )
 
@@ -330,30 +276,30 @@ update action model =
           if model.user.name == Anonymous
             then
               case page of
-                GithubAuth ->
-                  (GithubAuth, model.nextPage)
+                App.GithubAuth ->
+                  (App.GithubAuth, model.nextPage)
 
                 -- The user is anonymous and we are asked to set the active page
                 -- to login, then we make sure that the next page doesn't
                 -- change, so they won't be rediected back to the login page.
-                Login ->
-                  (Login, model.nextPage)
+                App.Login ->
+                  (App.Login, model.nextPage)
 
                 -- When the page is not found, we should keep the URL as is,
                 -- and even after the user info was fetched, we should keep it
                 -- so we set the next Page also to the error page.
-                PageNotFound ->
+                App.PageNotFound ->
                   (page, Just page)
 
                 _ ->
-                  (Login, Just page)
+                  (App.Login, Just page)
 
               -- Authenticated user.
               else (page, Nothing)
 
         currentPageEffects =
           case model.activePage of
-            Event companyId ->
+            App.Event companyId ->
               Task.succeed (ChildEventAction Event.Deactivate) |> Effects.task
 
             _ ->
@@ -361,13 +307,13 @@ update action model =
 
         newPageEffects =
           case page' of
-            Article ->
+            App.Article ->
               Task.succeed (ChildArticleAction Pages.Article.Update.Activate) |> Effects.task
 
-            Event companyId ->
+            App.Event companyId ->
               Task.succeed (ChildEventAction <| Event.Activate companyId) |> Effects.task
 
-            GithubAuth ->
+            App.GithubAuth ->
               Task.succeed (ChildGithubAuthAction GithubAuth.Activate) |> Effects.task
 
             _ ->
@@ -405,185 +351,6 @@ update action model =
     _ ->
       ( model, Effects.none )
 
--- VIEW
-
-isActivePage : Page -> Page -> Bool
-isActivePage activePage page =
-  case activePage of
-    Event companyId ->
-      page == (Event Nothing)
-    _->
-      activePage == page
-
-view : Signal.Address Action -> Model -> Html
-view address model =
-  if model.configError == True
-    then
-      Config.View.view
-
-    else
-      div
-        []
-        [ (navbar address model)
-        , (mainContent address model)
-        , footer
-        ]
-
-mainContent : Signal.Address Action -> Model -> Html
-mainContent address model =
-  case model.activePage of
-    Article ->
-      let
-        childAddress =
-          Signal.forwardTo address ChildArticleAction
-      in
-        div [ style myStyle ] [ Pages.Article.View.view childAddress model.article ]
-
-    Event companyId ->
-      let
-        childAddress =
-          Signal.forwardTo address ChildEventAction
-
-        context =
-          { companies = model.companies}
-      in
-        div [ style myStyle ] [ Event.view context childAddress model.events ]
-
-    GithubAuth ->
-      let
-        childAddress =
-          Signal.forwardTo address ChildGithubAuthAction
-      in
-        div [ style myStyle ] [ GithubAuth.view childAddress model.githubAuth ]
-
-    Login ->
-      let
-        childAddress =
-          Signal.forwardTo address ChildLoginAction
-
-        context =
-          { backendConfig = (.config >> .backendConfig) model }
-
-      in
-        div [ style myStyle ] [ Pages.Login.View.view context childAddress model.login ]
-
-    PageNotFound ->
-      div [] [ PageNotFound.view ]
-
-
-    User ->
-      let
-        childAddress =
-          Signal.forwardTo address ChildUserAction
-      in
-        div [ style myStyle ] [ Pages.User.View.view childAddress model.user ]
-
-navbar : Signal.Address Action -> Model -> Html
-navbar address model =
-  case model.user.name of
-    Anonymous ->
-      div [] []
-
-    LoggedIn name ->
-      navbarLoggedIn address model
-
-footer : Html
-footer =
-
-  div [class "main-footer"]
-    [ div [class "container"]
-      [ span []
-        [ text "With "
-        , i [ class "fa fa-heart" ] []
-        , text " from "
-        , a [ href "http://gizra.com", target "_blank", class "gizra-logo" ] [text "gizra"]
-        , span [ class "divider" ] [text "|"]
-        , text "Fork me on "
-        , a [href "https://github.com/Gizra/elm-hedley", target "_blank"] [text "Github"]
-        ]
-      ]
-  ]
-
--- Navbar for Auth user.
-navbarLoggedIn : Signal.Address Action -> Model -> Html
-navbarLoggedIn address model =
-  let
-    activeClass page =
-      [ ("active", isActivePage model.activePage page) ]
-
-    childAddress =
-      Signal.forwardTo address ChildUserAction
-
-    hrefVoid =
-      href "javascript:void(0);"
-
-
-    navCollapseButton =
-      let
-        iconBar index =
-          span [ class "icon-bar" ] []
-
-      in
-        button
-          [ class "navbar-toggle"
-          , attribute "data-toggle" "collapse"
-          , attribute "data-target" ".main-nav"
-          ]
-          [ span [ class "sr-only"] [ text "Menu" ]
-          , span [] ( List.map iconBar [0..2] )
-          ]
-
-  in
-    node "nav"
-      [ id "main-header"
-      , class "navbar navbar-default" ]
-      [ div
-          [ class "container" ]
-          [ div
-              [ class "navbar-header" ]
-              [ a [ class "brand visible-xs pull-left", href "#!/" ] [ text "Hedley" ]
-              , navCollapseButton
-              ]
-          , div
-              [ class "collapse navbar-collapse main-nav" ]
-              [ ul
-                  [ class "nav navbar-nav"]
-                  [ li [] [ a [ class "brand hidden-xs", href "#!/" ] [ text "Hedley" ] ]
-                  , li
-                      [ classList (activeClass User) ]
-                      [ i [ class "glyphicon glyphicon-user" ] []
-                      , a [ hrefVoid, onClick address (SetActivePage User) ] [ text "My account" ]
-                      ]
-                  , li
-                      [ classList (activeClass (Event Nothing)) ]
-                      [ i [ class "fa fa-map-marker" ] []
-                      , a [ hrefVoid, onClick address (SetActivePage <| Event Nothing) ] [ text "Events" ]
-                      ]
-                  , li
-                      [ classList (activeClass Article) ]
-                      [ i [ class "fa fa-file-o" ] []
-                      , a [ hrefVoid, onClick address (SetActivePage Article) ] [ text "Articles"]
-                      ]
-                  , li
-                      [  classList (activeClass PageNotFound) ]
-                      [ i [ class "fa fa-exclamation-circle" ] []
-                      , a [ href "#!/error-page" ] [ text "PageNotFound (404)" ]
-                      ]
-                  , li
-                      []
-                      [ i [ class "fa fa-sign-out" ] []
-                      , a [ hrefVoid, onClick address Logout ] [ text "Logout" ]
-                      ]
-                ]
-              ]
-          ]
-      ]
-
-
-myStyle : List (String, String)
-myStyle =
-  [ ("font-size", "1.2em") ]
-
 -- EFFECTS
 
 sendInputToStorage : String -> Effects Action
@@ -600,62 +367,3 @@ removeStorageItem =
     |> Task.toMaybe
     |> Task.map NoOpLogout
     |> Effects.task
-
--- ROUTING
-
-delta2update : Model -> Model -> Maybe HashUpdate
-delta2update previous current =
-  case current.activePage of
-    Article ->
-      Just <| RouteHash.set ["articles"]
-
-    Event companyId ->
-      -- First, we ask the submodule for a HashUpdate. Then, we use
-      -- `map` to prepend something to the URL.
-      RouteHash.map ((::) "events") <|
-        Event.delta2update previous.events current.events
-
-    GithubAuth ->
-      RouteHash.map (\_ -> ["auth", "github"]) Nothing
-
-    Login ->
-      if current.login.hasAccessTokenInStorage
-        -- The user has access token, but not yet logged in, so we don't change
-        -- the url to "login", as we are just waiting for the server to fetch
-        -- the user info.
-        then Nothing
-        else Just <| RouteHash.set ["login"]
-
-
-    PageNotFound ->
-      Nothing
-
-    User ->
-      Just <| RouteHash.set ["my-account"]
-
-
--- Here, we basically do the reverse of what delta2update does
-location2action : List String -> List Action
-location2action list =
-  case list of
-    ["auth", "github"] ->
-      ( SetActivePage GithubAuth ) :: []
-
-    "articles" :: rest ->
-      ( SetActivePage Article ) :: []
-
-    "login" :: rest ->
-      ( SetActivePage Login ) :: []
-
-    "my-account" :: rest ->
-      ( SetActivePage User ) :: []
-
-    "events" :: rest ->
-      ( SetActivePage <| Event (Event.location2company rest) ) :: []
-
-
-    "" :: rest ->
-      ( SetActivePage <| Event Nothing ) :: []
-
-    _ ->
-      ( SetActivePage PageNotFound ) :: []

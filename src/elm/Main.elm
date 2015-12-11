@@ -1,10 +1,13 @@
-import App exposing (init, update, view)
+import App.Model as App exposing (Model)
+import App.Router exposing (delta2update, location2action)
+import App.Update exposing (init, update)
+import App.View exposing (view)
 import ArticleForm.Model exposing (PostStatus)
 import ArticleForm.Update exposing (Action)
 import Effects exposing (Never)
 import Event exposing (Action)
 import Leaflet.Model exposing (Model)
-import Leaflet.Update exposing (Action)
+-- import Leaflet.Update exposing (Action)
 import Pages.Article.Update exposing (Action)
 import RouteHash
 import StartApp as StartApp
@@ -13,23 +16,23 @@ import Task exposing (Task)
 
 app =
   StartApp.start
-    { init = init
-    , update = update
-    , view = view
+    { init = App.Update.init
+    , update = App.Update.update
+    , view = App.View.view
     , inputs =
         [ messages.signal
-        , Signal.map (App.ChildArticleAction << Pages.Article.Update.ChildArticleFormAction << ArticleForm.Update.SetImageId) dropzoneUploadedFile
-        , Signal.map (App.ChildArticleAction << Pages.Article.Update.ChildArticleFormAction << ArticleForm.Update.UpdateBody) ckeditor
-        , Signal.map (App.ChildEventAction << Event.SelectEvent) selectEvent
+        , Signal.map (App.Update.ChildArticleAction << Pages.Article.Update.ChildArticleFormAction << ArticleForm.Update.SetImageId) dropzoneUploadedFile
+        , Signal.map (App.Update.ChildArticleAction << Pages.Article.Update.ChildArticleFormAction << ArticleForm.Update.UpdateBody) ckeditor
+        , Signal.map (App.Update.ChildEventAction << Event.SelectEvent) selectEvent
         ]
     }
 
 main =
   app.html
 
-messages : Signal.Mailbox App.Action
+messages : Signal.Mailbox App.Update.Action
 messages =
-    Signal.mailbox App.NoOp
+    Signal.mailbox App.Update.NoOp
 
 port tasks : Signal (Task.Task Never ())
 port tasks =
@@ -41,8 +44,8 @@ port routeTasks =
     { prefix = RouteHash.defaultPrefix
     , address = messages.address
     , models = app.model
-    , delta2update = App.delta2update
-    , location2action = App.location2action
+    , delta2update = App.Router.delta2update
+    , location2action = App.Router.location2action
     }
 
 -- Interactions with Leaflet maps

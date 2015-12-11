@@ -29,16 +29,13 @@ init =
 type Action
   = SelectCompany (Maybe Int)
 
-type alias UpdateContext =
+type alias Context =
   { accessToken : String
   , backendConfig : BackendConfig
   , companies : List Company.Model
   }
 
-type alias ViewContext =
-  { companies : List Company.Model }
-
-update : UpdateContext -> Action -> EventCompanyFilter.Model -> (EventCompanyFilter.Model, Effects Action)
+update : Context -> Action -> EventCompanyFilter.Model -> (EventCompanyFilter.Model, Effects Action)
 update context action model =
   case action of
     SelectCompany maybeCompanyId ->

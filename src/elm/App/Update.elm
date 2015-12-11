@@ -6,7 +6,7 @@ import Config.Update exposing (init, Action)
 import Company exposing (Model)
 import Effects exposing (Effects)
 import Event exposing (Model, initialModel, update)
-import GithubAuth exposing (Model)
+import Json.Encode as JE exposing (string, Value)
 import Json.Encode as JE exposing (string, Value)
 import String exposing (isEmpty)
 import Storage exposing (removeItem, setItem)
@@ -15,9 +15,9 @@ import Task exposing (succeed)
 -- Pages import
 
 import Pages.Article.Update exposing (Action)
+import Pages.GithubAuth.Update exposing (Action)
 import Pages.Login.Update exposing (Action)
-
-import Pages.User.Model as User exposing(..)
+import Pages.User.Model as User exposing (..)
 import Pages.User.Update exposing (Action)
 
 type alias Model = App.Model
@@ -38,7 +38,7 @@ type Action
   = ChildArticleAction Pages.Article.Update.Action
   | ChildConfigAction Config.Update.Action
   | ChildEventAction Event.Action
-  | ChildGithubAuthAction GithubAuth.Action
+  | ChildGithubAuthAction Pages.GithubAuth.Update.Action
   | ChildLoginAction Pages.Login.Update.Action
   | ChildUserAction User.Action
   | Logout
@@ -115,7 +115,7 @@ update action model =
         context =
           { backendConfig = (.config >> .backendConfig) model }
 
-        (childModel, childEffects) = GithubAuth.update context act model.githubAuth
+        (childModel, childEffects) = Pages.GithubAuth.Update.update context act model.githubAuth
 
         defaultEffect =
           Effects.map ChildGithubAuthAction childEffects
@@ -129,7 +129,7 @@ update action model =
             -- User's token was fetched, so we can set it in the accessToken
             -- root property, and also get the user info, which will in turn
             -- redirect the user from the login page.
-            GithubAuth.SetAccessToken token ->
+            Pages.GithubAuth.Update.SetAccessToken token ->
               (Task.succeed (SetAccessToken token) |> Effects.task)
               ::
               defaultEffects
@@ -314,7 +314,7 @@ update action model =
               Task.succeed (ChildEventAction <| Event.Activate companyId) |> Effects.task
 
             App.GithubAuth ->
-              Task.succeed (ChildGithubAuthAction GithubAuth.Activate) |> Effects.task
+              Task.succeed (ChildGithubAuthAction Pages.GithubAuth.Update.Activate) |> Effects.task
 
             _ ->
               Effects.none

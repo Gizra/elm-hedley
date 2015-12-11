@@ -4,7 +4,7 @@ import Config.Model exposing (BackendConfig)
 import Company exposing (initialModel, Model)
 import Effects exposing (Effects, Never)
 import Http exposing (Error)
-import Pages.User.Model as User exposing (AccessToken, Model)
+import Pages.User.Model as User exposing (Model)
 import Pages.User.Decoder exposing (decode)
 import Task exposing (succeed)
 
@@ -28,7 +28,6 @@ init =
   ( User.initialModel
   , Effects.none
   )
-
 
 update : UpdateContext -> Action -> Model -> (Model, Effects Action)
 update context action model =

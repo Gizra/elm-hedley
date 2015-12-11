@@ -1,7 +1,7 @@
 module App.View where
 
 import App.Model as App exposing (initialModel, Model)
-import App.Update as App exposing (init, Action)
+import App.Update exposing (init, Action)
 
 import Config.View exposing (view)
 import Event exposing (view)
@@ -15,9 +15,8 @@ import Pages.Article.View exposing (view)
 import Pages.GithubAuth.View exposing (view)
 import Pages.Login.View exposing (view)
 import Pages.PageNotFound.View exposing (view)
-import Pages.User.Model exposing(User)
-import Pages.User.View exposing(view)
-
+import Pages.User.Model exposing (User)
+import Pages.User.View exposing (view)
 
 type alias Page = App.Page
 
@@ -49,14 +48,14 @@ mainContent address model =
     App.Article ->
       let
         childAddress =
-          Signal.forwardTo address App.ChildArticleAction
+          Signal.forwardTo address App.Update.ChildArticleAction
       in
         div [ style myStyle ] [ Pages.Article.View.view childAddress model.article ]
 
     App.Event companyId ->
       let
         childAddress =
-          Signal.forwardTo address App.ChildEventAction
+          Signal.forwardTo address App.Update.ChildEventAction
 
         context =
           { companies = model.companies}
@@ -66,14 +65,14 @@ mainContent address model =
     App.GithubAuth ->
       let
         childAddress =
-          Signal.forwardTo address App.ChildGithubAuthAction
+          Signal.forwardTo address App.Update.ChildGithubAuthAction
       in
         div [ style myStyle ] [ Pages.GithubAuth.View.view childAddress model.githubAuth ]
 
     App.Login ->
       let
         childAddress =
-          Signal.forwardTo address App.ChildLoginAction
+          Signal.forwardTo address App.Update.ChildLoginAction
 
         context =
           { backendConfig = (.config >> .backendConfig) model }
@@ -88,7 +87,7 @@ mainContent address model =
     App.User ->
       let
         childAddress =
-          Signal.forwardTo address App.ChildUserAction
+          Signal.forwardTo address App.Update.ChildUserAction
       in
         div [ style myStyle ] [ Pages.User.View.view childAddress model.user ]
 
@@ -126,7 +125,7 @@ navbarLoggedIn address model =
       [ ("active", isActivePage model.activePage page) ]
 
     childAddress =
-      Signal.forwardTo address App.ChildUserAction
+      Signal.forwardTo address App.Update.ChildUserAction
 
     hrefVoid =
       href "javascript:void(0);"
@@ -166,17 +165,17 @@ navbarLoggedIn address model =
                   , li
                       [ classList (activeClass App.User) ]
                       [ i [ class "glyphicon glyphicon-user" ] []
-                      , a [ hrefVoid, onClick address (App.SetActivePage App.User) ] [ text "My account" ]
+                      , a [ hrefVoid, onClick address (App.Update.SetActivePage App.User) ] [ text "My account" ]
                       ]
                   , li
                       [ classList (activeClass (App.Event Nothing)) ]
                       [ i [ class "fa fa-map-marker" ] []
-                      , a [ hrefVoid, onClick address (App.SetActivePage <| App.Event Nothing) ] [ text "Events" ]
+                      , a [ hrefVoid, onClick address (App.Update.SetActivePage <| App.Event Nothing) ] [ text "Events" ]
                       ]
                   , li
                       [ classList (activeClass App.Article) ]
                       [ i [ class "fa fa-file-o" ] []
-                      , a [ hrefVoid, onClick address (App.SetActivePage App.Article) ] [ text "Articles"]
+                      , a [ hrefVoid, onClick address (App.Update.SetActivePage App.Article) ] [ text "Articles"]
                       ]
                   , li
                       [  classList (activeClass App.PageNotFound) ]
@@ -186,7 +185,7 @@ navbarLoggedIn address model =
                   , li
                       []
                       [ i [ class "fa fa-sign-out" ] []
-                      , a [ hrefVoid, onClick address App.Logout ] [ text "Logout" ]
+                      , a [ hrefVoid, onClick address App.Update.Logout ] [ text "Logout" ]
                       ]
                 ]
               ]

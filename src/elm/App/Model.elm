@@ -9,7 +9,7 @@ import Event exposing (Model, initialModel, update)
 import Pages.Article.Model as Article exposing (initialModel, Model)
 import Pages.GithubAuth.Model as GithubAuth exposing (Model)
 import Pages.Login.Model as Login exposing (initialModel, Model)
-import Pages.User.Model as User exposing(..)
+import Pages.User.Model as User exposing (initialModel, Model)
 
 type alias AccessToken = String
 type alias CompanyId = Int

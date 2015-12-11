@@ -35,3 +35,4 @@ initialModel =
   -- Child components
   , companies = [Company.initialModel]
   }
+  

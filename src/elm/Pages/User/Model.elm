@@ -1,6 +1,6 @@
 module Pages.User.Model where
 
-import Company exposing (initialModel, Model)
+import Company.Model as Company exposing (initialModel, Model)
 import Http exposing (Error)
 
 type alias Id = Int
@@ -35,4 +35,3 @@ initialModel =
   -- Child components
   , companies = [Company.initialModel]
   }
-  

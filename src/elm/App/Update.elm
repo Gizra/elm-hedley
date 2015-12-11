@@ -3,7 +3,7 @@ module App.Update where
 import App.Model as App exposing (initialModel, Model)
 
 import Config.Update exposing (init, Action)
-import Company exposing (Model)
+import Company.Model as Company exposing (Model)
 import Effects exposing (Effects)
 import Event exposing (Model, initialModel, update)
 import Json.Encode as JE exposing (string, Value)

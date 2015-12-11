@@ -4,7 +4,7 @@ import ElmTest.Assertion exposing (..)
 import ElmTest.Test exposing (..)
 
 import Config.Model exposing (initialBackendConfig)
-import Company exposing (Model)
+import Company.Model as Company exposing (Model)
 import Effects exposing (Effects)
 import Event exposing (initialModel, UpdateContext)
 

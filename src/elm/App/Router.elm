@@ -2,7 +2,7 @@ module App.Router where
 
 import App.Model as App exposing (Model)
 import App.Update exposing (Action)
-import Event exposing (Model, initialModel, update)
+import Pages.Event.Router as Event exposing (delta2update)
 import RouteHash exposing (HashUpdate)
 
 type alias Model = App.Model

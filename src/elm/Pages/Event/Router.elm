@@ -1,11 +1,8 @@
-module EventCompanyFilter.Router where
+module Pages.Event.Router where
 
-import EventCompanyFilter.Model as EventCompanyFilter exposing (initialModel, Model)
-
+import Pages.Event.Model as Event exposing (Model)
 import RouteHash exposing (HashUpdate)
 import String exposing (toInt)
-
-type alias Model = EventCompanyFilter.Model
 
 delta2update : Model -> Model -> Maybe HashUpdate
 delta2update previous current =

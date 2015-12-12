@@ -1,4 +1,4 @@
-module Page.Event.Model where
+module Pages.Event.Model where
 
 import Http exposing (Error)
 import Leaflet.Model exposing (initialModel, Model)

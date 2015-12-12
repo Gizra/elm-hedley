@@ -1,33 +1,31 @@
-module Page.Event.Update where
+module Pages.Event.Update where
 
-import Page.Event.Model as Event exposing (initialModel, Model)
+import Pages.Event.Model as Event exposing (initialModel, Event, Model)
 
--- import Config exposing (cacheTtl)
--- import Config.Model exposing (BackendConfig)
--- import Company.Model as Company exposing (Model)
+import Config exposing (cacheTtl)
+import Config.Model exposing (BackendConfig)
+import Company.Model as Company exposing (Model)
 -- import Dict exposing (Dict)
 import Effects exposing (Effects)
--- import Html exposing (a, div, input, text, select, span, li, option, ul, Html)
--- import Html.Attributes exposing (class, hidden, href, id, placeholder, selected, style, value)
--- import Html.Events exposing (on, onClick, targetValue)
--- import Http
--- import Json.Decode as Json exposing ((:=))
--- import Leaflet.Model exposing (initialModel, Model)
--- import Leaflet.Update exposing (Action)
--- import RouteHash exposing (HashUpdate)
--- import String exposing (length)
--- import Task  exposing (andThen, Task)
--- import TaskTutorial exposing (getCurrentTime)
--- import Time exposing (Time)
 
--- MODEL
+import Event.Decoder exposing (decode)
+import Http exposing (Error)
+-- import Json.Decode as Json exposing ((:=))
+import Leaflet.Model exposing (initialModel, Marker)
+import Leaflet.Update exposing (Action)
+-- import RouteHash exposing (HashUpdate)
+import String exposing (length, trim)
+import Task  exposing (andThen, succeed)
+import TaskTutorial exposing (getCurrentTime)
+import Time exposing (Time)
 
 type alias Id = Int
 type alias CompanyId = Int
+type alias Model = Event.Model
 
 init : (Model, Effects Action)
 init =
-  ( initialModel
+  ( Event.initialModel
   , Effects.none
   )
 
@@ -76,7 +74,7 @@ update context action model =
           (model, getDataFromCache model.status maybeCompanyId)
       in
       case model.status of
-        Fetching id ->
+        Event.Fetching id ->
           if id == maybeCompanyId
             -- We are already fetching this data
             then noFx
@@ -95,7 +93,7 @@ update context action model =
         url =
           backendUrl ++ "/api/v1.0/events"
       in
-        ( { model | status <- Fetching maybeCompanyId}
+        ( { model | status <- Event.Fetching maybeCompanyId}
         , getJson url maybeCompanyId context.accessToken
         )
 
@@ -104,12 +102,12 @@ update context action model =
         Ok events ->
           ( {model
               | events <- events
-              , status <- Fetched maybeCompanyId timestamp
+              , status <- Event.Fetched maybeCompanyId timestamp
             }
           , Task.succeed (FilterEvents model.filterString) |> Effects.task
           )
         Err msg ->
-          ( {model | status <- HttpError msg}
+          ( {model | status <- Event.HttpError msg}
           , Effects.none
           )
 
@@ -234,7 +232,7 @@ leafletMarkers model =
 
 -- EFFECTS
 
-getDataFromCache : Status -> Maybe CompanyId -> Effects Action
+getDataFromCache : Event.Status -> Maybe CompanyId -> Effects Action
 getDataFromCache status maybeCompanyId =
   let
     getFx =
@@ -242,7 +240,7 @@ getDataFromCache status maybeCompanyId =
 
     actionTask =
       case status of
-        Fetched id fetchTime ->
+        Event.Fetched id fetchTime ->
           if id == maybeCompanyId
             then
               Task.map (\currentTime ->
@@ -281,7 +279,7 @@ getJson url maybeCompanyId accessToken =
 
     httpTask =
       Task.toResult <|
-        Http.get decodeData encodedUrl
+        Http.get Event.Decoder.decode encodedUrl
 
     actionTask =
       httpTask `andThen` (\result ->
@@ -292,4 +290,29 @@ getJson url maybeCompanyId accessToken =
 
   in
     Effects.task actionTask
-    
+
+-- In case an author or string-filter is selected, filter the events.
+filterListEvents : Model -> List Event
+filterListEvents model =
+  let
+    authorFilter : List Event -> List Event
+    authorFilter events =
+      case model.selectedAuthor of
+        Just id ->
+          List.filter (\event -> event.author.id == id) events
+
+        Nothing ->
+          events
+
+    stringFilter : List Event -> List Event
+    stringFilter events =
+      if String.length (String.trim model.filterString) > 0
+        then
+          List.filter (\event -> String.contains (String.trim (String.toLower model.filterString)) (String.toLower event.label)) events
+
+        else
+          events
+
+  in
+    authorFilter model.events
+     |> stringFilter

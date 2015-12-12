@@ -2,11 +2,11 @@ module Event.Decoder where
 
 import Event.Model as Event exposing (Author, Event, Marker)
 
-import JD.Decode as JD exposing ((:=))
+import Json.Decode as JD exposing ((:=))
 import String exposing (toInt, toFloat)
 
-decodeData : JD.Decoder (List Event)
-decodeData =
+decode : JD.Decoder (List Event)
+decode =
   let
     -- Cast String to Int.
     number : JD.Decoder Int

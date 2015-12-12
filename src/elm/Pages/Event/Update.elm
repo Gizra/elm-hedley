@@ -292,35 +292,4 @@ getJson url maybeCompanyId accessToken =
 
   in
     Effects.task actionTask
-
-
-decodeData : Json.Decoder (List Event)
-decodeData =
-  let
-    -- Cast String to Int.
-    number : Json.Decoder Int
-    number =
-      Json.oneOf [ Json.int, Json.customDecoder Json.string String.toInt ]
-
-
-    numberFloat : Json.Decoder Float
-    numberFloat =
-      Json.oneOf [ Json.float, Json.customDecoder Json.string String.toFloat ]
-
-    marker =
-      Json.object2 Marker
-        ("lat" := numberFloat)
-        ("lng" := numberFloat)
-
-    author =
-      Json.object2 Author
-        ("id" := number)
-        ("label" := Json.string)
-  in
-    Json.at ["data"]
-      <| Json.list
-      <| Json.object4 Event
-        ("id" := number)
-        ("label" := Json.string)
-        ("location" := marker)
-        ("user" := author)
+    

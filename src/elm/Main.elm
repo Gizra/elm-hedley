@@ -23,7 +23,7 @@ app =
         [ messages.signal
         , Signal.map (App.Update.ChildArticleAction << Pages.Article.Update.ChildArticleFormAction << ArticleForm.Update.SetImageId) dropzoneUploadedFile
         , Signal.map (App.Update.ChildArticleAction << Pages.Article.Update.ChildArticleFormAction << ArticleForm.Update.UpdateBody) ckeditor
-        , Signal.map (App.Update.ChildEventAction << Event.SelectEvent) selectEvent
+        , Signal.map (App.Update.ChildEventAction << Pages.Event.Update.SelectEvent) selectEvent
         ]
     }
 

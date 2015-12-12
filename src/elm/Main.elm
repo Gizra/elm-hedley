@@ -7,7 +7,6 @@ import ArticleForm.Update exposing (Action)
 import Effects exposing (Never)
 import Pages.Event.Update exposing (Action)
 import Leaflet.Model exposing (Model)
--- import Leaflet.Update exposing (Action)
 import Pages.Article.Update exposing (Action)
 import RouteHash
 import StartApp as StartApp

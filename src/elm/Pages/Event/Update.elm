@@ -1,15 +1,15 @@
 module Pages.Event.Update where
 
-import Pages.Event.Model as Event exposing (initialModel, Event, Model)
-
 import Config exposing (cacheTtl)
 import Config.Model exposing (BackendConfig)
 import Company.Model as Company exposing (Model)
 import Effects exposing (Effects)
 import Event.Decoder exposing (decode)
+import Event.Model exposing (Event)
 import Http exposing (Error)
 import Leaflet.Model exposing (initialModel, Marker)
 import Leaflet.Update exposing (Action)
+import Pages.Event.Model as Event exposing (Model)
 import String exposing (length, trim)
 import Task  exposing (andThen, succeed)
 import TaskTutorial exposing (getCurrentTime)

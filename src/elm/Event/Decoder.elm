@@ -1,7 +1,6 @@
 module Event.Decoder where
 
 import Event.Model as Event exposing (Author, Event, Marker)
-
 import Json.Decode as JD exposing ((:=))
 import String exposing (toInt, toFloat)
 

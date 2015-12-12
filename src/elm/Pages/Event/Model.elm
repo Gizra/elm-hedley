@@ -1,5 +1,6 @@
 module Pages.Event.Model where
 
+import Event.Model exposing (Event)
 import Http exposing (Error)
 import Leaflet.Model exposing (initialModel, Model)
 import Time exposing (Time)
@@ -12,23 +13,6 @@ type Status =
   | Fetching (Maybe CompanyId)
   | Fetched (Maybe CompanyId) Time.Time
   | HttpError Http.Error
-
-type alias Marker =
-  { lat: Float
-  , lng : Float
-  }
-
-type alias Author =
-  { id : Id
-  , name : String
-  }
-
-type alias Event =
-  { id : Id
-  , label : String
-  , marker : Marker
-  , author : Author
-  }
 
 type alias Model =
   { events : List Event

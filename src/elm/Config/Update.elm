@@ -1,25 +1,10 @@
-module ConfigManager where
+module Config.Update where
 
 import Config exposing (backends)
-import ConfigType exposing (BackendConfig, initialBackendConfig)
+import Config.Model exposing (initialModel, Model)
 import Effects exposing (Effects)
 import Task exposing (map)
 import WebAPI.Location exposing (location)
-
-type Status
-  = Init
-  | Error
-
-type alias Model =
-  { backendConfig : BackendConfig
-  , status : Status
-  }
-
-initialModel : Model
-initialModel =
-  { backendConfig = initialBackendConfig
-  , status = Init
-  }
 
 init : (Model, Effects Action)
 init =
@@ -27,11 +12,9 @@ init =
   , getConfigFromUrl
   )
 
--- UPDATE
-
 type Action
-  = SetConfig BackendConfig
-  | SetStatus Status
+  = SetConfig Config.Model.BackendConfig
+  | SetError
 
 update : Action -> Model -> (Model, Effects Action)
 update action model =
@@ -41,8 +24,8 @@ update action model =
       , Effects.none
       )
 
-    SetStatus status ->
-      ( { model | status <- status }
+    SetError ->
+      ( { model | error <- True }
       , Effects.none
       )
 
@@ -60,7 +43,7 @@ getConfigFromUrl =
       in
         case config of
           Just val -> SetConfig val
-          Nothing -> SetStatus Error
+          Nothing -> SetError
 
     actionTask =
       Task.map getAction WebAPI.Location.location

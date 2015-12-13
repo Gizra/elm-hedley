@@ -5,14 +5,17 @@ import Graphics.Element exposing (Element)
 import ElmTest.Test exposing (Test, suite)
 import ElmTest.Runner.Element exposing (runDisplay)
 
-import EventTest
-import LoginTest
+import Config.Test as Config
+import EventTest as Event
+import Pages.Login.Test as Login
+
 
 allTests : Test
 allTests =
   suite "All tests"
-    [ EventTest.all
-    , LoginTest.all
+    [ Config.all
+    , Event.all
+    , Login.all
     ]
 
 main : Element

@@ -1,8 +1,8 @@
 module Event where
 
 import Config exposing (cacheTtl)
-import ConfigType exposing (BackendConfig)
-import Company exposing (Model)
+import Config.Model exposing (BackendConfig)
+import Company.Model as Company exposing (Model)
 import Dict exposing (Dict)
 import Effects exposing (Effects)
 import Html exposing (a, div, h3, i, input, text, select, span, li, option, ul, Html)
@@ -10,14 +10,13 @@ import Html.Attributes exposing (class, hidden, href, id, placeholder, selected,
 import Html.Events exposing (on, onClick, targetValue)
 import Http
 import Json.Decode as Json exposing ((:=))
-import Leaflet exposing (Model, initialModel, Marker, update)
+import Leaflet.Model exposing (initialModel, Model)
+import Leaflet.Update exposing (Action)
 import RouteHash exposing (HashUpdate)
 import String exposing (length)
 import Task  exposing (andThen, Task)
 import TaskTutorial exposing (getCurrentTime)
 import Time exposing (Time)
-
-import Debug
 
 -- MODEL
 
@@ -55,7 +54,7 @@ type alias Model =
   , selectedAuthor : Maybe Int
   -- @todo: Make (Maybe String)
   , filterString : String
-  , leaflet : Leaflet.Model
+  , leaflet : Leaflet.Model.Model
   }
 
 initialModel : Model
@@ -66,7 +65,7 @@ initialModel =
   , selectedEvent = Nothing
   , selectedAuthor = Nothing
   , filterString = ""
-  , leaflet = Leaflet.initialModel
+  , leaflet = Leaflet.Model.initialModel
   }
 
 init : (Model, Effects Action)
@@ -95,7 +94,7 @@ type Action
   | FilterEvents String
 
   -- Child actions
-  | ChildLeafletAction Leaflet.Action
+  | ChildLeafletAction Leaflet.Update.Action
 
   -- Page
   | Activate (Maybe CompanyId)
@@ -190,14 +189,14 @@ update context action model =
       case val of
         Just id ->
           ( { model | selectedEvent <- Just id }
-          , Task.succeed (ChildLeafletAction <| Leaflet.SelectMarker <| Just id) |> Effects.task
+          , Task.succeed (ChildLeafletAction <| Leaflet.Update.SelectMarker <| Just id) |> Effects.task
           )
         Nothing ->
           (model, Task.succeed UnSelectEvent |> Effects.task)
 
     UnSelectEvent ->
       ( { model | selectedEvent <- Nothing }
-      , Task.succeed (ChildLeafletAction <| Leaflet.SelectMarker Nothing) |> Effects.task
+      , Task.succeed (ChildLeafletAction <| Leaflet.Update.SelectMarker Nothing) |> Effects.task
       )
 
     SelectAuthor id ->
@@ -248,7 +247,7 @@ update context action model =
 
     ChildLeafletAction act ->
       let
-        (childModel, childEffects) = Leaflet.update act model.leaflet
+        (childModel, childEffects) = Leaflet.Update.update act model.leaflet
       in
         ( {model | leaflet <- childModel }
         , Effects.map ChildLeafletAction childEffects
@@ -256,7 +255,7 @@ update context action model =
 
     Activate maybeCompanyId ->
       let
-        (childModel, childEffects) = Leaflet.update Leaflet.ToggleMap model.leaflet
+        (childModel, childEffects) = Leaflet.Update.update Leaflet.Update.ToggleMap model.leaflet
 
       in
         ( {model | leaflet <- childModel }
@@ -268,7 +267,7 @@ update context action model =
 
     Deactivate ->
       let
-        (childModel, childEffects) = Leaflet.update Leaflet.ToggleMap model.leaflet
+        (childModel, childEffects) = Leaflet.Update.update Leaflet.Update.ToggleMap model.leaflet
       in
         ( {model | leaflet <- childModel }
         , Effects.map ChildLeafletAction childEffects
@@ -276,10 +275,10 @@ update context action model =
 
 
 -- Build the Leaflet's markers data from the events
-leafletMarkers : Model -> List Leaflet.Marker
+leafletMarkers : Model -> List Leaflet.Model.Marker
 leafletMarkers model =
   filterListEvents model
-    |> List.map (\event -> Leaflet.Marker event.id event.marker.lat event.marker.lng)
+    |> List.map (\event -> Leaflet.Model.Marker event.id event.marker.lat event.marker.lng)
 
 -- VIEW
 

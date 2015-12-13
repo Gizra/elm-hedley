@@ -4,14 +4,15 @@
   .unselect {
     position: absolute;
     top: 0;
+    bottom: 0;
     right: 7px;
     color: $error;
-    line-height: 30px;
+    line-height: 36px;
     font-size: 18px;
     text-decoration: none;
-    border-left: 1px solid $gray;
+    border-left: 1px solid #E2E2E2;
     padding-left: 8px;
-    transition: color 0.4s ease-in;
+    transition: color 0.2s ease-in;
 
     &:hover {
       color: $error-light;
@@ -44,16 +45,24 @@
 
   .authors,
   .events {
-    @extend .list-theme;
+    list-style: none;
     margin-bottom: 15px;
+    padding: 0;
 
     li {
-      margin-top: 20px;
-      transition: background 0.4s ease-in;
+      margin-top: 10px;
+      padding: 5px 9px;
+      border-bottom: 1px solid #E2E2E2;
+      transition: background 0.2s ease-in;
+      @extend .shadow;
 
-      &:hover,
       &.-active {
         background: $light-blue;
+        border-bottom: 1px solid #BFD7EB;
+
+        .unselect {
+          border-left: 1px solid #BFD7EB;
+        }
       }
     }
   }

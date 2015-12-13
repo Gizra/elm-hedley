@@ -20,16 +20,16 @@ update : Action -> Model -> (Model, Effects Action)
 update action model =
   case action of
     ToggleMap ->
-      ( { model | showMap <- (not model.showMap) }
+      ( { model | showMap = (not model.showMap) }
       , Effects.none
       )
 
     SelectMarker val ->
-      ( { model | selectedMarker <- val }
+      ( { model | selectedMarker = val }
       , Effects.none
       )
 
     UnselectMarker ->
-      ( { model | selectedMarker <- Nothing }
+      ( { model | selectedMarker = Nothing }
       , Effects.none
       )

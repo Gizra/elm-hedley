@@ -144,7 +144,7 @@ update context action model =
         url =
           backendUrl ++ "/api/v1.0/events"
       in
-        ( { model | status <- Fetching maybeCompanyId}
+        ( { model | status = Fetching maybeCompanyId}
         , getJson url maybeCompanyId context.accessToken
         )
 
@@ -152,13 +152,13 @@ update context action model =
       case result of
         Ok events ->
           ( {model
-              | events <- events
-              , status <- Fetched maybeCompanyId timestamp
+              | events = events
+              , status = Fetched maybeCompanyId timestamp
             }
           , Task.succeed (FilterEvents model.filterString) |> Effects.task
           )
         Err msg ->
-          ( {model | status <- HttpError msg}
+          ( {model | status = HttpError msg}
           , Effects.none
           )
 
@@ -180,7 +180,7 @@ update context action model =
             Nothing ->
               Nothing
       in
-        ( { model | selectedCompany <- selectedCompany }
+        ( { model | selectedCompany = selectedCompany }
         , Task.succeed (GetData selectedCompany) |> Effects.task
         )
 
@@ -188,19 +188,19 @@ update context action model =
     SelectEvent val ->
       case val of
         Just id ->
-          ( { model | selectedEvent <- Just id }
+          ( { model | selectedEvent = Just id }
           , Task.succeed (ChildLeafletAction <| Leaflet.Update.SelectMarker <| Just id) |> Effects.task
           )
         Nothing ->
           (model, Task.succeed UnSelectEvent |> Effects.task)
 
     UnSelectEvent ->
-      ( { model | selectedEvent <- Nothing }
+      ( { model | selectedEvent = Nothing }
       , Task.succeed (ChildLeafletAction <| Leaflet.Update.SelectMarker Nothing) |> Effects.task
       )
 
     SelectAuthor id ->
-      ( { model | selectedAuthor <- Just id }
+      ( { model | selectedAuthor = Just id }
       , Effects.batch
         [ Task.succeed UnSelectEvent |> Effects.task
         , Task.succeed (FilterEvents model.filterString) |> Effects.task
@@ -208,7 +208,7 @@ update context action model =
       )
 
     UnSelectAuthor ->
-      ( { model | selectedAuthor <- Nothing }
+      ( { model | selectedAuthor = Nothing }
       , Effects.batch
         [ Task.succeed UnSelectEvent |> Effects.task
         , Task.succeed (FilterEvents model.filterString) |> Effects.task
@@ -217,10 +217,10 @@ update context action model =
 
     FilterEvents val ->
       let
-        model' = { model | filterString <- val }
+        model' = { model | filterString = val }
 
         leaflet = model.leaflet
-        leaflet' = { leaflet | markers <- (leafletMarkers model')}
+        leaflet' = { leaflet | markers = (leafletMarkers model')}
 
         effects =
           case model.selectedEvent of
@@ -239,8 +239,8 @@ update context action model =
               Effects.none
       in
         ( { model
-          | filterString <- val
-          , leaflet <- leaflet'
+          | filterString = val
+          , leaflet = leaflet'
           }
         , effects
         )
@@ -249,7 +249,7 @@ update context action model =
       let
         (childModel, childEffects) = Leaflet.Update.update act model.leaflet
       in
-        ( {model | leaflet <- childModel }
+        ( {model | leaflet = childModel }
         , Effects.map ChildLeafletAction childEffects
         )
 
@@ -258,7 +258,7 @@ update context action model =
         (childModel, childEffects) = Leaflet.Update.update Leaflet.Update.ToggleMap model.leaflet
 
       in
-        ( {model | leaflet <- childModel }
+        ( {model | leaflet = childModel }
         , Effects.batch
             [ Task.succeed (SelectCompany maybeCompanyId) |> Effects.task
             , Effects.map ChildLeafletAction childEffects
@@ -269,7 +269,7 @@ update context action model =
       let
         (childModel, childEffects) = Leaflet.Update.update Leaflet.Update.ToggleMap model.leaflet
       in
-        ( {model | leaflet <- childModel }
+        ( {model | leaflet = childModel }
         , Effects.map ChildLeafletAction childEffects
         )
 

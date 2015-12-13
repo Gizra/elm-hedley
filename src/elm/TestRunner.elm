@@ -2,8 +2,7 @@ module Main where
 
 import Graphics.Element exposing (Element)
 
-import ElmTest.Test exposing (Test, suite)
-import ElmTest.Runner.Element exposing (runDisplay)
+import ElmTest exposing (..)
 
 import Config.Test as Config
 import EventTest as Event
@@ -20,4 +19,4 @@ allTests =
 
 main : Element
 main =
-  runDisplay allTests
+  elementRunner allTests

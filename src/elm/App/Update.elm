@@ -67,7 +67,7 @@ update action model =
 
         (childModel, childEffects) = Pages.Article.Update.update context act model.article
       in
-        ( {model | article <- childModel }
+        ( {model | article = childModel }
         , Effects.map ChildArticleAction childEffects
         )
 
@@ -90,7 +90,7 @@ update action model =
 
       in
         ( { model
-          | config <- childModel
+          | config = childModel
           }
         , Effects.batch effects'
         )
@@ -106,7 +106,7 @@ update action model =
 
         (childModel, childEffects) = Event.update context act model.events
       in
-        ( {model | events <- childModel }
+        ( {model | events = childModel }
         , Effects.map ChildEventAction childEffects
         )
 
@@ -139,7 +139,7 @@ update action model =
               defaultEffects
 
       in
-        ( {model | githubAuth <- childModel }
+        ( {model | githubAuth = childModel }
         , Effects.batch effects'
         )
 
@@ -173,7 +173,7 @@ update action model =
               defaultEffects
 
       in
-        ( {model | login <- childModel }
+        ( {model | login = childModel }
         , Effects.batch effects'
         )
 
@@ -194,7 +194,7 @@ update action model =
           [ defaultEffect ]
 
         model' =
-          { model | user <- childModel }
+          { model | user = childModel }
 
         (model'', effects') =
           case act of
@@ -223,7 +223,7 @@ update action model =
                   in
                     -- User data was successfully fetched, so we can redirect to
                     -- the next page, and update their companies.
-                    ( { model' | nextPage <- Nothing }
+                    ( { model' | nextPage = Nothing }
                     , (Task.succeed (UpdateCompanies companies) |> Effects.task)
                       ::
                       (Task.succeed (SetActivePage nextPage) |> Effects.task)
@@ -267,7 +267,7 @@ update action model =
               defaultEffects
 
       in
-        ( { model | accessToken <- accessToken}
+        ( { model | accessToken = accessToken}
         , Effects.batch effects'
         )
 
@@ -326,11 +326,11 @@ update action model =
             -- Requesting the same page, so don't do anything.
             -- @todo: Because login and myAccount are under the same page (User)
             -- we set the nextPage here as-well.
-            ( { model | nextPage <- nextPage }, Effects.none)
+            ( { model | nextPage = nextPage }, Effects.none)
           else
             ( { model
-              | activePage <- page'
-              , nextPage <- nextPage
+              | activePage = page'
+              , nextPage = nextPage
               }
             , Effects.batch
               [ currentPageEffects
@@ -339,12 +339,12 @@ update action model =
             )
 
     SetConfigError ->
-      ( { model | configError <- True}
+      ( { model | configError = True}
       , Effects.none
       )
 
     UpdateCompanies companies ->
-      ( { model | companies <- companies}
+      ( { model | companies = companies}
       , Effects.none
       )
 

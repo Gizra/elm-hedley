@@ -49,7 +49,7 @@ update context action model =
 
       in
 
-        ( { model | articleForm <- childModel }
+        ( { model | articleForm = childModel }
         , Effects.batch effects'
         )
 
@@ -57,6 +57,6 @@ update context action model =
       let
         (childModel, childEffects) = ArticleList.Update.update context act model.articleList
       in
-        ( { model | articleList <- childModel }
+        ( { model | articleList = childModel }
         , Effects.map ChildArticleListAction childEffects
         )

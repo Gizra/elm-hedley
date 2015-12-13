@@ -7,9 +7,14 @@ type Bit = On | Off
 
 fromNumber : Int -> List Bit
 fromNumber int =
-  if | int == 0     -> []
-     | int % 2 == 1 -> fromNumber(int//2) `append` [On]
-     | int % 2 == 0 -> fromNumber(int//2) `append` [Off]
+  if int == 0 then
+    []
+  else if int % 2 == 1 then
+    fromNumber(int//2) `append` [On]
+  else if int % 2 == 0 then
+    fromNumber(int//2) `append` [Off]
+  else
+    []
 
 fromNumberWithSize : Int -> Int -> List Bit
 fromNumberWithSize number size =

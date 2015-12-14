@@ -186,15 +186,15 @@ update context action model =
 
     Activate maybeCompanyId ->
       let
-        (childModel, childEffects) =
-          Leaflet.Update.update Leaflet.Update.ToggleMap model.leaflet
-
-        context =
+        context' =
           { companies = context.companies
           }
 
         (childEventCompanyFilterModel, childEventCompanyFilterEffects) =
-          EventCompanyFilter.Update.update context EventCompanyFilter.Update.SelectCompany model.selectedCompany
+          EventCompanyFilter.Update.update context' (EventCompanyFilter.Update.SelectCompany maybeCompanyId) model.selectedCompany
+
+        (childModel, childEffects) =
+          Leaflet.Update.update Leaflet.Update.ToggleMap model.leaflet
 
       in
         ( { model

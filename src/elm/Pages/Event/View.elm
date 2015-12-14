@@ -3,6 +3,7 @@ module Pages.Event.View where
 import Company.Model as Company exposing (Model)
 import Dict exposing (Dict)
 import Event.Model exposing (Author, Event)
+import EventCompanyFilter.Update exposing (Action)
 import EventCompanyFilter.View exposing (view)
 import Html exposing (a, div, input, text, select, span, li, option, ul, Html)
 import Html.Attributes exposing (class, hidden, href, id, placeholder, selected, style, value)
@@ -88,7 +89,7 @@ companyListForSelect address companies selectedCompany  =
   in
     select
       [ value selectedText
-      , on "change" targetValue (\str -> Signal.message address <| Pages.Event.Update.SelectCompany <| textToMaybe str)
+      , on "change" targetValue (\str -> Signal.message address <| (Pages.Event.Update.ChildEventCompanyFilterAction << EventCompanyFilter.Update.SelectCompany) <| textToMaybe str)
       ]
       (List.map getOption companies')
 

@@ -12,16 +12,16 @@ import Html.Events exposing (on, onClick, targetValue)
 type alias Model = EventAuthorFilter.Model
 
 view : List Event -> Signal.Address Action -> Model -> Html
-view events address model =
+view events address selectedAuthor =
   div []
     [ div [class "h2"] [ text "Event Authors"]
-    , ul [] (viewEventsByAuthors address events model)
+    , ul [] (viewEventsByAuthors events address selectedAuthor)
     -- @todo: Add fetching to context
     -- , div [ hidden (isFetched model.status)] [ text "Loading..."]
     ]
 
-viewEventsByAuthors : Signal.Address Action -> List Event -> Maybe Int -> List Html
-viewEventsByAuthors address events selectedAuthor =
+viewEventsByAuthors : List Event -> Signal.Address Action -> Maybe Int -> List Html
+viewEventsByAuthors events address selectedAuthor =
   let
     getText : Author -> Int -> Html
     getText author count =

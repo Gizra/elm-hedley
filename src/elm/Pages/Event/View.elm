@@ -1,8 +1,8 @@
 module Pages.Event.View where
 
 import Company.Model as Company exposing (Model)
-import Dict exposing (Dict)
 import Event.Model exposing (Author, Event)
+import EventAuthorFilter.View exposing (view)
 import EventCompanyFilter.View exposing (view)
 import Html exposing (a, div, input, text, select, span, li, option, ul, Html)
 import Html.Attributes exposing (class, hidden, href, id, placeholder, selected, style, value)
@@ -21,19 +21,18 @@ type alias Context =
 view : Context -> Signal.Address Action -> Model -> Html
 view context address model =
   let
+
+    childEventAuthorFilterAddress =
+      Signal.forwardTo address Pages.Event.Update.ChildEventAuthorFilterAction
+
     childEventCompanyFilterAddress =
       Signal.forwardTo address Pages.Event.Update.ChildEventCompanyFilterAction
   in
     div [class "container"]
       [ div [class "row"]
         [ div [class "col-md-3"]
-            [ (EventCompanyFilter.View.view context childEventCompanyFilterAddress model.selectedCompany)
-
-            , div []
-                [ div [class "h2"] [ text "Event Authors"]
-                , ul [] (viewEventsByAuthors address model.events model.selectedAuthor)
-                , div [ hidden (isFetched model.status)] [ text "Loading..."]
-                ]
+            [ (EventCompanyFilter.View.view context.companies childEventCompanyFilterAddress model.selectedCompany)
+            , (EventAuthorFilter.View.view model.events childEventAuthorFilterAddress model.selectedAuthor)
 
             , div []
                 [ div [class "h2"] [ text "Event list"]
@@ -56,58 +55,6 @@ mapStyle =
   [ ("width", "600px")
   , ("height", "400px")
   ]
-
-groupEventsByAuthors : List Event -> Dict Int (Author, Int)
-groupEventsByAuthors events =
-  let
-    handleEvent : Event -> Dict Int (Author, Int) -> Dict Int (Author, Int)
-    handleEvent event dict =
-      let
-        currentValue =
-          Maybe.withDefault (event.author, 0) <|
-            Dict.get event.author.id dict
-
-        newValue =
-          case currentValue of
-            (author, count) -> (author, count + 1)
-      in
-        Dict.insert event.author.id newValue dict
-
-  in
-    List.foldl handleEvent Dict.empty events
-
-viewEventsByAuthors : Signal.Address Action -> List Event -> Maybe Int -> List Html
-viewEventsByAuthors address events selectedAuthor =
-  let
-    getText : Author -> Int -> Html
-    getText author count =
-      let
-        authorRaw =
-          text (author.name ++ " (" ++ toString(count) ++ ")")
-
-        authorSelect =
-          a [ href "javascript:void(0);", onClick address (Pages.Event.Update.SelectAuthor author.id) ] [ authorRaw ]
-
-        authorUnselect =
-          span []
-            [ a [ href "javascript:void(0);", onClick address (Pages.Event.Update.UnSelectAuthor) ] [ text "x " ]
-            , authorRaw
-            ]
-      in
-        case selectedAuthor of
-          Just id ->
-            if author.id == id then authorUnselect else authorSelect
-
-          Nothing ->
-            authorSelect
-
-    viewAuthor (author, count) =
-      li [] [getText author count]
-  in
-    -- Get HTML from the grouped events
-    groupEventsByAuthors events |>
-      Dict.values |>
-        List.map viewAuthor
 
 
 -- In case an author or string-filter is selected, filter the events.

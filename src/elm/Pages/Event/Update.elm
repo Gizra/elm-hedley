@@ -6,6 +6,7 @@ import Company.Model as Company exposing (Model)
 import Effects exposing (Effects)
 import Event.Decoder exposing (decode)
 import Event.Model exposing (Event)
+import EventAuthorFilter.Update exposing (Action)
 import EventCompanyFilter.Update exposing (Action)
 import Http exposing (Error)
 import Leaflet.Model exposing (initialModel, Marker)
@@ -36,12 +37,11 @@ type Action
   -- so we allow passing a Maybe Int, instead of just Int.
   | SelectEvent (Maybe Int)
   | UnSelectEvent
-  | SelectAuthor Int
-  | UnSelectAuthor
   -- @todo: Make (Maybe String)
   | FilterEvents String
 
   -- Child actions
+  | ChildEventAuthorFilterAction EventAuthorFilter.Update.Action
   | ChildEventCompanyFilterAction EventCompanyFilter.Update.Action
   | ChildLeafletAction Leaflet.Update.Action
 
@@ -59,6 +59,14 @@ type alias Context =
 update : Context -> Action -> Model -> (Model, Effects Action)
 update context action model =
   case action of
+    ChildEventAuthorFilterAction act ->
+      ( model
+      , Effects.batch
+        [ Task.succeed UnSelectEvent |> Effects.task
+        , Task.succeed (FilterEvents model.filterString) |> Effects.task
+        ]
+      )
+
     ChildEventCompanyFilterAction act ->
       -- Reach into the selected company, and invoke getting the data.
       case act of
@@ -128,22 +136,6 @@ update context action model =
     UnSelectEvent ->
       ( { model | selectedEvent = Nothing }
       , Task.succeed (ChildLeafletAction <| Leaflet.Update.SelectMarker Nothing) |> Effects.task
-      )
-
-    SelectAuthor id ->
-      ( { model | selectedAuthor = Just id }
-      , Effects.batch
-        [ Task.succeed UnSelectEvent |> Effects.task
-        , Task.succeed (FilterEvents model.filterString) |> Effects.task
-        ]
-      )
-
-    UnSelectAuthor ->
-      ( { model | selectedAuthor = Nothing }
-      , Effects.batch
-        [ Task.succeed UnSelectEvent |> Effects.task
-        , Task.succeed (FilterEvents model.filterString) |> Effects.task
-        ]
       )
 
     FilterEvents val ->

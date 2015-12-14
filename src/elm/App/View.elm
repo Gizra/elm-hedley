@@ -58,7 +58,7 @@ mainContent address model =
           Signal.forwardTo address App.Update.ChildEventAction
 
         context =
-          { companies = model.companies}
+          { companies = model.companies }
       in
         div [ style myStyle ] [ Pages.Event.View.view context childAddress model.events ]
 

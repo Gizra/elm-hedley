@@ -9,17 +9,14 @@ import Html.Attributes exposing (class, hidden, href, id, placeholder, selected,
 import Html.Events exposing (on, onClick, targetValue)
 import String exposing (toInt)
 
-type alias Context =
-  { companies : List Company.Model }
-
 type alias Model = EventCompanyFilter.Model
 
-view : Context -> Signal.Address Action -> Model -> Html
-view context address model =
+view : List Company.Model -> Signal.Address Action -> Model -> Html
+view companies address model =
   div
     []
     [ div [class "h2"] [ text "Companies"]
-    , companyListForSelect address context.companies model
+    , companyListForSelect address companies model
     ]
 
 companyListForSelect : Signal.Address Action -> List Company.Model -> Model -> Html

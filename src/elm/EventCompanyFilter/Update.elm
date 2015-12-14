@@ -3,8 +3,8 @@ module EventCompanyFilter.Update where
 import EventCompanyFilter.Model as EventCompanyFilter exposing (initialModel, Model)
 
 -- import Config exposing (cacheTtl)
-import ConfigType exposing (BackendConfig)
-import Company exposing (Model)
+import Config.Model exposing (BackendConfig)
+import Company.Model as Company exposing (Model)
 -- import Dict exposing (Dict)
 import Effects exposing (Effects)
 -- import Html exposing (a, div, input, text, select, span, li, option, ul, Html)
@@ -15,7 +15,6 @@ import Effects exposing (Effects)
 -- import Leaflet exposing (Model, initialModel, Marker, update)
 -- import RouteHash exposing (HashUpdate)
 -- import String exposing (length)
-import Task  exposing (succeed)
 -- import TaskTutorial exposing (getCurrentTime)
 -- import Time exposing (Time)
 
@@ -35,7 +34,9 @@ type alias Context =
   , companies : List Company.Model
   }
 
-update : Context -> Action -> EventCompanyFilter.Model -> (EventCompanyFilter.Model, Effects Action)
+type alias Model = EventCompanyFilter.Model
+
+update : Context -> Action -> Model -> (Model, Effects Action)
 update context action model =
   case action of
     SelectCompany maybeCompanyId ->
@@ -56,6 +57,6 @@ update context action model =
             Nothing ->
               Nothing
       in
-        ( { model | selectedCompany = selectedCompany }
-        , Task.succeed (GetData selectedCompany) |> Effects.task
+        ( selectedCompany
+        , Effects.none
         )

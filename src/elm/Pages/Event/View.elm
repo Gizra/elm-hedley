@@ -3,6 +3,7 @@ module Pages.Event.View where
 import Company.Model as Company exposing (Model)
 import Dict exposing (Dict)
 import Event.Model exposing (Author, Event)
+import EventCompanyFilter.View exposing (view)
 import Html exposing (a, div, input, text, select, span, li, option, ul, Html)
 import Html.Attributes exposing (class, hidden, href, id, placeholder, selected, style, value)
 import Html.Events exposing (on, onClick, targetValue)

@@ -3,14 +3,16 @@ module EventCompanyFilter.View where
 import EventCompanyFilter.Model as EventCompanyFilter exposing (initialModel, Model)
 import EventCompanyFilter.Update exposing (Action)
 
-
 import Company.Model as Company exposing (Model)
--- import Html exposing (a, div, input, text, select, span, li, option, ul, Html)
--- import Html.Attributes exposing (class, hidden, href, id, placeholder, selected, style, value)
--- import Html.Events exposing (on, onClick, targetValue)
+import Html exposing (a, div, input, text, select, span, li, option, ul, Html)
+import Html.Attributes exposing (class, hidden, href, id, placeholder, selected, style, value)
+import Html.Events exposing (on, onClick, targetValue)
+import String exposing (toInt)
 
 type alias Context =
   { companies : List Company.Model }
+
+type alias Model = EventCompanyFilter.Model
 
 view : Context -> Signal.Address Action -> Model -> Html
 view context address model =
@@ -57,6 +59,6 @@ companyListForSelect address companies selectedCompany  =
   in
     select
       [ value selectedText
-      , on "change" targetValue (\str -> Signal.message address <| SelectCompany <| textToMaybe str)
+      , on "change" targetValue (\str -> Signal.message address <| EventCompanyFilter.Update.SelectCompany <| textToMaybe str)
       ]
       (List.map getOption companies')

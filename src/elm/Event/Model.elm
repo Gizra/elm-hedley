@@ -13,8 +13,8 @@ type alias Author =
   }
 
 type alias Event =
-  { id : Id
+  { author : Author
+  , id : Id
   , label : String
   , marker : Marker
-  , author : Author
   }

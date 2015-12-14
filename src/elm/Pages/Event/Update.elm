@@ -6,6 +6,7 @@ import Company.Model as Company exposing (Model)
 import Effects exposing (Effects)
 import Event.Decoder exposing (decode)
 import Event.Model exposing (Event)
+import EventCompanyFilter.Update exposing (Action)
 import Http exposing (Error)
 import Leaflet.Model exposing (initialModel, Marker)
 import Leaflet.Update exposing (Action)
@@ -42,6 +43,7 @@ type Action
   | FilterEvents String
 
   -- Child actions
+  | ChildConfigEventCompanyFilterAction EventCompanyFilter.Update.Action
   | ChildLeafletAction Leaflet.Update.Action
 
   -- Page
@@ -58,6 +60,14 @@ type alias Context =
 update : Context -> Action -> Model -> (Model, Effects Action)
 update context action model =
   case action of
+    ChildConfigEventCompanyFilterAction act ->
+      -- Reach into the selected company, and invoke getting the data.
+      case act of
+        EventCompanyFilter.Update.SelectCompany maybeCompanyId ->
+          ( model
+          , Task.succeed (GetData maybeCompanyId) |> Effects.task
+          )
+
     NoOp ->
       (model, Effects.none)
 

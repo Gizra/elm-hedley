@@ -36,7 +36,7 @@ update : UpdateContext -> Action -> ArticleList.Model.Model -> (ArticleList.Mode
 update context action model =
   case action of
     AppendArticle article ->
-      ( { model | articles <- article :: model.articles }
+      ( { model | articles = article :: model.articles }
       , Effects.none
       )
 
@@ -63,7 +63,7 @@ update context action model =
         url =
           backendUrl ++ "/api/v1.0/articles"
       in
-        ( { model | status <- ArticleList.Model.Fetching }
+        ( { model | status = ArticleList.Model.Fetching }
         , getJson url context.accessToken
         )
 
@@ -72,14 +72,14 @@ update context action model =
       case result of
         Ok articles ->
           ( { model
-            | articles <- articles
-            , status <- ArticleList.Model.Fetched timestamp'
+            | articles = articles
+            , status = ArticleList.Model.Fetched timestamp'
             }
           , Effects.none
           )
 
         Err err ->
-          ( { model | status <- ArticleList.Model.HttpError err }
+          ( { model | status = ArticleList.Model.HttpError err }
           , Effects.none
           )
 

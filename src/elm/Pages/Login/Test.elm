@@ -1,7 +1,6 @@
 module Pages.Login.Test where
 
-import ElmTest.Assertion exposing (..)
-import ElmTest.Test exposing (..)
+import ElmTest exposing (..)
 
 import Config.Model exposing (initialBackendConfig)
 import Effects exposing (Effects)
@@ -61,7 +60,7 @@ submitForm status =
       Pages.Login.Model.initialModel
 
     model' =
-      { model | status <- status }
+      { model | status = status }
 
   in
     Pages.Login.Update.update updateContext Pages.Login.Update.SubmitForm model'

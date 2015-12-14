@@ -4,6 +4,8 @@ For the moment only works with the characters :
 
 " !\"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"
 
+# Method
+@docs encode, decode
 -}
 
 import List
@@ -56,7 +58,7 @@ toTupleList list =
     a :: b :: []     -> [(a, b , -1)]
     a :: []          -> [(a, -1, -1)]
     []               -> []
-    _                -> [(-1, -1, -1)]
+
 
 toCharList : List (Int,Int,Int) -> List Char
 toCharList bitList =
@@ -83,9 +85,13 @@ base64Map =
 isValid : String -> Bool
 isValid string =
   let isBase64Char char = Dict.member char base64Map
-      string' = if | String.endsWith "==" string -> String.dropRight 2 string
-                   | String.endsWith "=" string  -> String.dropRight 1 string
-                   | otherwise                   -> string
+      string' =
+        if String.endsWith "==" string then
+           String.dropRight 2 string
+        else if String.endsWith "=" string then
+          String.dropRight 1 string
+        else
+          string
   in
     String.all isBase64Char string'
 
@@ -101,14 +107,22 @@ dropLast number list =
 
 toBase64BitList : String -> List(Bit)
 toBase64BitList string =
-  let base64ToInt char = case Dict.get char base64Map of
-                           Just(value) -> value
-                           _           -> -1
-      endingEquals = if | (String.endsWith "==" string) -> 2
-                        | (String.endsWith "=" string)  -> 1
-                        | otherwise                     -> 0
-      stripped = String.toList (String.dropRight endingEquals string)
-      numberList = List.map base64ToInt stripped
+  let
+    base64ToInt char =
+      case Dict.get char base64Map of
+        Just(value) -> value
+        _           -> -1
+
+    endingEquals =
+      if (String.endsWith "==" string) then
+         2
+      else if String.endsWith "=" string then
+        1
+      else
+        0
+
+    stripped = String.toList (String.dropRight endingEquals string)
+    numberList = List.map base64ToInt stripped
   in
     dropLast (endingEquals*2) <| List.concatMap (flip BitList.fromNumberWithSize <| 6) numberList
 

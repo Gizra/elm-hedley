@@ -47,23 +47,23 @@ update context action model =
         )
 
     SetError msg ->
-      ( { model | status <- GithubAuth.Error msg }
+      ( { model | status = GithubAuth.Error msg }
       , Effects.none
       )
 
     SetAccessToken token ->
-      ( { model | accessToken <- token }
+      ( { model | accessToken = token }
       , Effects.none
       )
 
     UpdateAccessTokenFromServer result ->
       case result of
         Ok token ->
-          ( { model | status <- GithubAuth.Fetched }
+          ( { model | status = GithubAuth.Fetched }
           , Task.succeed (SetAccessToken token) |> Effects.task
           )
         Err msg ->
-          ( { model | status <- GithubAuth.HttpError msg }
+          ( { model | status = GithubAuth.HttpError msg }
           -- @todo: Improve.
           , Task.succeed (SetError "HTTP error") |> Effects.task
           )

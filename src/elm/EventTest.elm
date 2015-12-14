@@ -1,7 +1,6 @@
 module EventTest where
 
-import ElmTest.Assertion exposing (..)
-import ElmTest.Test exposing (..)
+import ElmTest exposing (..)
 
 import Config.Model exposing (initialBackendConfig)
 import Company.Model as Company exposing (Model)

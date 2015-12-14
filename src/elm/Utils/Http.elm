@@ -9,10 +9,14 @@ getErrorMessageFromHttpResponse err =
       "Connection has timed out"
 
     Http.BadResponse code _ ->
-      if | code == 401 -> "Wrong username or password"
-         | code == 429 -> "Too many login requests with the wrong username or password. Wait a few hours before trying again"
-         | code >= 500 -> "Some error has occured on the server"
-         | otherwise -> "Unknow error has occured"
+      if code == 401 then
+        "Wrong username or password"
+      else if code == 429 then
+         "Too many login requests with the wrong username or password. Wait a few hours before trying again"
+      else if code >= 500 then
+        "Some error has occured on the server"
+      else
+        "Unknow error has occured"
 
     Http.NetworkError ->
       "A network error has occured"

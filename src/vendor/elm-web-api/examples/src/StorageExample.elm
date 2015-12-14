@@ -150,7 +150,7 @@ type StorageOperation
 {-| Actually perform the StorageAction, and log it. -}
 updateStorageAction : StorageAction -> Model -> (Model, Effects Action)
 updateStorageAction action model =
-    ( { model | log <- LogAction action :: model.log }
+    ( { model | log = LogAction action :: model.log }
     , Effects.task (Task.map StorageResponse (storageAction2task action))
     )
 
@@ -158,7 +158,7 @@ updateStorageAction action model =
 {- When we get a response, we just log it. -}
 updateStorageResponse : StorageResponse -> Model -> (Model, Effects Action)
 updateStorageResponse action model =
-    ( { model | log <- LogResponse action :: model.log }
+    ( { model | log = LogResponse action :: model.log }
     , Effects.none
     )
 
@@ -166,7 +166,7 @@ updateStorageResponse action model =
 {- As with an event. -}
 updateStorageEvent : Storage.Event -> Model -> (Model, Effects Action)
 updateStorageEvent action model =
-    ( { model | log <- LogEvent action :: model.log }
+    ( { model | log = LogEvent action :: model.log }
     , Effects.none
     )
 
@@ -208,10 +208,10 @@ updateSetAction action model =
                             currentAction.target
 
                     newAction =
-                        { currentAction | target <- storage }
+                        { currentAction | target = storage }
 
                 in
-                    { model | action <- newAction } 
+                    { model | action = newAction } 
 
             SetOperationType string ->
                 let
@@ -251,10 +251,10 @@ updateSetAction action model =
                             currentAction.operation
 
                     newAction =
-                        { currentAction | operation <- operation }
+                        { currentAction | operation = operation }
                     
                 in
-                    { model | action <- newAction } 
+                    { model | action = newAction } 
 
             SetKeyIndex string ->
                 let
@@ -267,15 +267,15 @@ updateSetAction action model =
                                 lastOperation.key
 
                     newAction =
-                        { currentAction | operation <- operation }
+                        { currentAction | operation = operation }
 
                     newLastOperation =
-                        { lastOperation | key <- operation }
+                        { lastOperation | key = operation }
 
                 in
                     { model
-                        | action <- newAction
-                        , lastOperation <- newLastOperation
+                        | action = newAction
+                        , lastOperation = newLastOperation
                     } 
 
             SetGetKey string ->
@@ -284,15 +284,15 @@ updateSetAction action model =
                         DoGet string
 
                     newAction =
-                        { currentAction | operation <- operation }
+                        { currentAction | operation = operation }
 
                     newLastOperation =
-                        { lastOperation | get <- operation }
+                        { lastOperation | get = operation }
     
                 in
                     { model
-                        | action <- newAction
-                        , lastOperation <- newLastOperation
+                        | action = newAction
+                        , lastOperation = newLastOperation
                     } 
 
             SetRemoveKey string ->
@@ -301,15 +301,15 @@ updateSetAction action model =
                         DoRemove string
 
                     newAction =
-                        { currentAction | operation <- operation }
+                        { currentAction | operation = operation }
 
                     newLastOperation =
-                        { lastOperation | remove <- operation }
+                        { lastOperation | remove = operation }
     
                 in
                     { model
-                        | action <- newAction
-                        , lastOperation <- newLastOperation
+                        | action = newAction
+                        , lastOperation = newLastOperation
                     } 
 
             SetSetKey string ->
@@ -323,15 +323,15 @@ updateSetAction action model =
                                 DoSet string ""
                     
                     newAction =
-                        { currentAction | operation <- operation }
+                        { currentAction | operation = operation }
 
                     newLastOperation =
-                        { lastOperation | set <- operation }
+                        { lastOperation | set = operation }
     
                 in
                     { model
-                        | action <- newAction
-                        , lastOperation <- newLastOperation
+                        | action = newAction
+                        , lastOperation = newLastOperation
                     } 
 
             SetSetValue string ->
@@ -345,15 +345,15 @@ updateSetAction action model =
                                 DoSet "" string
                 
                     newAction =
-                        { currentAction | operation <- operation }
+                        { currentAction | operation = operation }
 
                     newLastOperation =
-                        { lastOperation | set <- operation }
+                        { lastOperation | set = operation }
     
                 in
                     { model
-                        | action <- newAction
-                        , lastOperation <- newLastOperation
+                        | action = newAction
+                        , lastOperation = newLastOperation
                     } 
 
 

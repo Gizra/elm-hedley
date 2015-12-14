@@ -22,8 +22,8 @@ decode =
         ("id" := number)
         ("label" := Json.string)
   in
-  Json.at ["data", "0"]
-    <| Json.object3 (,,)
-      ("id" := number)
-      ("label" := Json.string)
-      ("companies" := Json.list company)
+    Json.at ["data", "0"]
+      <| Json.object3 (,,)
+        ("id" := number)
+        ("label" := Json.string)
+        ("companies" := Json.list company)

@@ -1,7 +1,6 @@
 module Config.Test where
 
-import ElmTest.Assertion exposing (..)
-import ElmTest.Test exposing (..)
+import ElmTest exposing (..)
 
 import Config.Model exposing (initialBackendConfig, initialModel, Model)
 import Config.Update exposing (update, Action)

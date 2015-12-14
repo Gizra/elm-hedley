@@ -3,7 +3,7 @@ node_js:
   - "4.1"
 
 install:
-  - npm install -g elm@0.15.1 casperjs http-server
+  - npm install -g elm@0.16.0 casperjs http-server
   - elm-package install -y
 before_script:
   - elm-make ./src/elm/TestRunner.elm --output test.html

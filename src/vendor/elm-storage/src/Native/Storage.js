@@ -692,7 +692,7 @@ requireModule('promise/polyfill').polyfill();
 
     // Sadly, the best way to save binary data in WebSQL/localStorage is serializing
     // it to Base64, so this is how we store it to prevent very strange errors with less
-    // verbose ways of binary <-> string data storage.
+    // verbose ways of binary => string data storage.
     var BASE_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 
     var SERIALIZED_MARKER = '__lfsc__:';

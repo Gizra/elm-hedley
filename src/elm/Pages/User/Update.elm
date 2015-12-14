@@ -47,21 +47,21 @@ update context action model =
           then
             (model, Effects.none)
           else
-            ( { model | status <- User.Fetching }
+            ( { model | status = User.Fetching }
             , getJson url context.accessToken
             )
 
     UpdateDataFromServer result ->
       let
         model' =
-          { model | status <- User.Fetched}
+          { model | status = User.Fetched}
       in
         case result of
           Ok (id, name, companies) ->
             ( {model'
-                | id <- id
-                , name <- User.LoggedIn name
-                , companies <- companies
+                | id = id
+                , name = User.LoggedIn name
+                , companies = companies
               }
             , Effects.none
             )
@@ -79,12 +79,12 @@ update context action model =
                     Effects.none
 
             in
-            ( { model' | status <- User.HttpError msg }
+            ( { model' | status = User.HttpError msg }
             , effects
             )
 
     SetAccessToken accessToken ->
-      ( {model | accessToken <- accessToken}
+      ( {model | accessToken = accessToken}
       , Effects.none
       )
 

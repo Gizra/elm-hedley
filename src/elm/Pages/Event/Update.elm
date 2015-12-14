@@ -34,7 +34,6 @@ type Action
 
   -- Select event might get values from JS (i.e. selecting a leaflet marker)
   -- so we allow passing a Maybe Int, instead of just Int.
-  | SelectCompany (Maybe CompanyId)
   | SelectEvent (Maybe Int)
   | UnSelectEvent
   | SelectAuthor Int
@@ -43,7 +42,7 @@ type Action
   | FilterEvents String
 
   -- Child actions
-  | ChildConfigEventCompanyFilterAction EventCompanyFilter.Update.Action
+  | ChildEventCompanyFilterAction EventCompanyFilter.Update.Action
   | ChildLeafletAction Leaflet.Update.Action
 
   -- Page
@@ -60,16 +59,13 @@ type alias Context =
 update : Context -> Action -> Model -> (Model, Effects Action)
 update context action model =
   case action of
-    ChildConfigEventCompanyFilterAction act ->
+    ChildEventCompanyFilterAction act ->
       -- Reach into the selected company, and invoke getting the data.
       case act of
         EventCompanyFilter.Update.SelectCompany maybeCompanyId ->
           ( model
           , Task.succeed (GetData maybeCompanyId) |> Effects.task
           )
-
-    NoOp ->
-      (model, Effects.none)
 
     GetData maybeCompanyId ->
       let
@@ -103,6 +99,9 @@ update context action model =
         , getJson url maybeCompanyId context.accessToken
         )
 
+    NoOp ->
+      (model, Effects.none)
+
     UpdateDataFromServer result maybeCompanyId timestamp ->
       case result of
         Ok events ->
@@ -116,29 +115,6 @@ update context action model =
           ( {model | status = Event.HttpError msg}
           , Effects.none
           )
-
-    SelectCompany maybeCompanyId ->
-      let
-        isValidCompany val =
-          context.companies
-            |> List.filter (\company -> company.id == val)
-            |> List.length
-
-
-        selectedCompany =
-          case maybeCompanyId of
-            Just val ->
-              -- Make sure the given company ID is a valid one.
-              if ((isValidCompany val) > 0)
-                then Just val
-                else Nothing
-            Nothing ->
-              Nothing
-      in
-        ( { model | selectedCompany = selectedCompany }
-        , Task.succeed (GetData selectedCompany) |> Effects.task
-        )
-
 
     SelectEvent val ->
       case val of
@@ -210,12 +186,23 @@ update context action model =
 
     Activate maybeCompanyId ->
       let
-        (childModel, childEffects) = Leaflet.Update.update Leaflet.Update.ToggleMap model.leaflet
+        (childModel, childEffects) =
+          Leaflet.Update.update Leaflet.Update.ToggleMap model.leaflet
+
+        context =
+          { companies = context.companies
+          }
+
+        (childEventCompanyFilterModel, childEventCompanyFilterEffects) =
+          EventCompanyFilter.Update.update context EventCompanyFilter.Update.SelectCompany model.selectedCompany
 
       in
-        ( {model | leaflet = childModel }
+        ( { model
+          | leaflet = childModel
+          , selectedCompany = childEventCompanyFilterModel
+          }
         , Effects.batch
-            [ Task.succeed (SelectCompany maybeCompanyId) |> Effects.task
+            [ Effects.map ChildEventCompanyFilterAction childEventCompanyFilterEffects
             , Effects.map ChildLeafletAction childEffects
             ]
         )

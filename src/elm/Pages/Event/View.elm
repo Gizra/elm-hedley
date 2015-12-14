@@ -3,7 +3,6 @@ module Pages.Event.View where
 import Company.Model as Company exposing (Model)
 import Dict exposing (Dict)
 import Event.Model exposing (Author, Event)
-import EventCompanyFilter.Update exposing (Action)
 import EventCompanyFilter.View exposing (view)
 import Html exposing (a, div, input, text, select, span, li, option, ul, Html)
 import Html.Attributes exposing (class, hidden, href, id, placeholder, selected, style, value)
@@ -21,77 +20,35 @@ type alias Context =
 
 view : Context -> Signal.Address Action -> Model -> Html
 view context address model =
-  div [class "container"]
-    [ div [class "row"]
-      [ div [class "col-md-3"]
-          [ div []
-              [ div [class "h2"] [ text "Companies"]
-              , companyListForSelect address context.companies model.selectedCompany
-              ]
-
-          , div []
-              [ div [class "h2"] [ text "Event Authors"]
-              , ul [] (viewEventsByAuthors address model.events model.selectedAuthor)
-              , div [ hidden (isFetched model.status)] [ text "Loading..."]
-              ]
-
-          , div []
-              [ div [class "h2"] [ text "Event list"]
-              , (viewFilterString address model)
-              , (viewListEvents address model)
-              ]
-          ]
-
-      , div [class "col-md-9"]
-          [ div [class "h2"] [ text "Map"]
-          , div [ style mapStyle, id "map" ] []
-          , viewEventInfo model
-          ]
-      ]
-    ]
-
-companyListForSelect : Signal.Address Action -> List Company.Model -> Maybe CompanyId -> Html
-companyListForSelect address companies selectedCompany  =
   let
-    selectedText =
-      case selectedCompany of
-        Just id ->
-          toString id
-        Nothing ->
-          ""
-
-    textToMaybe string =
-      if string == "0"
-        then Nothing
-        else
-          -- Converting to int return a result.
-          case (String.toInt string) of
-            Ok val ->
-              Just val
-            Err _ ->
-              Nothing
-
-
-    -- Add an "All companies" option
-    companies' =
-      (Company.Model 0 "-- All companies --") :: companies
-
-    -- The selected company ID.
-    selectedId =
-      case selectedCompany of
-        Just id ->
-          id
-        Nothing ->
-          0
-
-    getOption company =
-      option [value <| toString company.id, selected (company.id == selectedId)] [ text company.label]
+    childEventCompanyFilterAddress =
+      Signal.forwardTo address Pages.Event.Update.ChildEventCompanyFilterAction
   in
-    select
-      [ value selectedText
-      , on "change" targetValue (\str -> Signal.message address <| (Pages.Event.Update.ChildEventCompanyFilterAction << EventCompanyFilter.Update.SelectCompany) <| textToMaybe str)
+    div [class "container"]
+      [ div [class "row"]
+        [ div [class "col-md-3"]
+            [ (EventCompanyFilter.View.view context childEventCompanyFilterAddress model.selectedCompany)
+
+            , div []
+                [ div [class "h2"] [ text "Event Authors"]
+                , ul [] (viewEventsByAuthors address model.events model.selectedAuthor)
+                , div [ hidden (isFetched model.status)] [ text "Loading..."]
+                ]
+
+            , div []
+                [ div [class "h2"] [ text "Event list"]
+                , (viewFilterString address model)
+                , (viewListEvents address model)
+                ]
+            ]
+
+        , div [class "col-md-9"]
+            [ div [class "h2"] [ text "Map"]
+            , div [ style mapStyle, id "map" ] []
+            , viewEventInfo model
+            ]
+        ]
       ]
-      (List.map getOption companies')
 
 
 mapStyle : List (String, String)

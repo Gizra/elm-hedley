@@ -56,6 +56,6 @@ update context action model =
             Nothing ->
               Nothing
       in
-        ( { model | selectedCompany <- selectedCompany }
+        ( { model | selectedCompany = selectedCompany }
         , Task.succeed (GetData selectedCompany) |> Effects.task
         )

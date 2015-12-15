@@ -30,7 +30,7 @@ decode =
     JD.at ["data"]
       <| JD.list
       <| JD.object4 Event
+        ("user" := author)
         ("id" := number)
         ("label" := JD.string)
         ("location" := marker)
-        ("user" := author)

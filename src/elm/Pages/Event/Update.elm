@@ -113,24 +113,12 @@ update context action model =
     UpdateDataFromServer result maybeCompanyId timestamp ->
       case result of
         Ok events ->
-          let
-            context' =
-              { companies = context.companies
-              }
-
-            (childEventCompanyFilterModel, childEventCompanyFilterEffects) =
-              EventCompanyFilter.Update.update context' (EventCompanyFilter.Update.SelectCompany maybeCompanyId) model.selectedCompany
-
-          in
-            ( {model
-                | events = events
-                , status = Event.Fetched maybeCompanyId timestamp
-              }
-            , Effects.batch
-              [ Task.succeed (FilterEvents model.filterString) |> Effects.task
-              , Effects.map ChildEventCompanyFilterAction childEventCompanyFilterEffects
-              ]
-            )
+          ( {model
+            | events = events
+            , status = Event.Fetched maybeCompanyId timestamp
+            }
+          , Task.succeed (FilterEvents model.filterString) |> Effects.task
+          )
 
         Err msg ->
           ( {model | status = Event.HttpError msg}

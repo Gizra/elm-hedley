@@ -113,12 +113,25 @@ update context action model =
     UpdateDataFromServer result maybeCompanyId timestamp ->
       case result of
         Ok events ->
-          ( {model
-              | events = events
-              , status = Event.Fetched maybeCompanyId timestamp
-            }
-          , Task.succeed (FilterEvents model.filterString) |> Effects.task
-          )
+          let
+            context' =
+              { companies = context.companies
+              }
+
+            (childEventCompanyFilterModel, childEventCompanyFilterEffects) =
+              EventCompanyFilter.Update.update context' (EventCompanyFilter.Update.SelectCompany maybeCompanyId) model.selectedCompany
+
+          in
+            ( {model
+                | events = events
+                , status = Event.Fetched maybeCompanyId timestamp
+              }
+            , Effects.batch
+              [ Task.succeed (FilterEvents model.filterString) |> Effects.task
+              , Effects.map ChildEventCompanyFilterAction childEventCompanyFilterEffects
+              ]
+            )
+
         Err msg ->
           ( {model | status = Event.HttpError msg}
           , Effects.none
@@ -178,23 +191,14 @@ update context action model =
 
     Activate maybeCompanyId ->
       let
-        context' =
-          { companies = context.companies
-          }
-
-        (childEventCompanyFilterModel, childEventCompanyFilterEffects) =
-          EventCompanyFilter.Update.update context' (EventCompanyFilter.Update.SelectCompany maybeCompanyId) model.selectedCompany
-
         (childModel, childEffects) =
           Leaflet.Update.update Leaflet.Update.ToggleMap model.leaflet
 
       in
-        ( { model
-          | leaflet = childModel
-          , selectedCompany = childEventCompanyFilterModel
-          }
+        ( { model | leaflet = childModel }
         , Effects.batch
-            [ Effects.map ChildEventCompanyFilterAction childEventCompanyFilterEffects
+            -- Get data without companies filtering.
+            [ Task.succeed (GetData Nothing) |> Effects.task
             , Effects.map ChildLeafletAction childEffects
             ]
         )

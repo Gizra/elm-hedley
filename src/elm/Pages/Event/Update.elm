@@ -8,6 +8,7 @@ import Event.Decoder exposing (decode)
 import Event.Model exposing (Event)
 import EventAuthorFilter.Update exposing (Action)
 import EventCompanyFilter.Update exposing (Action)
+import EventList.Update exposing (Action)
 import Http exposing (Error)
 import Leaflet.Model exposing (initialModel, Marker)
 import Leaflet.Update exposing (Action)
@@ -36,6 +37,7 @@ type Action
   -- Child actions
   | ChildEventAuthorFilterAction EventAuthorFilter.Update.Action
   | ChildEventCompanyFilterAction EventCompanyFilter.Update.Action
+  | ChildEventListAction EventList.Update.Action
   | ChildLeafletAction Leaflet.Update.Action
 
   -- Page
@@ -54,6 +56,8 @@ update context action model =
   case action of
     ChildEventAuthorFilterAction act ->
       ( model
+      -- The child component doesn't have effects, so we don't bother invoking
+      -- its effects      
       , Effects.batch
         [ Task.succeed UnSelectEvent |> Effects.task
         , Task.succeed (FilterEvents model.filterString) |> Effects.task
@@ -67,6 +71,9 @@ update context action model =
           ( model
           , Task.succeed (GetData maybeCompanyId) |> Effects.task
           )
+
+    ChildEventListAction act ->
+      (model, Effects.none)
 
     GetData maybeCompanyId ->
       let

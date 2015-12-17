@@ -1,7 +1,10 @@
 module Pages.Event.Model where
 
 import Event.Model exposing (Event)
-import EventCompanyFilter.Model exposing (initialModel, Model)
+import EventAuthorFilter.Model as EventAuthorFilter exposing (initialModel, Model)
+import EventCompanyFilter.Model as EventCompanyFilter exposing (initialModel, Model)
+import EventList.Model as EventList exposing (initialModel, Model)
+
 import Http exposing (Error)
 import Leaflet.Model exposing (initialModel, Model)
 import Time exposing (Time)
@@ -17,22 +20,19 @@ type Status =
 
 type alias Model =
   { events : List Event
+  , eventList: EventList.Model
   , status : Status
-  , selectedCompany : EventCompanyFilter.Model.Model
-  , selectedEvent : Maybe Int
-  , selectedAuthor : Maybe Int
-  -- @todo: Make (Maybe String)
-  , filterString : String
+  , selectedCompany : EventCompanyFilter.Model
+  , selectedAuthor : EventAuthorFilter.Model
   , leaflet : Leaflet.Model.Model
   }
 
 initialModel : Model
 initialModel =
   { events = []
+  , eventList = EventList.initialModel
   , status = Init
-  , selectedCompany = EventCompanyFilter.Model.initialModel
-  , selectedEvent = Nothing
-  , selectedAuthor = Nothing
-  , filterString = ""
+  , selectedCompany = EventCompanyFilter.initialModel
+  , selectedAuthor = EventAuthorFilter.initialModel
   , leaflet = Leaflet.Model.initialModel
   }

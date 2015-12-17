@@ -33,12 +33,6 @@ view context address model =
         [ div [class "col-md-3"]
             [ (EventCompanyFilter.View.view context.companies childEventCompanyFilterAddress model.selectedCompany)
             , (EventAuthorFilter.View.view model.events childEventAuthorFilterAddress model.selectedAuthor)
-
-            , div []
-                [ div [class "h2"] [ text "Event list"]
-                , (viewFilterString address model)
-                , (viewListEvents address model)
-                ]
             ]
 
         , div [class "col-md-9"]
@@ -82,55 +76,6 @@ filterListEvents model =
   in
     authorFilter model.events
      |> stringFilter
-
-viewFilterString : Signal.Address Action -> Model -> Html
-viewFilterString address model =
-  div []
-    [ input
-        [ placeholder "Filter events"
-        , value model.filterString
-        , on "input" targetValue (Signal.message address << Pages.Event.Update.FilterEvents)
-        ]
-        []
-    ]
-
-
-viewListEvents : Signal.Address Action -> Model -> Html
-viewListEvents address model =
-  let
-    filteredEvents = filterListEvents model
-
-    hrefVoid =
-      href "javascript:void(0);"
-
-    eventSelect event =
-      li []
-        [ a [ hrefVoid , onClick address (Pages.Event.Update.SelectEvent <| Just event.id) ] [ text event.label ] ]
-
-    eventUnselect event =
-      li []
-        [ span []
-          [ a [ href "javascript:void(0);", onClick address (Pages.Event.Update.UnSelectEvent) ] [ text "x " ]
-          , text event.label
-          ]
-        ]
-
-    getListItem : Event -> Html
-    getListItem event =
-      case model.selectedEvent of
-        Just id ->
-          if event.id == id then eventUnselect(event) else eventSelect(event)
-
-        Nothing ->
-          eventSelect(event)
-  in
-    if not <| List.isEmpty filteredEvents
-      then
-        ul [] (List.map getListItem filteredEvents)
-      else
-        div [] [ text "No results found"]
-
-
 
 
 viewEventInfo : Model -> Html

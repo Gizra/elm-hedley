@@ -117,7 +117,8 @@ update context action model =
             | events = events
             , status = Event.Fetched maybeCompanyId timestamp
             }
-          , Task.succeed (FilterEvents model.filterString) |> Effects.task
+          -- , Task.succeed (FilterEvents model.filterString) |> Effects.task
+          , Effects.none
           )
 
         Err msg ->

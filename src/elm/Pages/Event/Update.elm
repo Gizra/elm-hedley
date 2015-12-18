@@ -58,9 +58,9 @@ update context action model =
       let
         -- The child component doesn't have effects.
         childModel =
-          EventAuthorFilter.Update.update act model.selectedAuthor
+          EventAuthorFilter.Update.update act model.eventAuthorFilter
       in
-        ( { model | selectedAuthor = childModel }
+        ( { model | eventAuthorFilter = childModel }
         , Effects.none
         )
 

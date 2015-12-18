@@ -22,8 +22,8 @@ type alias Model =
   { events : List Event
   , eventList: EventList.Model
   , status : Status
-  , selectedCompany : EventCompanyFilter.Model
-  , selectedAuthor : EventAuthorFilter.Model
+  , eventCompanyFilter : EventCompanyFilter.Model
+  , eventAuthorFilter : EventAuthorFilter.Model
   , leaflet : Leaflet.Model.Model
   }
 
@@ -32,7 +32,7 @@ initialModel =
   { events = []
   , eventList = EventList.initialModel
   , status = Init
-  , selectedCompany = EventCompanyFilter.initialModel
-  , selectedAuthor = EventAuthorFilter.initialModel
+  , eventCompanyFilter = EventCompanyFilter.initialModel
+  , eventAuthorFilter = EventAuthorFilter.initialModel
   , leaflet = Leaflet.Model.initialModel
   }

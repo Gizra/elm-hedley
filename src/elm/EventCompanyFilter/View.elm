@@ -20,10 +20,10 @@ view companies address model =
     ]
 
 companyListForSelect : Signal.Address Action -> List Company.Model -> Model -> Html
-companyListForSelect address companies selectedCompany  =
+companyListForSelect address companies eventCompanyFilter  =
   let
     selectedText =
-      case selectedCompany of
+      case eventCompanyFilter of
         Just id -> toString id
         Nothing -> ""
 
@@ -45,7 +45,7 @@ companyListForSelect address companies selectedCompany  =
 
     -- The selected company ID.
     selectedId =
-      case selectedCompany of
+      case eventCompanyFilter of
         Just id ->
           id
         Nothing ->

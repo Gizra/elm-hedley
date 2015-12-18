@@ -11,9 +11,9 @@ import Event exposing (initialModel, UpdateContext)
 selectCompanySuite : Test
 selectCompanySuite =
   suite "Select Company Action Suite"
-    [ test "no company" (assertEqual Nothing (.selectedCompany <| fst(selectCompany Nothing)))
-    , test "valid company" (assertEqual (Just 1) (.selectedCompany <| fst(selectCompany <| Just 1)))
-    , test "invalid company" (assertEqual Nothing (.selectedCompany <| fst(selectCompany <| Just 100)))
+    [ test "no company" (assertEqual Nothing (.eventCompanyFilter <| fst(selectCompany Nothing)))
+    , test "valid company" (assertEqual (Just 1) (.eventCompanyFilter <| fst(selectCompany <| Just 1)))
+    , test "invalid company" (assertEqual Nothing (.eventCompanyFilter <| fst(selectCompany <| Just 100)))
     ]
 
 selectCompany : Maybe Int -> (Event.Model, Effects Event.Action)

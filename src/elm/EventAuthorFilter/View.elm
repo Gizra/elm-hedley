@@ -12,16 +12,16 @@ import Html.Events exposing (on, onClick, targetValue)
 type alias Model = EventAuthorFilter.Model
 
 view : List Event -> Signal.Address Action -> Model -> Html
-view events address selectedAuthor =
+view events address eventAuthorFilter =
   div []
     [ div [class "h2"] [ text "Event Authors"]
-    , ul [] (viewEventsByAuthors events address selectedAuthor)
+    , ul [] (viewEventsByAuthors events address eventAuthorFilter)
     -- @todo: Add fetching to context
     -- , div [ hidden (isFetched model.status)] [ text "Loading..."]
     ]
 
 viewEventsByAuthors : List Event -> Signal.Address Action -> Maybe Int -> List Html
-viewEventsByAuthors events address selectedAuthor =
+viewEventsByAuthors events address eventAuthorFilter =
   let
     getText : Author -> Int -> Html
     getText author count =
@@ -38,7 +38,7 @@ viewEventsByAuthors events address selectedAuthor =
             , authorRaw
             ]
       in
-        case selectedAuthor of
+        case eventAuthorFilter of
           Just id ->
             if author.id == id then authorUnselect else authorSelect
 

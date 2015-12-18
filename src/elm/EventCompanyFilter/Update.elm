@@ -28,7 +28,7 @@ update context action model =
             |> List.length
 
 
-        selectedCompany =
+        eventCompanyFilter =
           case maybeCompanyId of
             Just val ->
               -- Make sure the given company ID is a valid one.
@@ -38,4 +38,4 @@ update context action model =
             Nothing ->
               Nothing
       in
-        selectedCompany
+        eventCompanyFilter

@@ -56,7 +56,7 @@ update action model =
 --   let
 --     authorFilter : List Event -> List Event
 --     authorFilter events =
---       case model.selectedAuthor of
+--       case model.eventAuthorFilter of
 --         Just id ->
 --           List.filter (\event -> event.author.id == id) events
 --

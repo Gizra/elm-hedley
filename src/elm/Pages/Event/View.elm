@@ -31,14 +31,15 @@ view context address model =
     div [class "container"]
       [ div [class "row"]
         [ div [class "col-md-3"]
-            [ (EventCompanyFilter.View.view context.companies childEventCompanyFilterAddress model.selectedCompany)
-            , (EventAuthorFilter.View.view model.events childEventAuthorFilterAddress model.selectedAuthor)
+            [ (EventCompanyFilter.View.view context.companies childEventCompanyFilterAddress model.eventCompanyFilter)
+            , (EventAuthorFilter.View.view model.events childEventAuthorFilterAddress model.eventAuthorFilter)
             ]
 
         , div [class "col-md-9"]
             [ div [class "h2"] [ text "Map"]
             , div [ style mapStyle, id "map" ] []
             ]
+        , div [] [ text (toString model)]
         ]
       ]
 

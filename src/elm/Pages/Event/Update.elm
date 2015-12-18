@@ -55,14 +55,14 @@ update : Context -> Action -> Model -> (Model, Effects Action)
 update context action model =
   case action of
     ChildEventAuthorFilterAction act ->
-      ( model
-      -- The child component doesn't have effects, so we don't bother invoking
-      -- its effects      
-      , Effects.batch
-        [ Task.succeed UnSelectEvent |> Effects.task
-        , Task.succeed (FilterEvents model.filterString) |> Effects.task
-        ]
-      )
+      let
+        -- The child component doesn't have effects.
+        childModel =
+          EventAuthorFilter.Update.update act model.selectedAuthor
+      in
+        ( { model | selectedAuthor = childModel }
+        , Effects.none
+        )
 
     ChildEventCompanyFilterAction act ->
       -- Reach into the selected company, and invoke getting the data.
@@ -156,13 +156,6 @@ update context action model =
         )
 
 
--- Build the Leaflet's markers data from the events
-leafletMarkers : Model -> List Leaflet.Model.Marker
-leafletMarkers model =
-  filterListEvents model
-    |> List.map (\event -> Leaflet.Model.Marker event.id event.marker.lat event.marker.lng)
-
-
 -- EFFECTS
 
 getDataFromCache : Event.Status -> Maybe CompanyId -> Effects Action
@@ -223,29 +216,3 @@ getJson url maybeCompanyId accessToken =
 
   in
     Effects.task actionTask
-
--- In case an author or string-filter is selected, filter the events.
-filterListEvents : Model -> List Event
-filterListEvents model =
-  let
-    authorFilter : List Event -> List Event
-    authorFilter events =
-      case model.selectedAuthor of
-        Just id ->
-          List.filter (\event -> event.author.id == id) events
-
-        Nothing ->
-          events
-
-    stringFilter : List Event -> List Event
-    stringFilter events =
-      if String.length (String.trim model.filterString) > 0
-        then
-          List.filter (\event -> String.contains (String.trim (String.toLower model.filterString)) (String.toLower event.label)) events
-
-        else
-          events
-
-  in
-    authorFilter model.events
-     |> stringFilter

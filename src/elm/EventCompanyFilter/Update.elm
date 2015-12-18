@@ -3,14 +3,10 @@ module EventCompanyFilter.Update where
 import EventCompanyFilter.Model as EventCompanyFilter exposing (initialModel, Model)
 
 import Company.Model as Company exposing (Model)
-import Effects exposing (Effects)
 
-init : (EventCompanyFilter.Model, Effects Action)
-init =
-  ( initialModel
-  , Effects.none
-  )
 
+init : Model
+init = initialModel
 
 type Action
   = SelectCompany (Maybe Int)
@@ -21,7 +17,7 @@ type alias Context =
 
 type alias Model = EventCompanyFilter.Model
 
-update : Context -> Action -> Model -> (Model, Effects Action)
+update : Context -> Action -> Model -> Model
 update context action model =
   case action of
     SelectCompany maybeCompanyId ->
@@ -42,6 +38,4 @@ update context action model =
             Nothing ->
               Nothing
       in
-        ( selectedCompany
-        , Effects.none
-        )
+        selectedCompany

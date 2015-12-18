@@ -2,30 +2,18 @@ module EventAuthorFilter.Update where
 
 import EventAuthorFilter.Model as EventAuthorFilter exposing (initialModel, Model)
 
-import Effects exposing (Effects)
-
-init : (EventAuthorFilter.Model, Effects Action)
-init =
-  ( initialModel
-  , Effects.none
-  )
-
+init : EventAuthorFilter.Model
+init = initialModel
 
 type Action
   = SelectAuthor Int
   | UnSelectAuthor
 
-type alias Model = EventAuthorFilter.Model
-
-update : Action -> Model -> (Model, Effects Action)
+update : Action -> Model -> Model
 update action model =
   case action of
     SelectAuthor id ->
-      ( Just id
-      , Effects.none
-      )
+      Just id
 
     UnSelectAuthor ->
-      ( Nothing
-      , Effects.none
-      )
+      Nothing

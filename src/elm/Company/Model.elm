@@ -1,12 +1,14 @@
 module Company.Model where
 
-type alias Id = Int
+type alias CompanyId = Int
 
 type alias Model =
-  { id : Id
+  { id : CompanyId
   , label : String
   }
 
 initialModel : Model
 initialModel =
-  Model 0 ""
+  { id = 0
+  , label = ""
+  }

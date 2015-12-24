@@ -5,7 +5,6 @@ import App.Model as App exposing (initialModel, Model)
 import Config.Update exposing (init, Action)
 import Company.Model as Company exposing (Model)
 import Effects exposing (Effects)
-import Event exposing (Model, initialModel, update)
 import Json.Encode as JE exposing (string, Value)
 import Json.Encode as JE exposing (string, Value)
 import String exposing (isEmpty)
@@ -15,6 +14,7 @@ import Task exposing (succeed)
 -- Pages import
 
 import Pages.Article.Update exposing (Action)
+import Pages.Event.Update exposing (Action)
 import Pages.GithubAuth.Update exposing (Action)
 import Pages.Login.Update exposing (Action)
 import Pages.User.Model exposing (User)
@@ -38,7 +38,7 @@ init =
 type Action
   = ChildArticleAction Pages.Article.Update.Action
   | ChildConfigAction Config.Update.Action
-  | ChildEventAction Event.Action
+  | ChildEventAction Pages.Event.Update.Action
   | ChildGithubAuthAction Pages.GithubAuth.Update.Action
   | ChildLoginAction Pages.Login.Update.Action
   | ChildUserAction Pages.User.Update.Action
@@ -104,7 +104,7 @@ update action model =
           , companies = model.companies
           }
 
-        (childModel, childEffects) = Event.update context act model.events
+        (childModel, childEffects) = Pages.Event.Update.update context act model.events
       in
         ( {model | events = childModel }
         , Effects.map ChildEventAction childEffects
@@ -301,7 +301,7 @@ update action model =
         currentPageEffects =
           case model.activePage of
             App.Event companyId ->
-              Task.succeed (ChildEventAction Event.Deactivate) |> Effects.task
+              Task.succeed (ChildEventAction Pages.Event.Update.Deactivate) |> Effects.task
 
             _ ->
               Effects.none
@@ -312,7 +312,7 @@ update action model =
               Task.succeed (ChildArticleAction Pages.Article.Update.Activate) |> Effects.task
 
             App.Event companyId ->
-              Task.succeed (ChildEventAction <| Event.Activate companyId) |> Effects.task
+              Task.succeed (ChildEventAction <| Pages.Event.Update.Activate companyId) |> Effects.task
 
             App.GithubAuth ->
               Task.succeed (ChildGithubAuthAction Pages.GithubAuth.Update.Activate) |> Effects.task

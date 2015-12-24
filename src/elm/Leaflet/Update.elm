@@ -1,35 +1,35 @@
 module Leaflet.Update where
 
-import Leaflet.Model exposing (initialModel, Model)
+import Event.Model exposing (Event)
+import Leaflet.Model as Leaflet exposing (initialModel, Marker, Model)
 
-import Effects exposing (Effects)
-
-init : (Model, Effects Action)
+init : Model
 init =
-  ( initialModel
-  , Effects.none
-  )
+  initialModel
 
 type Action
-  = ToggleMap
-  | SelectMarker (Maybe Int)
+  = SelectMarker (Maybe Int)
+  | SetMarkers (List Event)
+  | ToggleMap
   | UnselectMarker
 
 
-update : Action -> Model -> (Model, Effects Action)
+update : Action -> Model -> Model
 update action model =
   case action of
-    ToggleMap ->
-      ( { model | showMap = (not model.showMap) }
-      , Effects.none
-      )
-
     SelectMarker val ->
-      ( { model | selectedMarker = val }
-      , Effects.none
-      )
+      { model | selectedMarker = val }
+
+    SetMarkers events ->
+      { model | markers = eventToMarkers events }
+
+    ToggleMap ->
+      { model | showMap = (not model.showMap) }
 
     UnselectMarker ->
-      ( { model | selectedMarker = Nothing }
-      , Effects.none
-      )
+      { model | selectedMarker = Nothing }
+
+eventToMarkers : List Event -> List Leaflet.Marker
+eventToMarkers events =
+  events
+    |> List.map (\event -> Leaflet.Marker event.id event.marker.lat event.marker.lng)

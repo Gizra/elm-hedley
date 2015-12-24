@@ -5,7 +5,7 @@ import Graphics.Element exposing (Element)
 import ElmTest exposing (..)
 
 import Config.Test as Config
-import EventTest as Event
+import EventCompanyFilter.Test as EventCompanyFilter
 import Pages.Login.Test as Login
 
 
@@ -13,7 +13,7 @@ allTests : Test
 allTests =
   suite "All tests"
     [ Config.all
-    , Event.all
+    , EventCompanyFilter.all
     , Login.all
     ]
 

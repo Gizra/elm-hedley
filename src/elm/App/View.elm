@@ -4,7 +4,6 @@ import App.Model as App exposing (initialModel, Model)
 import App.Update exposing (init, Action)
 
 import Config.View exposing (view)
-import Event exposing (view)
 import Html exposing (a, div, h2, i, li, node, span, text, ul, button, Html)
 import Html.Attributes exposing (class, classList, id, href, style, target, attribute)
 import Html.Events exposing (onClick)
@@ -12,6 +11,7 @@ import Html.Events exposing (onClick)
 -- Pages import
 
 import Pages.Article.View exposing (view)
+import Pages.Event.View exposing (view)
 import Pages.GithubAuth.View exposing (view)
 import Pages.Login.View exposing (view)
 import Pages.PageNotFound.View exposing (view)
@@ -58,9 +58,9 @@ mainContent address model =
           Signal.forwardTo address App.Update.ChildEventAction
 
         context =
-          { companies = model.companies}
+          { companies = model.companies }
       in
-        div [ style myStyle ] [ Event.view context childAddress model.events ]
+        div [ style myStyle ] [ Pages.Event.View.view context childAddress model.events ]
 
     App.GithubAuth ->
       let

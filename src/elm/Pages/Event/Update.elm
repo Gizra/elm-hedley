@@ -109,11 +109,11 @@ update context action model =
 
     ChildLeafletAction act ->
       let
-        childModel =
+        (childModel, childEffects) =
           Leaflet.Update.update act model.leaflet
       in
         ( {model | leaflet = childModel }
-        , Effects.none
+        , Effects.map ChildLeafletAction childEffects
         )
 
     GetData maybeCompanyId ->

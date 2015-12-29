@@ -347,6 +347,7 @@ update action model =
             , Effects.batch
               [ currentPageEffects
               , newPageEffects
+              , Effects.tick (SetMountedPage <| Just page')
               ]
             )
 

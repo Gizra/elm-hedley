@@ -32,7 +32,7 @@ update action model =
 
     SetMountStatus status ->
       ( model
-      , Effects.none 
+      , Effects.none
       )
 
     ToggleMap ->

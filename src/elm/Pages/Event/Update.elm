@@ -112,7 +112,7 @@ update context action model =
         (childModel, childEffects) =
           Leaflet.Update.update act model.leaflet
       in
-        ( {model | leaflet = childModel }
+        ( { model | leaflet = childModel }
         , Effects.map ChildLeafletAction childEffects
         )
 
@@ -179,24 +179,25 @@ update context action model =
 
     Activate maybeCompanyId ->
       let
-        childModel =
+        (childModel, childEffects) =
           Leaflet.Update.update Leaflet.Update.ToggleMap model.leaflet
 
       in
         ( { model | leaflet = childModel }
         , Effects.batch
-          [ Task.succeed (GetData maybeCompanyId) |> Effects.task
+          [ Effects.map ChildLeafletAction childEffects
+          , Task.succeed (GetData maybeCompanyId) |> Effects.task
           , Task.succeed (ChildEventCompanyFilterAction <| EventCompanyFilter.Update.SelectCompany maybeCompanyId) |> Effects.task
           ]
         )
 
     Deactivate ->
       let
-        childModel =
+        (childModel, childEffects) =
           Leaflet.Update.update Leaflet.Update.ToggleMap model.leaflet
       in
         ( { model | leaflet = childModel }
-        , Effects.none
+        , Effects.map ChildLeafletAction childEffects
         )
 
 

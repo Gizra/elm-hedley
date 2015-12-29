@@ -13,15 +13,15 @@ type alias Marker =
 
 type alias Model =
   { markers : List Marker
+  , mountStatus : MountStatus
   , selectedMarker : Maybe Int
   , showMap : Bool
-  , mountStatus : MountStatus
   }
 
 initialModel : Model
 initialModel =
   { markers = []
+  , mountStatus = Init
   , selectedMarker = Nothing
   , showMap = False
-  , mountStatus = Init
   }

@@ -43,6 +43,8 @@ type Action
   | ChildLoginAction Pages.Login.Update.Action
   | ChildUserAction Pages.User.Update.Action
   | Logout
+  | ResetMountedPage
+  | SetMountedPage (Maybe App.Page)
   | SetAccessToken AccessToken
   | SetActivePage App.Page
   | SetConfigError
@@ -247,6 +249,16 @@ update action model =
     Logout ->
       ( App.initialModel
       , Effects.batch <| removeStorageItem :: initialEffects
+      )
+
+    ResetMountedPage ->
+      ( { model | mountedPage = Nothing }
+      , Effects.none
+      )
+
+    SetMountedPage maybePage ->
+      ( { model | mountedPage = maybePage }
+      , Task.succeed ResetMountedPage |> Effects.task
       )
 
     SetAccessToken accessToken ->

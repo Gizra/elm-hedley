@@ -32,6 +32,7 @@ type alias Model =
   , events : Event.Model
   , githubAuth: GithubAuth.Model
   , login: Login.Model
+  , mountedPage : Maybe Page
   -- If the user is anonymous, we want to know where to redirect them.
   , nextPage : Maybe Page
   , user : User.Model
@@ -48,6 +49,7 @@ initialModel =
   , events = Event.initialModel
   , githubAuth = GithubAuth.initialModel
   , login = Login.initialModel
+  , mountedPage = Nothing
   , nextPage = Nothing
   , user = User.initialModel
   }

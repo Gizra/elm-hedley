@@ -80,12 +80,18 @@ type alias ActivePagePort =
   { accessToken : String
   , activePage : String
   , backendUrl : String
+  , mountedPage : String
   , postStatus : String
   }
 
 port activePage : Signal ActivePagePort
 port activePage =
   let
+    mountedPageAsString page =
+      case page of
+        Just val -> pageAsString val
+        Nothing -> ""
+
     pageAsString page =
       case page of
         App.Article -> "Article"
@@ -105,6 +111,7 @@ port activePage =
       { accessToken = model.accessToken
       , activePage = pageAsString model.activePage
       , backendUrl = (.config >> .backendConfig >> .backendUrl) model
+      , mountedPage = mountedPageAsString model.mountedPage
       , postStatus = postStatusAsString model.article.articleForm.postStatus
       }
   in

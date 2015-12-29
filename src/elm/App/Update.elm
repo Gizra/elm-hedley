@@ -10,6 +10,7 @@ import Json.Encode as JE exposing (string, Value)
 import String exposing (isEmpty)
 import Storage exposing (removeItem, setItem)
 import Task exposing (succeed)
+import Time exposing (Time)
 
 -- Pages import
 
@@ -44,7 +45,7 @@ type Action
   | ChildUserAction Pages.User.Update.Action
   | Logout
   | ResetMountedPage
-  | SetMountedPage (Maybe App.Page)
+  | SetMountedPage Time
   | SetAccessToken AccessToken
   | SetActivePage App.Page
   | SetConfigError
@@ -256,8 +257,8 @@ update action model =
       , Effects.none
       )
 
-    SetMountedPage maybePage ->
-      ( { model | mountedPage = maybePage }
+    SetMountedPage _ ->
+      ( { model | mountedPage = Just model.activePage }
       , Task.succeed ResetMountedPage |> Effects.task
       )
 
@@ -347,7 +348,7 @@ update action model =
             , Effects.batch
               [ currentPageEffects
               , newPageEffects
-              , Effects.tick (SetMountedPage <| Just page')
+              , Effects.tick SetMountedPage
               ]
             )
 

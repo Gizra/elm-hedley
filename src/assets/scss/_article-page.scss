@@ -38,7 +38,7 @@ $br: 2px;
     padding: 0;
     list-style: none;
 
-    li {
+    > li {
       padding: 12px;
       border-radius: 2px;
       border: 1px solid #ccc;

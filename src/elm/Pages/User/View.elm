@@ -32,7 +32,7 @@ view address model =
               [ mainTitle
               , h4 [ class "name" ] [ text <| "Welcome " ++ name ]
               , h4 [ class "company-title"] [ text "Your companies are:" ]
-              , ul  [ class "companies" ] (List.map viewCompanies model.companies)
+              , ol  [ class "companies" ] (List.map viewCompanies model.companies)
               ]
           ]
 

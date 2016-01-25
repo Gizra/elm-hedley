@@ -5,7 +5,7 @@ import EventList.Model as EventList exposing (initialModel, Model)
 import EventList.Update exposing (Action)
 import EventList.Utils exposing (filterEventsByString)
 
-import Html exposing (a, div, input, text, select, span, li, option, ul, Html)
+import Html exposing (h3, a, i, div, input, text, select, span, li, option, ul, Html)
 import Html.Attributes exposing (class, hidden, href, id, placeholder, selected, style, value)
 import Html.Events exposing (on, onClick, targetValue)
 
@@ -13,17 +13,25 @@ type alias Model = EventList.Model
 
 view : List Event -> Signal.Address Action -> Model -> Html
 view events address model =
-  div []
-      [ div [class "h2"] [ text "Event list"]
+  div
+    [ id "events"
+    , class "wrapper -suffix" ]
+    [ h3
+      [ class "title" ]
+      [ i [ class "fa fa-map-marker" ] []
+      , text <| " " ++ "Event List"
+      ]
       , (viewFilterString address model)
       , (viewListEvents events address model)
       ]
+
 
 viewFilterString : Signal.Address Action -> Model -> Html
 viewFilterString address model =
   div []
     [ input
-        [ placeholder "Filter events"
+        [ class "search form-control"
+        , placeholder "Filter events"
         , value model.filterString
         , on "input" targetValue (Signal.message address << EventList.Update.FilterEvents)
         ]
@@ -47,7 +55,11 @@ viewListEvents events address model =
     eventUnselect event =
       li []
         [ span []
-          [ a [ href "javascript:void(0);", onClick address (EventList.Update.UnSelectEvent) ] [ text "x " ]
+          [ a
+            [ class "unselect fa fa-minus-circle"
+            , href "javascript:void(0);"
+            , onClick address (EventList.Update.UnSelectEvent)
+            ] []
           , text event.label
           ]
         ]
@@ -65,6 +77,6 @@ viewListEvents events address model =
   in
     if List.isEmpty filteredEvents
       then
-        div [] [ text "No results found"]
+        div [] [ text "No results found" ]
       else
-        ul [] (List.map getListItem filteredEvents)
+        ul [ class "authors" ] (List.map getListItem filteredEvents)

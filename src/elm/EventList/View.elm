@@ -56,7 +56,7 @@ viewListEvents events address model =
       li []
         [ span []
           [ a
-            [ class "unselect fa fa-minus-circle"
+            [ class "unselect fa fa-times-circle"
             , href "javascript:void(0);"
             , onClick address (EventList.Update.UnSelectEvent)
             ] []

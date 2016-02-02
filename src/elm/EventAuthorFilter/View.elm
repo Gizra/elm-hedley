@@ -38,7 +38,7 @@ viewEventsByAuthors events address eventAuthorFilter =
         authorUnselect =
           span []
             [ a
-              [ class "unselect fa fa-minus-circle"
+              [ class "unselect fa fa-times-circle"
               , href "javascript:void(0);"
               , onClick address (EventAuthorFilter.Update.UnSelectAuthor)
               ] []

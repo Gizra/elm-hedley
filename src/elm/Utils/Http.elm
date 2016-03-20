@@ -12,14 +12,12 @@ getErrorMessageFromHttpResponse err =
       if code == 401 then
         "Wrong username or password"
       else if code == 429 then
-         "Too many login requests with the wrong username or password. Wait a few hours before trying again"
-      else if code >= 500 then
-        "Some error has occured on the server"
+        "Too many login requests with the wrong username or password. Wait a few hours before trying again"
       else
-        "Unknow error has occured"
+        "Some error has occurred on the server"
 
     Http.NetworkError ->
-      "A network error has occured"
+      "A network error has occurred"
 
     Http.UnexpectedPayload string ->
-      "Unknow error has occured: " ++ string
+      "Unknown error has occurred: " ++ string

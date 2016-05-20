@@ -13,7 +13,7 @@ localBackend =
 
 prodBackend : BackendConfig
 prodBackend =
-  { backendUrl = "https://live-hedley-elm.pantheon.io"
+  { backendUrl = "https://live-hedley-elm.pantheonsite.io"
   , githubClientId = "4aef0ced83d72bd48d00"
   , name = "gh-pages"
   , hostname = "gizra.github.io"

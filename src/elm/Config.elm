@@ -5,7 +5,7 @@ import Time exposing (Time)
 
 localBackend : BackendConfig
 localBackend =
-  { backendUrl = "https://dev-hedley-elm.pantheon.io"
+  { backendUrl = "https://dev-hedley-elm.pantheonsite.io"
   , githubClientId = "e5661c832ed931ae176c"
   , name = "local"
   , hostname = "localhost"

@@ -1,4 +1,4 @@
-module Pages.Event.View where
+module Pages.Event.View exposing (..)
 
 import Company.Model as Company exposing (Model)
 import EventAuthorFilter.View exposing (view)

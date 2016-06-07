@@ -1,4 +1,4 @@
-module Config where
+module Config exposing (..)
 
 import Config.Model as Config exposing (BackendConfig)
 import Time exposing (Time)

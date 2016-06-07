@@ -1,4 +1,4 @@
-module App.Router where
+module App.Router exposing (..)
 
 import App.Model as App exposing (Model)
 import App.Update exposing (Action)

@@ -1,4 +1,4 @@
-module EventList.View (view) where
+module EventList.View exposing (view)
 
 import Event.Model as Event exposing (Event)
 import EventList.Model as EventList exposing (initialModel, Model)

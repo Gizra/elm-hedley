@@ -1,4 +1,4 @@
-module Article.Model where
+module Article.Model exposing (..)
 
 type alias Id = Int
 

@@ -1,4 +1,4 @@
-module Pages.Article.View where
+module Pages.Article.View exposing (..)
 
 import ArticleForm.View as ArticleForm exposing (view)
 import ArticleList.View as ArticleList exposing (view)

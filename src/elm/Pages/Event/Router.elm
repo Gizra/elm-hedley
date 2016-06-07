@@ -1,4 +1,4 @@
-module Pages.Event.Router where
+module Pages.Event.Router exposing (..)
 
 import Pages.Event.Model as Event exposing (Model)
 import RouteHash exposing (HashUpdate)

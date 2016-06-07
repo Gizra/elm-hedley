@@ -1,4 +1,4 @@
-module Pages.Login.View where
+module Pages.Login.View exposing (..)
 
 import Pages.Login.Model exposing (initialModel, Model)
 import Pages.Login.Update exposing (Action)

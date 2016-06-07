@@ -1,4 +1,4 @@
-module Pages.Event.Utils where
+module Pages.Event.Utils exposing (..)
 
 import EventAuthorFilter.Model as EventAuthorFilter exposing (Model)
 import Event.Model exposing (Event)

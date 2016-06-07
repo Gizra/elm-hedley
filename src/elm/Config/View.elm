@@ -1,4 +1,4 @@
-module Config.View where
+module Config.View exposing (..)
 
 import Html exposing (div, h2, text, Html)
 import Html.Attributes exposing (class)

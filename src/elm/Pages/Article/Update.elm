@@ -1,4 +1,4 @@
-module Pages.Article.Update where
+module Pages.Article.Update exposing (..)
 
 import ArticleForm.Update exposing (Action)
 import ArticleList.Update exposing (Action)

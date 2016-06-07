@@ -1,4 +1,4 @@
-module Config.Model where
+module Config.Model exposing (..)
 
 type alias BackendConfig =
   { backendUrl : String

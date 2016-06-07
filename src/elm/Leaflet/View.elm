@@ -1,4 +1,4 @@
-module Leaflet.View where
+module Leaflet.View exposing (..)
 
 import Leaflet.Model exposing (initialModel, Model)
 import Leaflet.Update exposing (Action)

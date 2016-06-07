@@ -1,4 +1,4 @@
-module Pages.Event.Update where
+module Pages.Event.Update exposing (..)
 
 import Config exposing (cacheTtl)
 import Config.Model exposing (BackendConfig)

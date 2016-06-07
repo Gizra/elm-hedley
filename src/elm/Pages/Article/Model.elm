@@ -1,4 +1,4 @@
-module Pages.Article.Model where
+module Pages.Article.Model exposing (..)
 
 import ArticleForm.Model as ArticleForm exposing (initialModel, Model)
 import ArticleList.Model as ArticleList exposing (initialModel, Model)

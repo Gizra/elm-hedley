@@ -1,4 +1,4 @@
-module Company.Model where
+module Company.Model exposing (..)
 
 type alias CompanyId = Int
 

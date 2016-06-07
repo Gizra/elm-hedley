@@ -1,4 +1,4 @@
-module Pages.User.Decoder where
+module Pages.User.Decoder exposing (..)
 
 import Company.Model as Company exposing (Model)
 import Effects exposing (Effects, Never)

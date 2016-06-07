@@ -1,4 +1,4 @@
-module Pages.User.Update where
+module Pages.User.Update exposing (..)
 
 import Config.Model exposing (BackendConfig)
 import Company.Model as Company exposing (initialModel, Model)

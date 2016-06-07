@@ -1,4 +1,4 @@
-module ArticleList.View where
+module ArticleList.View exposing (..)
 
 import Article.Model exposing (Model)
 

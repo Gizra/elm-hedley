@@ -1,4 +1,4 @@
-module EventList.Utils (filterEventsByString) where
+module EventList.Utils exposing (filterEventsByString)
 
 import Event.Model exposing (Event)
 import String exposing (isEmpty, trim, toLower)

@@ -1,4 +1,4 @@
-module Pages.User.View where
+module Pages.User.View exposing (..)
 
 import Company.Model as Company exposing (Model)
 import Html exposing (..)

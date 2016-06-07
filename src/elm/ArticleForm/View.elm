@@ -1,4 +1,4 @@
-module ArticleForm.View where
+module ArticleForm.View exposing (..)
 
 import ArticleForm.Model exposing (initialModel, Model, UserMessage)
 import ArticleForm.Update exposing (Action)

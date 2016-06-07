@@ -1,4 +1,4 @@
-module Leaflet.Model where
+module Leaflet.Model exposing (..)
 
 type alias Marker =
   { id : Int

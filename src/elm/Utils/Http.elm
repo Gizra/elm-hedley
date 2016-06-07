@@ -1,4 +1,4 @@
-module Utils.Http where
+module Utils.Http exposing (..)
 
 import Http exposing (Error)
 

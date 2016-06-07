@@ -1,4 +1,4 @@
-module App.Model where
+module App.Model exposing (..)
 
 import Config.Model as Config exposing (initialModel, Model)
 import Company.Model as Company exposing (Model)

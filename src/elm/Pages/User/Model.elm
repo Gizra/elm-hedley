@@ -1,4 +1,4 @@
-module Pages.User.Model where
+module Pages.User.Model exposing (..)
 
 import Company.Model as Company exposing (initialModel, Model)
 import Http exposing (Error)

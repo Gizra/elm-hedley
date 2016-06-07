@@ -1,4 +1,4 @@
-module Article.Decoder where
+module Article.Decoder exposing (..)
 
 import Article.Model as Article exposing (Model)
 

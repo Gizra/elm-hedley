@@ -1,4 +1,4 @@
-module Pages.GithubAuth.Model where
+module Pages.GithubAuth.Model exposing (..)
 
 import Http exposing (Error)
 

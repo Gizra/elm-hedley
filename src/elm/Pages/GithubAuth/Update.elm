@@ -1,4 +1,4 @@
-module Pages.GithubAuth.Update where
+module Pages.GithubAuth.Update exposing (..)
 
 import Config.Model exposing (BackendConfig)
 import Dict exposing (get)

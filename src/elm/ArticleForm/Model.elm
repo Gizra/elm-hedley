@@ -1,4 +1,4 @@
-module ArticleForm.Model where
+module ArticleForm.Model exposing (..)
 
 type PostStatus = Busy | Done | Ready
 

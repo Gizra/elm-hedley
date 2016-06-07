@@ -1,4 +1,4 @@
-module EventAuthorFilter.Model where
+module EventAuthorFilter.Model exposing (..)
 
 type alias Model = Maybe Int
 

@@ -1,4 +1,4 @@
-module EventList.Model where
+module EventList.Model exposing (..)
 
 type alias Model =
   { filterString : String

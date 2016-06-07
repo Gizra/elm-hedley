@@ -1,4 +1,4 @@
-module Config.Test where
+module Config.Test exposing (..)
 
 import ElmTest exposing (..)
 

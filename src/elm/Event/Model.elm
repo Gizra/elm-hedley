@@ -1,4 +1,4 @@
-module Event.Model where
+module Event.Model exposing (..)
 
 type alias Id = Int
 

@@ -1,4 +1,4 @@
-module Event.Decoder where
+module Event.Decoder exposing (..)
 
 import Event.Model as Event exposing (Author, Event, Marker)
 import Json.Decode as JD exposing ((:=))

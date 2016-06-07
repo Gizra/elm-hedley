@@ -1,4 +1,4 @@
-module Config.Update where
+module Config.Update exposing (..)
 
 import Config exposing (backends)
 import Config.Model exposing (initialModel, Model)

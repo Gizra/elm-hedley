@@ -1,4 +1,4 @@
-module Leaflet.Update where
+module Leaflet.Update exposing (..)
 
 import Event.Model exposing (Event)
 import Leaflet.Model as Leaflet exposing (initialModel, Marker, Model)

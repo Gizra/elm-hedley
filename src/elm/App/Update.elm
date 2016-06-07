@@ -1,4 +1,4 @@
-module App.Update where
+module App.Update exposing (..)
 
 import App.Model as App exposing (initialModel, Model)
 

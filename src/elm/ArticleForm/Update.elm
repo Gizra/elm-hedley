@@ -1,4 +1,4 @@
-module ArticleForm.Update where
+module ArticleForm.Update exposing (..)
 
 import Article.Decoder exposing (decode)
 import Article.Model as Article exposing (Author, Model)

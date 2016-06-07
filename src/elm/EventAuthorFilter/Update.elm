@@ -1,4 +1,4 @@
-module EventAuthorFilter.Update where
+module EventAuthorFilter.Update exposing (..)
 
 import EventAuthorFilter.Model as EventAuthorFilter exposing (initialModel, Model)
 

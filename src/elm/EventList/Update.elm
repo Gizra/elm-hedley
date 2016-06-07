@@ -1,4 +1,4 @@
-module EventList.Update where
+module EventList.Update exposing (..)
 
 import Event.Model exposing (Event)
 import EventList.Model as EventList exposing (initialModel, Model)

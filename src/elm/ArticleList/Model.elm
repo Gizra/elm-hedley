@@ -1,4 +1,4 @@
-module ArticleList.Model where
+module ArticleList.Model exposing (..)
 
 import Article.Model as Article exposing (Model)
 import Http exposing (Error)

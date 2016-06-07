@@ -1,4 +1,4 @@
-module EventCompanyFilter.Test where
+module EventCompanyFilter.Test exposing (..)
 
 import ElmTest exposing (..)
 

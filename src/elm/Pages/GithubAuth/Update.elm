@@ -2,7 +2,7 @@ module Pages.GithubAuth.Update exposing (..)
 
 import Config.Model exposing (BackendConfig)
 import Dict exposing (get)
-import Effects exposing (Effects)
+
 import Http exposing (Error)
 import Json.Decode as JD exposing ((:=))
 import Json.Encode as JE exposing (..)

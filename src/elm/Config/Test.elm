@@ -4,7 +4,7 @@ import ElmTest exposing (..)
 
 import Config.Model exposing (initialBackendConfig, initialModel, Model)
 import Config.Update exposing (update, Action)
-import Effects exposing (Effects)
+
 
 type alias Action = Config.Update.Action
 type alias Model = Config.Model.Model

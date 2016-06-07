@@ -5,7 +5,7 @@ import Article.Model as Article exposing (Model)
 import ArticleList.Model exposing (initialModel, Model)
 import Config exposing (cacheTtl)
 import Config.Model exposing (BackendConfig)
-import Effects exposing (Effects)
+
 import Http exposing (post, Error)
 import Json.Decode as JD exposing ((:=))
 import Task  exposing (andThen, Task)

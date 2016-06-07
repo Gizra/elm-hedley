@@ -3,7 +3,7 @@ module Pages.Event.Update exposing (..)
 import Config exposing (cacheTtl)
 import Config.Model exposing (BackendConfig)
 import Company.Model as Company exposing (Model)
-import Effects exposing (Effects)
+
 import Event.Decoder exposing (decode)
 import Event.Model exposing (Event)
 import EventAuthorFilter.Update exposing (Action)

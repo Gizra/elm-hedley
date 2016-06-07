@@ -3,7 +3,7 @@ module Pages.Login.Test exposing (..)
 import ElmTest exposing (..)
 
 import Config.Model exposing (initialBackendConfig)
-import Effects exposing (Effects)
+
 import Http exposing (Error)
 import Pages.Login.Model exposing (initialModel, Model)
 import Pages.Login.Update exposing (Action)

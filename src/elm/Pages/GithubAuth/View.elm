@@ -2,7 +2,7 @@ module Pages.GithubAuth.View exposing (..)
 
 -- import Config.Model exposing (BackendConfig)
 -- import Dict exposing (get)
--- import Effects exposing (Effects)
+-- 
 import Html exposing (a, div, i, text, Html)
 import Html.Attributes exposing (class, href, id)
 -- import Http exposing (Error)

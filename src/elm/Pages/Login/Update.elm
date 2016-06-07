@@ -8,7 +8,7 @@ import Config.Model exposing (BackendConfig)
 import Http exposing (Error)
 import Json.Decode as JD exposing ((:=))
 import Storage exposing (getItem)
-import Task exposing  (Task)
+
 import Utils.Http exposing (getErrorMessageFromHttpResponse)
 
 type alias AccessToken = String

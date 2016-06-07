@@ -3,7 +3,7 @@ module Config.Update exposing (..)
 import Config exposing (backends)
 import Config.Model exposing (initialModel, Model)
 
-import Task exposing (map)
+
 import WebAPI.Location exposing (location)
 
 init : (Model, Effects Action)

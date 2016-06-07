@@ -6,7 +6,7 @@ import Effects exposing (Effects, Never)
 import Http exposing (Error)
 import Pages.User.Model as User exposing (Model)
 import Pages.User.Decoder exposing (decode)
-import Task exposing (succeed)
+
 
 type alias Id = Int
 type alias AccessToken = String

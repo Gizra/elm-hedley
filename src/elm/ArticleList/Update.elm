@@ -8,7 +8,7 @@ import Config.Model exposing (BackendConfig)
 
 import Http exposing (post, Error)
 import Json.Decode as JD exposing ((:=))
-import Task  exposing (andThen, Task)
+
 import TaskTutorial exposing (getCurrentTime)
 import Time exposing (Time)
 

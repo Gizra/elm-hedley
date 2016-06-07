@@ -8,7 +8,7 @@ import Company.Model as Company exposing (Model)
 import Json.Encode as JE exposing (string, Value)
 import String exposing (isEmpty)
 import Storage exposing (removeItem, setItem)
-import Task exposing (succeed)
+
 
 -- Pages import
 

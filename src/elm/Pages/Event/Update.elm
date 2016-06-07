@@ -14,7 +14,7 @@ import Http exposing (Error)
 import Leaflet.Update exposing (Action)
 import Pages.Event.Model as Event exposing (Model)
 import Pages.Event.Utils exposing (filterEventsByAuthor)
-import Task  exposing (andThen, succeed)
+
 import TaskTutorial exposing (getCurrentTime)
 import Time exposing (Time)
 

@@ -5,7 +5,7 @@ import ArticleList.Update exposing (Action)
 import Config.Model exposing (BackendConfig)
 
 import Pages.Article.Model exposing (Model)
-import Task exposing (succeed)
+
 
 type Action
   = Activate

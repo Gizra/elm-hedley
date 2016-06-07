@@ -7,7 +7,7 @@ import Http exposing (Error)
 import Json.Decode as JD exposing ((:=))
 import Json.Encode as JE exposing (..)
 import Pages.GithubAuth.Model as GithubAuth exposing (initialModel, Model)
-import Task exposing (map)
+
 import UrlParameterParser exposing (ParseResult, parseSearchString)
 import WebAPI.Location exposing (location)
 

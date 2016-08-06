@@ -110,6 +110,9 @@ footer =
         , i [ class "fa fa-heart" ] []
         , text " from "
         , a [ href "http://gizra.com", target "_blank", class "gizra-logo" ] [text "gizra"]
+        , span [ class "divider" ] [ text "|" ]
+        , text "Backend powered by "
+        , a [ href "https://pantheon.io/", target "_blank" ] [ text "Pantheon" ]
         , span [ class "divider" ] [text "|"]
         , text "Fork me on "
         , a [href "https://github.com/Gizra/elm-hedley", target "_blank"] [text "Github"]
